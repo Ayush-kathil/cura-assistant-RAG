@@ -1,5 +1,7 @@
 export interface ChunkedDocument {
   id: string;
+  documentId: string;
+  filename: string;
   text: string;
   embedding: number[];
   chunkIndex: number;
@@ -32,10 +34,12 @@ export const dotProduct = (a: number[], b: number[]): number => {
 
 export const searchVectorStore = (
   queryEmbedding: number[], 
-  store: ChunkedDocument[], 
+  store: ChunkedDocument[],
+  activeDocumentIds: string[],
   topK: number = 3
 ): ScoredChunk[] => {
-  const scoredChunks: ScoredChunk[] = store.map(chunk => ({
+  const filteredStore = store.filter(chunk => activeDocumentIds.includes(chunk.documentId));
+  const scoredChunks: ScoredChunk[] = filteredStore.map(chunk => ({
     chunk,
     score: dotProduct(queryEmbedding, chunk.embedding)
   }));

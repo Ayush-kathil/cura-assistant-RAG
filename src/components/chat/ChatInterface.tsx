@@ -2,10 +2,11 @@
 
 import { useState, useRef, useEffect, ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Copy, CheckCircle2, Bot, User, Loader2, Sparkles, Wand2, FileText, PlusCircle } from "lucide-react";
+import { Send, Copy, CheckCircle2, Bot, User, Loader2, Sparkles, Wand2, FileText, PlusCircle, Database, ChevronDown } from "lucide-react";
 import clsx from "clsx";
 import ReactMarkdown from "react-markdown";
 import { ScoredChunk } from "@/lib/vectorStore";
+import { ChatDocument } from "@/lib/storage";
 
 export interface Message {
   id: string;
@@ -21,10 +22,11 @@ interface ChatInterfaceProps {
   messages: Message[];
   onSendMessage: (msg: string) => void;
   generationState: GenerationState;
-  filename: string;
   onActionRequest?: (action: "summarize" | "explain" | "rewrite", text: string) => void;
   onNewSession: () => void;
-  hasActiveDocument: boolean;
+  documents: ChatDocument[];
+  activeDocumentIds: string[];
+  onToggleDocument: (id: string) => void;
 }
 
 const useSmartScrollLock = () => {
@@ -48,6 +50,44 @@ const useSmartScrollLock = () => {
   };
 
   return { containerRef, handleScroll, scrollToBottom };
+};
+
+const useSmoothStream = (rawText: string, isStreamFinished: boolean) => {
+  const [displayedText, setDisplayedText] = useState("");
+  const bufferRef = useRef("");
+  const animationFrameRef = useRef<number | null>(null);
+  const lastUpdateRef = useRef<number>(0);
+
+  useEffect(() => {
+    bufferRef.current = rawText;
+    
+    if (isStreamFinished && displayedText.length < rawText.length) {
+       setDisplayedText(rawText);
+       return;
+    }
+
+    const animate = (time: number) => {
+      if (time - lastUpdateRef.current > 10) { 
+        setDisplayedText((prev) => {
+          const buffer = bufferRef.current;
+          if (prev.length < buffer.length) {
+            const charsToAdd = Math.max(1, Math.floor((buffer.length - prev.length) / 4));
+            return prev + buffer.substring(prev.length, prev.length + charsToAdd);
+          }
+          return prev;
+        });
+        lastUpdateRef.current = time;
+      }
+      animationFrameRef.current = requestAnimationFrame(animate);
+    };
+    
+    animationFrameRef.current = requestAnimationFrame(animate);
+    return () => {
+      if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+    };
+  }, [rawText, isStreamFinished]);
+
+  return displayedText;
 };
 
 const StaggeredText = ({ text }: { text: string }) => {
@@ -148,7 +188,7 @@ const SourcePill = ({ source }: { source: ScoredChunk }) => {
         animate={{ scale: 1, opacity: 1 }}
         className="bg-white/5 border border-white/10 backdrop-blur-md rounded-full px-3 py-1 text-xs font-medium text-gray-300 cursor-pointer hover:bg-white/10 transition-colors"
       >
-        Source {source.chunk.chunkIndex}
+        {source.chunk.filename} (Chunk {source.chunk.chunkIndex})
       </motion.div>
       <AnimatePresence>
         {isOpen && (
@@ -158,7 +198,7 @@ const SourcePill = ({ source }: { source: ScoredChunk }) => {
             exit={{ opacity: 0, y: 5, scale: 0.95 }}
             className="absolute bottom-full mb-2 left-0 z-50 w-64 md:w-80 p-4 bg-[#0A0A15]/95 backdrop-blur-3xl border border-white/20 rounded-2xl shadow-2xl text-xs text-gray-300 leading-relaxed max-h-60 overflow-y-auto"
           >
-            <div className="font-semibold text-white mb-2 pb-2 border-b border-white/10">Extracted Context</div>
+            <div className="font-semibold text-white mb-2 pb-2 border-b border-white/10 truncate">{source.chunk.filename}</div>
             {source.chunk.text}
           </motion.div>
         )}
@@ -167,14 +207,32 @@ const SourcePill = ({ source }: { source: ScoredChunk }) => {
   );
 };
 
+const AnimatedMarkdown = ({ content, isFinished }: { content: string, isFinished: boolean }) => {
+  const smoothText = useSmoothStream(content, isFinished);
+  
+  return (
+    <ReactMarkdown
+      components={{
+        code: CodeBlock,
+        p: ({ children }) => <p className="mb-4 last:mb-0 text-[15px]">{children}</p>,
+        ul: ({ children }) => <ul className="list-disc pl-6 mb-4 text-[15px]">{children}</ul>,
+        ol: ({ children }) => <ol className="list-decimal pl-6 mb-4 text-[15px]">{children}</ol>,
+      }}
+    >
+      {smoothText}
+    </ReactMarkdown>
+  );
+};
+
 export const ChatInterface = ({ 
   messages, 
   onSendMessage, 
   generationState, 
-  filename,
   onActionRequest,
   onNewSession,
-  hasActiveDocument
+  documents,
+  activeDocumentIds,
+  onToggleDocument
 }: ChatInterfaceProps) => {
   const [input, setInput] = useState("");
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -182,6 +240,7 @@ export const ChatInterface = ({
 
   const [selectedText, setSelectedText] = useState("");
   const [floatingMenuPos, setFloatingMenuPos] = useState<{ x: number, y: number } | null>(null);
+  const [isKbOpen, setIsKbOpen] = useState(false);
 
   useEffect(() => {
     scrollToBottom();
@@ -257,25 +316,71 @@ export const ChatInterface = ({
         )}
       </AnimatePresence>
 
-      <div className="flex-none flex items-center justify-between px-6 py-4 border-b border-[var(--color-border)] bg-black/20 pt-20 lg:pt-4 z-10 backdrop-blur-md">
+      <div className="flex-none flex items-center justify-between px-6 py-4 border-b border-[var(--color-border)] bg-black/20 pt-20 lg:pt-4 z-20 backdrop-blur-md relative">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-[var(--color-accent)] rounded-lg text-white">
             <Bot className="w-5 h-5" />
           </div>
-          <div className="flex flex-col">
+          <div className="flex flex-col relative">
             <h3 className="font-semibold text-white tracking-wide">CURA</h3>
-            <div className="flex items-center gap-2">
-              {hasActiveDocument ? (
+            <button onClick={() => setIsKbOpen(!isKbOpen)} className="flex items-center gap-2 hover:bg-white/5 rounded-md px-1 -ml-1 transition-colors">
+              {activeDocumentIds.length > 0 ? (
                 <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.8)]" />
               ) : (
                 <div className="w-2 h-2 rounded-full bg-amber-500/80" />
               )}
-              <p className={clsx("text-xs truncate max-w-[200px] md:max-w-md", hasActiveDocument ? "text-gray-300" : "text-amber-500/80")}>
-                {hasActiveDocument ? `Context: ${filename}` : "No active document context—please upload."}
+              <p className={clsx("text-xs truncate max-w-[150px] md:max-w-xs", activeDocumentIds.length > 0 ? "text-gray-300" : "text-amber-500/80")}>
+                {documents.length} Files • {activeDocumentIds.length} Active
               </p>
-            </div>
+              <ChevronDown className="w-3 h-3 text-gray-400" />
+            </button>
           </div>
         </div>
+
+        <AnimatePresence>
+          {isKbOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.95 }}
+              className="absolute top-full left-16 mt-2 w-72 bg-[#0A0A15]/95 backdrop-blur-3xl border border-white/20 rounded-2xl shadow-2xl overflow-hidden z-50"
+            >
+              <div className="px-4 py-3 border-b border-white/10 flex items-center justify-between bg-white/5">
+                <span className="text-sm font-semibold text-white flex items-center gap-2">
+                  <Database className="w-4 h-4 text-[var(--color-accent)]" /> Knowledge Base
+                </span>
+              </div>
+              <div className="max-h-60 overflow-y-auto p-2">
+                {documents.map((doc) => {
+                  const isActive = activeDocumentIds.includes(doc.id);
+                  return (
+                    <div key={doc.id} className="flex items-center justify-between p-2 hover:bg-white/5 rounded-xl transition-colors">
+                      <span className="text-xs text-gray-300 truncate max-w-[180px]">{doc.filename}</span>
+                      <button
+                        onClick={() => onToggleDocument(doc.id)}
+                        className={clsx(
+                          "w-10 h-6 rounded-full p-1 transition-colors relative",
+                          isActive ? "bg-green-500" : "bg-gray-600"
+                        )}
+                      >
+                        <motion.div
+                          layout
+                          className="w-4 h-4 bg-white rounded-full shadow-md"
+                          animate={{ x: isActive ? 16 : 0 }}
+                          transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                        />
+                      </button>
+                    </div>
+                  );
+                })}
+                {documents.length === 0 && (
+                  <div className="p-4 text-center text-xs text-gray-500">No documents uploaded.</div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <button
           onClick={onNewSession}
           className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 backdrop-blur-md rounded-xl transition-all shadow-lg text-sm font-medium text-white"
@@ -297,65 +402,72 @@ export const ChatInterface = ({
           className="space-y-6 pb-4"
         >
           <AnimatePresence initial={false}>
-            {messages.map((msg) => (
-              <motion.div
-                key={msg.id}
-                layout
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className={clsx(
-                  "flex gap-4 max-w-[85%]",
-                  msg.role === "user" ? "ml-auto flex-row-reverse" : "mr-auto"
-                )}
-              >
-                <div className={clsx(
-                  "w-8 h-8 flex-shrink-0 rounded-full flex items-center justify-center mt-1",
-                  msg.role === "user" ? "bg-white/10" : "bg-[var(--color-accent)]"
-                )}>
-                  {msg.role === "user" ? <User className="w-4 h-4 text-white" /> : <Bot className="w-4 h-4 text-white" />}
-                </div>
-                <div className={clsx(
-                  "group relative p-4 rounded-2xl text-sm leading-relaxed",
-                  msg.role === "user" 
-                    ? "bg-white/10 text-white rounded-tr-sm" 
-                    : "bg-black/40 border border-white/5 text-gray-200 rounded-tl-sm shadow-inner flex flex-col"
-                )}>
-                  <div className="prose prose-invert max-w-none prose-p:leading-relaxed prose-p:tracking-wide prose-li:leading-relaxed prose-blockquote:border-blue-500/50 prose-blockquote:bg-blue-500/5 prose-blockquote:px-4 prose-blockquote:py-1 prose-blockquote:rounded-r-lg">
-                    {msg.isWelcome ? (
-                      <StaggeredText text={msg.content} />
-                    ) : (
-                      <ReactMarkdown
-                        components={{
-                          code: CodeBlock,
-                          p: ({ children }) => <p className="mb-4 last:mb-0 text-[15px]">{children}</p>,
-                          ul: ({ children }) => <ul className="list-disc pl-6 mb-4 text-[15px]">{children}</ul>,
-                          ol: ({ children }) => <ol className="list-decimal pl-6 mb-4 text-[15px]">{children}</ol>,
-                        }}
+            {messages.map((msg, index) => {
+              const isLastMsg = index === messages.length - 1;
+              const isFinished = generationState === "idle" || !isLastMsg;
+
+              return (
+                <motion.div
+                  key={msg.id}
+                  layout
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className={clsx(
+                    "flex gap-4 max-w-[85%]",
+                    msg.role === "user" ? "ml-auto flex-row-reverse" : "mr-auto"
+                  )}
+                >
+                  <div className={clsx(
+                    "w-8 h-8 flex-shrink-0 rounded-full flex items-center justify-center mt-1",
+                    msg.role === "user" ? "bg-white/10" : "bg-[var(--color-accent)]"
+                  )}>
+                    {msg.role === "user" ? <User className="w-4 h-4 text-white" /> : <Bot className="w-4 h-4 text-white" />}
+                  </div>
+                  <div className={clsx(
+                    "group relative p-4 rounded-2xl text-sm leading-relaxed",
+                    msg.role === "user" 
+                      ? "bg-white/10 text-white rounded-tr-sm" 
+                      : "bg-black/40 border border-white/5 text-gray-200 rounded-tl-sm shadow-inner flex flex-col"
+                  )}>
+                    <div className="prose prose-invert max-w-none prose-p:leading-relaxed prose-p:tracking-wide prose-li:leading-relaxed prose-blockquote:border-blue-500/50 prose-blockquote:bg-blue-500/5 prose-blockquote:px-4 prose-blockquote:py-1 prose-blockquote:rounded-r-lg">
+                      {msg.isWelcome ? (
+                        <StaggeredText text={msg.content} />
+                      ) : msg.role === "assistant" ? (
+                        <AnimatedMarkdown content={msg.content} isFinished={isFinished} />
+                      ) : (
+                        <ReactMarkdown
+                          components={{
+                            code: CodeBlock,
+                            p: ({ children }) => <p className="mb-4 last:mb-0 text-[15px]">{children}</p>,
+                            ul: ({ children }) => <ul className="list-disc pl-6 mb-4 text-[15px]">{children}</ul>,
+                            ol: ({ children }) => <ol className="list-decimal pl-6 mb-4 text-[15px]">{children}</ol>,
+                          }}
+                        >
+                          {msg.content}
+                        </ReactMarkdown>
+                      )}
+                    </div>
+                    
+                    {msg.role === "assistant" && msg.sources && msg.sources.length > 0 && (
+                      <div className="mt-2 pt-2 border-t border-white/5 flex flex-wrap items-center">
+                        {msg.sources.map(source => (
+                          <SourcePill key={source.chunk.id} source={source} />
+                        ))}
+                      </div>
+                    )}
+
+                    {msg.role === "assistant" && msg.content && !msg.isWelcome && (
+                      <button
+                        onClick={() => handleCopy(msg.id, msg.content)}
+                        className="absolute -right-10 top-2 p-1.5 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg hover:bg-white/10 text-gray-400 hover:text-white"
                       >
-                        {msg.content}
-                      </ReactMarkdown>
+                        {copiedId === msg.id ? <CheckCircle2 className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
+                      </button>
                     )}
                   </div>
-                  
-                  {msg.role === "assistant" && msg.sources && msg.sources.length > 0 && (
-                    <div className="mt-2 pt-2 border-t border-white/5 flex flex-wrap items-center">
-                      {msg.sources.map(source => (
-                        <SourcePill key={source.chunk.id} source={source} />
-                      ))}
-                    </div>
-                  )}
-
-                  {msg.role === "assistant" && msg.content && !msg.isWelcome && (
-                    <button
-                      onClick={() => handleCopy(msg.id, msg.content)}
-                      className="absolute -right-10 top-2 p-1.5 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg hover:bg-white/10 text-gray-400 hover:text-white"
-                    >
-                      {copiedId === msg.id ? <CheckCircle2 className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
-                    </button>
-                  )}
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              );
+            })}
           </AnimatePresence>
           <AnimatePresence>
             {generationState !== "idle" && (

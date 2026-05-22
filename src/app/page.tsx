@@ -49,8 +49,8 @@ export default function Home() {
   const activeSession = sessions.find(s => s.id === activeSessionId) || null;
 
   useEffect(() => {
-    if (activeSession && activeSession.documentName && activeSession.vectorStore.length === 0) {
-      updateActiveSession({ documentName: undefined, messages: [] });
+    if (activeSession && activeSession.documents && activeSession.documents.length > 0 && activeSession.vectorStore.length === 0) {
+      updateActiveSession({ documents: [], activeDocumentIds: [], messages: [] });
     }
   }, [activeSessionId]);
 
@@ -101,38 +101,61 @@ export default function Home() {
     setActiveSessionId(initSession.id);
   };
 
-  const handleDocumentProcessed = async (text: string, filename: string) => {
+  const handleToggleDocument = (documentId: string) => {
+    if (!activeSession) return;
+    const currentIds = activeSession.activeDocumentIds || [];
+    const newIds = currentIds.includes(documentId) 
+      ? currentIds.filter(id => id !== documentId) 
+      : [...currentIds, documentId];
+    updateActiveSession({ activeDocumentIds: newIds });
+  };
+
+  const handleDocumentsProcessed = async (docsToProcess: { text: string; filename: string }[]) => {
     if (!apiKey || !activeSession) return;
     setIsProcessing(true);
     
     try {
-      const chunks = chunkText(text);
-      const docs: ChunkedDocument[] = [];
-      const allEmbeddings = await generateEmbeddingsBatch(chunks, apiKey);
-      
-      for (let i = 0; i < chunks.length; i++) {
-        docs.push({
-          id: `chunk-${i}-${Date.now()}`,
-          text: chunks[i],
-          embedding: allEmbeddings[i],
-          chunkIndex: i + 1
-        });
+      const newDocuments = [];
+      const newVectorStore = [...activeSession.vectorStore];
+      const newActiveDocumentIds = [...activeSession.activeDocumentIds];
+
+      for (const doc of docsToProcess) {
+        const docId = `doc-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        newDocuments.push({ id: docId, filename: doc.filename });
+        newActiveDocumentIds.push(docId);
+
+        const chunks = chunkText(doc.text);
+        const allEmbeddings = await generateEmbeddingsBatch(chunks, apiKey);
+        
+        for (let i = 0; i < chunks.length; i++) {
+          newVectorStore.push({
+            id: `chunk-${docId}-${i}`,
+            documentId: docId,
+            filename: doc.filename,
+            text: chunks[i],
+            embedding: allEmbeddings[i],
+            chunkIndex: i + 1
+          });
+        }
       }
       
+      const welcomeMessage: Message = {
+        id: `welcome-${Date.now()}`,
+        role: "assistant",
+        content: `I've successfully processed ${newDocuments.length} document${newDocuments.length > 1 ? 's' : ''}. How can I assist you with this knowledge base?`,
+        isWelcome: true
+      };
+
       updateActiveSession({ 
-        vectorStore: docs, 
-        documentName: filename,
-        name: filename.slice(0, 20),
-        messages: [{
-          id: `welcome-${Date.now()}`,
-          role: "assistant",
-          content: "How can I assist you with this document?",
-          isWelcome: true
-        }]
+        vectorStore: newVectorStore, 
+        documents: [...activeSession.documents, ...newDocuments],
+        activeDocumentIds: newActiveDocumentIds,
+        name: newDocuments[0].filename.slice(0, 20),
+        messages: activeSession.messages.length === 0 ? [welcomeMessage] : [...activeSession.messages, welcomeMessage]
       });
     } catch (error: any) {
       console.error("Failed to generate embeddings:", error);
-      alert(`Failed to process document. Error: ${error?.message || error}`);
+      alert(`Failed to process documents. Error: ${error?.message || error}`);
     } finally {
       setIsProcessing(false);
     }
@@ -154,12 +177,12 @@ export default function Home() {
       
       setGenerationState("scanning");
       const queryEmbedding = await generateEmbedding(reformulatedQuery, apiKey);
-      const topScoredChunks = searchVectorStore(queryEmbedding, activeSession.vectorStore, 3);
+      const topScoredChunks = searchVectorStore(queryEmbedding, activeSession.vectorStore, activeSession.activeDocumentIds, 3);
       
       setGenerationState("synthesizing");
       
       if (topScoredChunks.length === 0 || topScoredChunks[0].score < 0.45) {
-        const fallbackMsg = "I could not find a highly relevant answer to this question in the provided document.";
+        const fallbackMsg = "I could not find a highly relevant answer to this question in the active documents. Please ensure the relevant documents are toggled on in the Knowledge Base.";
         updateActiveSession({ 
           messages: [...activeSession.messages, userMessage, { id: assistantId, role: "assistant", content: fallbackMsg }]
         });
@@ -175,7 +198,7 @@ export default function Home() {
       }));
       
       let fullResponse = "";
-      await generateStreamingResponse(reformulatedQuery, topScoredChunks, activeSession.documentName || "Document", apiKey, (chunkText) => {
+      await generateStreamingResponse(reformulatedQuery, topScoredChunks, "Multiple Documents", apiKey, (chunkText) => {
         fullResponse += chunkText;
         setSessions(prev => prev.map(s => {
           if (s.id !== activeSessionId) return s;
@@ -253,7 +276,7 @@ export default function Home() {
                 className="w-full flex justify-center items-center h-full"
               >
                 <DocumentUploader 
-                  onDocumentProcessed={handleDocumentProcessed} 
+                  onDocumentsProcessed={handleDocumentsProcessed} 
                   isProcessing={isProcessing} 
                 />
               </motion.div>
@@ -270,10 +293,11 @@ export default function Home() {
                   messages={activeSession.messages}
                   onSendMessage={handleSendMessage}
                   generationState={generationState}
-                  filename={activeSession.documentName || "Unknown Document"}
                   onActionRequest={handleActionRequest}
                   onNewSession={handleHardReset}
-                  hasActiveDocument={activeSession.vectorStore.length > 0}
+                  documents={activeSession.documents || []}
+                  activeDocumentIds={activeSession.activeDocumentIds || []}
+                  onToggleDocument={handleToggleDocument}
                 />
               </motion.div>
             ) : null}

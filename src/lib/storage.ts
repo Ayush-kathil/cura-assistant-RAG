@@ -1,11 +1,17 @@
 import { ChunkedDocument } from "./vectorStore";
 import { Message } from "@/components/chat/ChatInterface";
 
+export interface ChatDocument {
+  id: string;
+  filename: string;
+}
+
 export interface ChatSession {
   id: string;
   name: string;
   createdAt: number;
-  documentName: string | null;
+  documents: ChatDocument[];
+  activeDocumentIds: string[];
   vectorStore: ChunkedDocument[];
   messages: Message[];
 }
@@ -32,7 +38,8 @@ export const createSession = (name: string = "New Chat"): ChatSession => {
     id: `session-${Date.now()}`,
     name,
     createdAt: Date.now(),
-    documentName: null,
+    documents: [],
+    activeDocumentIds: [],
     vectorStore: [],
     messages: []
   };
