@@ -122,7 +122,13 @@ export default function Home() {
       updateActiveSession({ 
         vectorStore: docs, 
         documentName: filename,
-        name: filename.slice(0, 20)
+        name: filename.slice(0, 20),
+        messages: [{
+          id: `welcome-${Date.now()}`,
+          role: "assistant",
+          content: "How can I assist you with this document?",
+          isWelcome: true
+        }]
       });
     } catch (error: any) {
       console.error("Failed to generate embeddings:", error);

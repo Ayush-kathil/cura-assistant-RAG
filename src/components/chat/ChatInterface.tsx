@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, Copy, CheckCircle2, Bot, User, Loader2, Sparkles, Wand2, FileText, PlusCircle } from "lucide-react";
 import clsx from "clsx";
@@ -12,6 +12,7 @@ export interface Message {
   role: "user" | "assistant";
   content: string;
   sources?: ScoredChunk[];
+  isWelcome?: boolean;
 }
 
 export type GenerationState = "idle" | "reformulating" | "scanning" | "synthesizing";
@@ -25,6 +26,91 @@ interface ChatInterfaceProps {
   onNewSession: () => void;
   hasActiveDocument: boolean;
 }
+
+const useSmartScrollLock = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isAutoScrollEnabled, setIsAutoScrollEnabled] = useState(true);
+
+  const handleScroll = () => {
+    if (!containerRef.current) return;
+    const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
+    const isAtBottom = scrollHeight - scrollTop - clientHeight < 50;
+    setIsAutoScrollEnabled(isAtBottom);
+  };
+
+  const scrollToBottom = () => {
+    if (isAutoScrollEnabled && containerRef.current) {
+      containerRef.current.scrollTo({
+        top: containerRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  return { containerRef, handleScroll, scrollToBottom };
+};
+
+const StaggeredText = ({ text }: { text: string }) => {
+  const words = text.split(" ");
+  
+  return (
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={{
+        visible: { transition: { staggerChildren: 0.05 } },
+      }}
+      className="inline-block"
+    >
+      {words.map((word, i) => (
+        <motion.span
+          key={i}
+          variants={{
+            hidden: { opacity: 0, y: 5 },
+            visible: { opacity: 1, y: 0 },
+          }}
+          className="inline-block mr-1"
+        >
+          {word}
+        </motion.span>
+      ))}
+    </motion.div>
+  );
+};
+
+const CodeBlock = ({ node, inline, className, children, ...props }: any) => {
+  const match = /language-(\w+)/.exec(className || "");
+  const language = match ? match[1] : "";
+  const codeContent = String(children).replace(/\n$/, "");
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(codeContent);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  if (inline) {
+    return <code className="bg-white/10 px-1.5 py-0.5 rounded text-blue-300 font-mono text-sm" {...props}>{children}</code>;
+  }
+
+  return (
+    <div className="relative my-4 rounded-xl overflow-hidden bg-[#05050A] border border-white/10 shadow-inner">
+      <div className="flex items-center justify-between px-4 py-2 bg-white/5 border-b border-white/5">
+        <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">{language || "text"}</span>
+        <button
+          onClick={handleCopy}
+          className="p-1.5 rounded-md hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
+        >
+          {copied ? <CheckCircle2 className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
+        </button>
+      </div>
+      <div className="p-4 overflow-x-auto text-sm text-gray-300 font-mono">
+        <code {...props}>{children}</code>
+      </div>
+    </div>
+  );
+};
 
 const ThinkingIndicator = ({ state }: { state: GenerationState }) => {
   if (state === "idle") return null;
@@ -92,14 +178,14 @@ export const ChatInterface = ({
 }: ChatInterfaceProps) => {
   const [input, setInput] = useState("");
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const { containerRef, handleScroll, scrollToBottom } = useSmartScrollLock();
 
   const [selectedText, setSelectedText] = useState("");
   const [floatingMenuPos, setFloatingMenuPos] = useState<{ x: number, y: number } | null>(null);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, generationState]);
+    scrollToBottom();
+  }, [messages, generationState, scrollToBottom]);
 
   useEffect(() => {
     const handleSelection = () => {
@@ -152,7 +238,7 @@ export const ChatInterface = ({
       initial={{ opacity: 0, scale: 0.98, y: 20 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
-      className="flex flex-col w-full h-full lg:h-[90vh] lg:my-auto lg:max-w-5xl lg:rounded-3xl lg:border border-[var(--color-border)] bg-[var(--color-glass)] backdrop-blur-xl shadow-2xl shadow-blue-900/10 overflow-hidden"
+      className="flex flex-col w-full h-[calc(100vh-2rem)] lg:h-[90vh] lg:my-auto lg:max-w-5xl lg:rounded-3xl lg:border border-[var(--color-border)] bg-[var(--color-glass)] backdrop-blur-xl shadow-2xl shadow-blue-900/10 overflow-hidden"
     >
       <AnimatePresence>
         {floatingMenuPos && (
@@ -171,7 +257,7 @@ export const ChatInterface = ({
         )}
       </AnimatePresence>
 
-      <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-border)] bg-black/20 pt-20 lg:pt-4">
+      <div className="flex-none flex items-center justify-between px-6 py-4 border-b border-[var(--color-border)] bg-black/20 pt-20 lg:pt-4 z-10 backdrop-blur-md">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-[var(--color-accent)] rounded-lg text-white">
             <Bot className="w-5 h-5" />
@@ -199,12 +285,16 @@ export const ChatInterface = ({
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-6 space-y-6">
+      <div 
+        ref={containerRef}
+        onScroll={handleScroll}
+        className="flex-1 overflow-y-auto p-6 space-y-6"
+      >
         <motion.div 
           initial="hidden" 
           animate="show" 
           variants={{ show: { transition: { staggerChildren: 0.1 } } }} 
-          className="space-y-6"
+          className="space-y-6 pb-4"
         >
           <AnimatePresence initial={false}>
             {messages.map((msg) => (
@@ -230,10 +320,21 @@ export const ChatInterface = ({
                     ? "bg-white/10 text-white rounded-tr-sm" 
                     : "bg-black/40 border border-white/5 text-gray-200 rounded-tl-sm shadow-inner flex flex-col"
                 )}>
-                  <div className="prose prose-invert max-w-none prose-p:leading-relaxed">
-                    <ReactMarkdown>
-                      {msg.content}
-                    </ReactMarkdown>
+                  <div className="prose prose-invert max-w-none prose-p:leading-relaxed prose-p:tracking-wide prose-li:leading-relaxed prose-blockquote:border-blue-500/50 prose-blockquote:bg-blue-500/5 prose-blockquote:px-4 prose-blockquote:py-1 prose-blockquote:rounded-r-lg">
+                    {msg.isWelcome ? (
+                      <StaggeredText text={msg.content} />
+                    ) : (
+                      <ReactMarkdown
+                        components={{
+                          code: CodeBlock,
+                          p: ({ children }) => <p className="mb-4 last:mb-0 text-[15px]">{children}</p>,
+                          ul: ({ children }) => <ul className="list-disc pl-6 mb-4 text-[15px]">{children}</ul>,
+                          ol: ({ children }) => <ol className="list-decimal pl-6 mb-4 text-[15px]">{children}</ol>,
+                        }}
+                      >
+                        {msg.content}
+                      </ReactMarkdown>
+                    )}
                   </div>
                   
                   {msg.role === "assistant" && msg.sources && msg.sources.length > 0 && (
@@ -244,7 +345,7 @@ export const ChatInterface = ({
                     </div>
                   )}
 
-                  {msg.role === "assistant" && msg.content && (
+                  {msg.role === "assistant" && msg.content && !msg.isWelcome && (
                     <button
                       onClick={() => handleCopy(msg.id, msg.content)}
                       className="absolute -right-10 top-2 p-1.5 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg hover:bg-white/10 text-gray-400 hover:text-white"
@@ -264,10 +365,9 @@ export const ChatInterface = ({
             )}
           </AnimatePresence>
         </motion.div>
-        <div ref={bottomRef} />
       </div>
 
-      <div className="p-4 bg-black/30 border-t border-[var(--color-border)]">
+      <div className="flex-none p-4 sticky bottom-0 bg-black/40 backdrop-blur-xl border-t border-[var(--color-border)] z-20">
         <form onSubmit={handleSubmit} className="relative flex items-center w-full max-w-4xl mx-auto">
           <input
             type="text"
