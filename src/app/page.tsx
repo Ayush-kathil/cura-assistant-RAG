@@ -116,8 +116,9 @@ export default function Home() {
     
     try {
       const newDocuments = [];
-      const newVectorStore = [...activeSession.vectorStore];
-      const newActiveDocumentIds = [...activeSession.activeDocumentIds];
+      const newVectorStore = [...(activeSession.vectorStore || [])];
+      const newActiveDocumentIds = [...(activeSession.activeDocumentIds || [])];
+      const currentDocuments = activeSession.documents || [];
 
       for (const doc of docsToProcess) {
         const docId = `doc-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -148,7 +149,7 @@ export default function Home() {
 
       updateActiveSession({ 
         vectorStore: newVectorStore, 
-        documents: [...activeSession.documents, ...newDocuments],
+        documents: [...currentDocuments, ...newDocuments],
         activeDocumentIds: newActiveDocumentIds,
         name: newDocuments[0].filename.slice(0, 20),
         messages: activeSession.messages.length === 0 ? [welcomeMessage] : [...activeSession.messages, welcomeMessage]
