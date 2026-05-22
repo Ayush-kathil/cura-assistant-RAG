@@ -1,65 +1,256 @@
-import Image from "next/image";
+"use client";
+
+import { useState, useEffect } from "react";
+import { AnimatePresence } from "framer-motion";
+import { AntigravityLayout } from "@/components/ui/Layout";
+import { ApiKeyModal } from "@/components/ui/ApiKeyModal";
+import { DocumentUploader } from "@/components/ui/DocumentUploader";
+import { ChatInterface, Message, GenerationState } from "@/components/chat/ChatInterface";
+import { Sidebar } from "@/components/ui/Sidebar";
+import { SplitWorkspace } from "@/components/ui/SplitWorkspace";
+import { DocumentViewer } from "@/components/ui/DocumentViewer";
+import { chunkText, ChunkedDocument, searchVectorStore } from "@/lib/vectorStore";
+import { generateEmbeddingsBatch, generateStreamingResponse, generateEmbedding, reformulateQuery } from "@/lib/gemini";
+import { ChatSession, getSessions, saveSessions, createSession, deleteSession, renameSession } from "@/lib/storage";
 
 export default function Home() {
+  const [apiKey, setApiKey] = useState<string | null>(null);
+  const [isReady, setIsReady] = useState(false);
+  
+  const [sessions, setSessions] = useState<ChatSession[]>([]);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [generationState, setGenerationState] = useState<GenerationState>("idle");
+  const [activeChunkIndex, setActiveChunkIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    const envKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+    const storedKey = sessionStorage.getItem("gemini_api_key");
+    
+    if (envKey && envKey !== "your_api_key_here") {
+      setApiKey(envKey);
+    } else if (storedKey) {
+      setApiKey(storedKey);
+    }
+
+    const loadedSessions = getSessions();
+    if (loadedSessions.length > 0) {
+      setSessions(loadedSessions);
+      setActiveSessionId(loadedSessions[0].id);
+    } else {
+      const initSession = createSession();
+      setSessions([initSession]);
+      setActiveSessionId(initSession.id);
+      saveSessions([initSession]);
+    }
+
+    setIsReady(true);
+  }, []);
+
+  const handleSaveApiKey = (key: string) => {
+    sessionStorage.setItem("gemini_api_key", key);
+    setApiKey(key);
+  };
+
+  const activeSession = sessions.find(s => s.id === activeSessionId) || null;
+
+  const updateActiveSession = (updates: Partial<ChatSession>) => {
+    setSessions(prev => {
+      const updated = prev.map(s => s.id === activeSessionId ? { ...s, ...updates } : s);
+      saveSessions(updated);
+      return updated;
+    });
+  };
+
+  const handleCreateSession = () => {
+    const newSession = createSession(`Chat ${sessions.length + 1}`);
+    const updated = [newSession, ...sessions];
+    setSessions(updated);
+    setActiveSessionId(newSession.id);
+    saveSessions(updated);
+  };
+
+  const handleDeleteSession = (id: string) => {
+    const updated = deleteSession(id, sessions);
+    if (updated.length === 0) {
+      const newSession = createSession();
+      updated.push(newSession);
+    }
+    setSessions(updated);
+    if (activeSessionId === id) setActiveSessionId(updated[0].id);
+    saveSessions(updated);
+  };
+
+  const handleRenameSession = (id: string, newName: string) => {
+    const updated = renameSession(id, newName, sessions);
+    setSessions(updated);
+    saveSessions(updated);
+  };
+
+  const handleDocumentProcessed = async (text: string, filename: string) => {
+    if (!apiKey || !activeSession) return;
+    setIsProcessing(true);
+    
+    try {
+      const chunks = chunkText(text, 1000, 200);
+      const docs: ChunkedDocument[] = [];
+      const allEmbeddings = await generateEmbeddingsBatch(chunks, apiKey);
+      
+      for (let i = 0; i < chunks.length; i++) {
+        docs.push({
+          id: `chunk-${i}-${Date.now()}`,
+          text: chunks[i],
+          embedding: allEmbeddings[i],
+          chunkIndex: i + 1
+        });
+      }
+      
+      updateActiveSession({ 
+        vectorStore: docs, 
+        documentName: filename,
+        name: filename.slice(0, 20)
+      });
+    } catch (error: any) {
+      console.error("Failed to generate embeddings:", error);
+      alert(`Failed to process document. Error: ${error?.message || error}`);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const executeRagPipeline = async (query: string) => {
+    if (!apiKey || !activeSession || activeSession.vectorStore.length === 0) return;
+    
+    const userMessage: Message = { id: `user-${Date.now()}`, role: "user", content: query };
+    const assistantId = `assistant-${Date.now()}`;
+    const assistantMessagePlaceholder: Message = { id: assistantId, role: "assistant", content: "" };
+    
+    const currentMessages = [...activeSession.messages, userMessage, assistantMessagePlaceholder];
+    updateActiveSession({ messages: currentMessages });
+    
+    try {
+      setGenerationState("reformulating");
+      const reformulatedQuery = await reformulateQuery(query, activeSession.messages, apiKey);
+      
+      setGenerationState("scanning");
+      const queryEmbedding = await generateEmbedding(reformulatedQuery, apiKey);
+      const topScoredChunks = searchVectorStore(queryEmbedding, activeSession.vectorStore, 3);
+      
+      setGenerationState("synthesizing");
+      
+      if (topScoredChunks.length === 0 || topScoredChunks[0].score < 0.70) {
+        const fallbackMsg = "I could not find a highly relevant answer to this question in the provided document.";
+        updateActiveSession({ 
+          messages: [...activeSession.messages, userMessage, { id: assistantId, role: "assistant", content: fallbackMsg }]
+        });
+        return;
+      }
+      
+      let fullResponse = "";
+      await generateStreamingResponse(reformulatedQuery, topScoredChunks, activeSession.documentName || "Document", apiKey, (chunkText) => {
+        fullResponse += chunkText;
+        setSessions(prev => prev.map(s => {
+          if (s.id !== activeSessionId) return s;
+          const newMsgs = [...s.messages];
+          const lastIdx = newMsgs.findIndex(m => m.id === assistantId);
+          if (lastIdx > -1) newMsgs[lastIdx] = { ...newMsgs[lastIdx], content: fullResponse };
+          return { ...s, messages: newMsgs };
+        }));
+      });
+
+      setSessions(prev => {
+        const updated = prev.map(s => {
+          if (s.id !== activeSessionId) return s;
+          const newMsgs = [...s.messages];
+          const lastIdx = newMsgs.findIndex(m => m.id === assistantId);
+          if (lastIdx > -1) newMsgs[lastIdx] = { ...newMsgs[lastIdx], content: fullResponse };
+          return { ...s, messages: newMsgs };
+        });
+        saveSessions(updated);
+        return updated;
+      });
+      
+    } catch (error: any) {
+      console.error("Generation failed:", error);
+      updateActiveSession({ 
+        messages: [...activeSession.messages, userMessage, { id: assistantId, role: "assistant", content: `⚠️ Error: ${error?.message || error}` }]
+      });
+    } finally {
+      setGenerationState("idle");
+    }
+  };
+
+  const handleSendMessage = (query: string) => {
+    executeRagPipeline(query);
+  };
+
+  const handleActionRequest = (action: "summarize" | "explain" | "rewrite", text: string) => {
+    const promptMap = {
+      summarize: `Please summarize the following text:\n\n"${text}"`,
+      explain: `Please explain the following text in detail:\n\n"${text}"`,
+      rewrite: `Please rewrite the following text to improve clarity and flow:\n\n"${text}"`
+    };
+    executeRagPipeline(promptMap[action]);
+  };
+
+  if (!isReady) return <div className="min-h-screen bg-[#05050A]" />;
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <>
+      <AnimatePresence>
+        {!apiKey && <ApiKeyModal onSave={handleSaveApiKey} />}
+      </AnimatePresence>
+
+      <AntigravityLayout isGenerating={generationState !== "idle"}>
+        <Sidebar 
+          isOpen={isSidebarOpen}
+          setIsOpen={setIsSidebarOpen}
+          sessions={sessions}
+          activeSessionId={activeSessionId}
+          onSelectSession={setActiveSessionId}
+          onCreateSession={handleCreateSession}
+          onDeleteSession={handleDeleteSession}
+          onRenameSession={handleRenameSession}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+        
+        <div className="flex-1 flex w-full h-full relative">
+          <AnimatePresence mode="wait">
+            {activeSession && activeSession.vectorStore.length === 0 ? (
+              <div className="flex flex-col items-center justify-center w-full h-full lg:p-8">
+                <DocumentUploader 
+                  key={`upload-${activeSession.id}`} 
+                  onDocumentProcessed={handleDocumentProcessed} 
+                  isProcessing={isProcessing} 
+                />
+              </div>
+            ) : activeSession ? (
+              <SplitWorkspace 
+                key={`workspace-${activeSession.id}`}
+                leftPanel={
+                  <ChatInterface 
+                    messages={activeSession.messages}
+                    onSendMessage={handleSendMessage}
+                    generationState={generationState}
+                    filename={activeSession.documentName || "Unknown Document"}
+                    onCitationClick={(idx) => setActiveChunkIndex(idx)}
+                    onCitationHover={(idx) => setActiveChunkIndex(idx)}
+                    onActionRequest={handleActionRequest}
+                  />
+                }
+                rightPanel={
+                  <DocumentViewer 
+                    documentName={activeSession.documentName || "Unknown Document"}
+                    chunks={activeSession.vectorStore}
+                    activeChunkIndex={activeChunkIndex}
+                  />
+                }
+              />
+            ) : null}
+          </AnimatePresence>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+      </AntigravityLayout>
+    </>
   );
 }
