@@ -20,7 +20,11 @@ export const getSessions = (): ChatSession[] => {
 
 export const saveSessions = (sessions: ChatSession[]) => {
   if (typeof window === "undefined") return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
+  const strippedSessions = sessions.map(session => ({
+    ...session,
+    vectorStore: []
+  }));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(strippedSessions));
 };
 
 export const createSession = (name: string = "New Chat"): ChatSession => {

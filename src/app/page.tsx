@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { AntigravityLayout } from "@/components/ui/Layout";
 import { ApiKeyModal } from "@/components/ui/ApiKeyModal";
 import { DocumentUploader } from "@/components/ui/DocumentUploader";
@@ -46,12 +46,18 @@ export default function Home() {
     setIsReady(true);
   }, []);
 
+  const activeSession = sessions.find(s => s.id === activeSessionId) || null;
+
+  useEffect(() => {
+    if (activeSession && activeSession.documentName && activeSession.vectorStore.length === 0) {
+      updateActiveSession({ documentName: undefined, messages: [] });
+    }
+  }, [activeSessionId]);
+
   const handleSaveApiKey = (key: string) => {
     sessionStorage.setItem("gemini_api_key", key);
     setApiKey(key);
   };
-
-  const activeSession = sessions.find(s => s.id === activeSessionId) || null;
 
   const updateActiveSession = (updates: Partial<ChatSession>) => {
     setSessions(prev => {
@@ -84,6 +90,15 @@ export default function Home() {
     const updated = renameSession(id, newName, sessions);
     setSessions(updated);
     saveSessions(updated);
+  };
+
+  const handleHardReset = () => {
+    localStorage.clear();
+    sessionStorage.clear();
+    setApiKey(null);
+    const initSession = createSession();
+    setSessions([initSession]);
+    setActiveSessionId(initSession.id);
   };
 
   const handleDocumentProcessed = async (text: string, filename: string) => {
@@ -137,7 +152,7 @@ export default function Home() {
       
       setGenerationState("synthesizing");
       
-      if (topScoredChunks.length === 0 || topScoredChunks[0].score < 0.70) {
+      if (topScoredChunks.length === 0 || topScoredChunks[0].score < 0.45) {
         const fallbackMsg = "I could not find a highly relevant answer to this question in the provided document.";
         updateActiveSession({ 
           messages: [...activeSession.messages, userMessage, { id: assistantId, role: "assistant", content: fallbackMsg }]
@@ -221,24 +236,40 @@ export default function Home() {
         />
         
         <div className="flex-1 flex flex-col items-center justify-center relative w-full h-full lg:p-8">
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="popLayout">
             {activeSession && activeSession.vectorStore.length === 0 ? (
-              <DocumentUploader 
-                key={`upload-${activeSession.id}`} 
-                onDocumentProcessed={handleDocumentProcessed} 
-                isProcessing={isProcessing} 
-              />
+              <motion.div 
+                key="upload-view"
+                layout
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="w-full flex justify-center items-center h-full"
+              >
+                <DocumentUploader 
+                  onDocumentProcessed={handleDocumentProcessed} 
+                  isProcessing={isProcessing} 
+                />
+              </motion.div>
             ) : activeSession ? (
-              <div className="w-full max-w-4xl mx-auto h-full flex flex-col">
+              <motion.div
+                key="chat-view"
+                layout
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="w-full max-w-4xl mx-auto h-full flex flex-col"
+              >
                 <ChatInterface 
-                  key={`chat-${activeSession.id}`}
                   messages={activeSession.messages}
                   onSendMessage={handleSendMessage}
                   generationState={generationState}
                   filename={activeSession.documentName || "Unknown Document"}
                   onActionRequest={handleActionRequest}
+                  onNewSession={handleHardReset}
+                  hasActiveDocument={activeSession.vectorStore.length > 0}
                 />
-              </div>
+              </motion.div>
             ) : null}
           </AnimatePresence>
         </div>

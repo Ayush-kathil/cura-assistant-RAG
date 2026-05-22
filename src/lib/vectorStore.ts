@@ -22,19 +22,12 @@ export const chunkText = (text: string, chunkSize: number = 1200, overlap: numbe
   return chunks;
 };
 
-export const cosineSimilarity = (vecA: number[], vecB: number[]): number => {
-  let dotProduct = 0;
-  let normA = 0;
-  let normB = 0;
-  
-  for (let i = 0; i < vecA.length; i++) {
-    dotProduct += vecA[i] * vecB[i];
-    normA += vecA[i] * vecA[i];
-    normB += vecB[i] * vecB[i];
+export const dotProduct = (a: number[], b: number[]): number => {
+  let product = 0;
+  for (let i = 0; i < a.length; i++) {
+    product += a[i] * b[i];
   }
-  
-  if (normA === 0 || normB === 0) return 0;
-  return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+  return product;
 };
 
 export const searchVectorStore = (
@@ -44,7 +37,7 @@ export const searchVectorStore = (
 ): ScoredChunk[] => {
   const scoredChunks: ScoredChunk[] = store.map(chunk => ({
     chunk,
-    score: cosineSimilarity(queryEmbedding, chunk.embedding)
+    score: dotProduct(queryEmbedding, chunk.embedding)
   }));
   
   scoredChunks.sort((a, b) => b.score - a.score);

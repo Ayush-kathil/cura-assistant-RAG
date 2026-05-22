@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Copy, CheckCircle2, Bot, User, Loader2, Sparkles, Wand2, FileText } from "lucide-react";
+import { Send, Copy, CheckCircle2, Bot, User, Loader2, Sparkles, Wand2, FileText, PlusCircle } from "lucide-react";
 import clsx from "clsx";
 import ReactMarkdown from "react-markdown";
 import { ScoredChunk } from "@/lib/vectorStore";
@@ -22,6 +22,8 @@ interface ChatInterfaceProps {
   generationState: GenerationState;
   filename: string;
   onActionRequest?: (action: "summarize" | "explain" | "rewrite", text: string) => void;
+  onNewSession: () => void;
+  hasActiveDocument: boolean;
 }
 
 const ThinkingIndicator = ({ state }: { state: GenerationState }) => {
@@ -84,7 +86,9 @@ export const ChatInterface = ({
   onSendMessage, 
   generationState, 
   filename,
-  onActionRequest
+  onActionRequest,
+  onNewSession,
+  hasActiveDocument
 }: ChatInterfaceProps) => {
   const [input, setInput] = useState("");
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -172,11 +176,27 @@ export const ChatInterface = ({
           <div className="p-2 bg-[var(--color-accent)] rounded-lg text-white">
             <Bot className="w-5 h-5" />
           </div>
-          <div>
+          <div className="flex flex-col">
             <h3 className="font-semibold text-white tracking-wide">CURA</h3>
-            <p className="text-xs text-gray-400 truncate max-w-md">Context: {filename}</p>
+            <div className="flex items-center gap-2">
+              {hasActiveDocument ? (
+                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.8)]" />
+              ) : (
+                <div className="w-2 h-2 rounded-full bg-amber-500/80" />
+              )}
+              <p className={clsx("text-xs truncate max-w-[200px] md:max-w-md", hasActiveDocument ? "text-gray-300" : "text-amber-500/80")}>
+                {hasActiveDocument ? `Context: ${filename}` : "No active document context—please upload."}
+              </p>
+            </div>
           </div>
         </div>
+        <button
+          onClick={onNewSession}
+          className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 backdrop-blur-md rounded-xl transition-all shadow-lg text-sm font-medium text-white"
+        >
+          <PlusCircle className="w-4 h-4" />
+          <span className="hidden sm:inline">New Session</span>
+        </button>
       </div>
 
       <div className="flex-1 overflow-y-auto p-6 space-y-6">

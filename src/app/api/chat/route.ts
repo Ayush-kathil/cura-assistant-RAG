@@ -13,14 +13,14 @@ export async function POST(req: NextRequest) {
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const contextStr = contextChunks && contextChunks.length > 0 
-      ? `\n\nCONTEXT INFORMATION:\n${contextChunks.map((c: any) => `[Source ${c.chunk.chunkIndex}]\n${c.chunk.text}`).join("\n---\n")}\n\nBased ONLY on the above context information, answer the user query: ${prompt}`
+      ? `\n\nCONTEXT INFORMATION:\n${contextChunks.map((c: any) => `--- Chunk ${c.chunk.chunkIndex} ---\n${c.chunk.text}`).join("\n\n")}\n\nBased ONLY on the above context information, answer the user query: ${prompt}`
       : prompt;
 
     const result = await model.generateContentStream({
       contents: [{ role: "user", parts: [{ text: contextStr }] }],
       systemInstruction: `You are an elite AI assistant named Cura. Use the provided context to answer questions accurately. 
 If the context does not contain the answer, say you do not know based on the provided document.
-Do not use raw chunk text citations in your response text. Synthesize the answer fluidly without mentioning "Chunk X" or "[Source X]".`,
+Do not use raw chunk text citations in your response text. Synthesize the answer fluidly without mentioning "Chunk X" or "Source X".`,
     });
 
     const stream = new ReadableStream({
