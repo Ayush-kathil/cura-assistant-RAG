@@ -5,11 +5,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Send, Copy, CheckCircle2, Bot, User, Loader2, Sparkles, Wand2, FileText } from "lucide-react";
 import clsx from "clsx";
 import ReactMarkdown from "react-markdown";
+import { ScoredChunk } from "@/lib/vectorStore";
 
 export interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
+  sources?: ScoredChunk[];
 }
 
 export type GenerationState = "idle" | "reformulating" | "scanning" | "synthesizing";
@@ -19,8 +21,6 @@ interface ChatInterfaceProps {
   onSendMessage: (msg: string) => void;
   generationState: GenerationState;
   filename: string;
-  onCitationClick?: (index: number) => void;
-  onCitationHover?: (index: number) => void;
   onActionRequest?: (action: "summarize" | "explain" | "rewrite", text: string) => void;
 }
 
@@ -50,13 +50,40 @@ const ThinkingIndicator = ({ state }: { state: GenerationState }) => {
   );
 };
 
+const SourcePill = ({ source }: { source: ScoredChunk }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  
+  return (
+    <div className="relative inline-block mt-2 mr-2" onMouseEnter={() => setIsOpen(true)} onMouseLeave={() => setIsOpen(false)}>
+      <motion.div 
+        initial={{ scale: 0.9, opacity: 0 }} 
+        animate={{ scale: 1, opacity: 1 }}
+        className="bg-white/5 border border-white/10 backdrop-blur-md rounded-full px-3 py-1 text-xs font-medium text-gray-300 cursor-pointer hover:bg-white/10 transition-colors"
+      >
+        Source {source.chunk.chunkIndex}
+      </motion.div>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 5, scale: 0.95 }}
+            className="absolute bottom-full mb-2 left-0 z-50 w-64 md:w-80 p-4 bg-[#0A0A15]/95 backdrop-blur-3xl border border-white/20 rounded-2xl shadow-2xl text-xs text-gray-300 leading-relaxed max-h-60 overflow-y-auto"
+          >
+            <div className="font-semibold text-white mb-2 pb-2 border-b border-white/10">Extracted Context</div>
+            {source.chunk.text}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
 export const ChatInterface = ({ 
   messages, 
   onSendMessage, 
   generationState, 
   filename,
-  onCitationClick,
-  onCitationHover,
   onActionRequest
 }: ChatInterfaceProps) => {
   const [input, setInput] = useState("");
@@ -116,7 +143,13 @@ export const ChatInterface = ({
   };
 
   return (
-    <div className="flex flex-col w-full h-full bg-transparent overflow-hidden">
+    <motion.div
+      layout
+      initial={{ opacity: 0, scale: 0.98, y: 20 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      className="flex flex-col w-full h-full lg:h-[90vh] lg:my-auto lg:max-w-5xl lg:rounded-3xl lg:border border-[var(--color-border)] bg-[var(--color-glass)] backdrop-blur-xl shadow-2xl shadow-blue-900/10 overflow-hidden"
+    >
       <AnimatePresence>
         {floatingMenuPos && (
           <motion.div
@@ -134,7 +167,7 @@ export const ChatInterface = ({
         )}
       </AnimatePresence>
 
-      <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-border)] bg-black/20">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-border)] bg-black/20 pt-20 lg:pt-4">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-[var(--color-accent)] rounded-lg text-white">
             <Bot className="w-5 h-5" />
@@ -175,32 +208,22 @@ export const ChatInterface = ({
                   "group relative p-4 rounded-2xl text-sm leading-relaxed",
                   msg.role === "user" 
                     ? "bg-white/10 text-white rounded-tr-sm" 
-                    : "bg-black/40 border border-white/5 text-gray-200 rounded-tl-sm shadow-inner"
+                    : "bg-black/40 border border-white/5 text-gray-200 rounded-tl-sm shadow-inner flex flex-col"
                 )}>
                   <div className="prose prose-invert max-w-none prose-p:leading-relaxed">
-                    <ReactMarkdown
-                      components={{
-                        a: ({ node, href, children, ...props }) => {
-                          if (href?.startsWith("#chunk-")) {
-                            const chunkId = parseInt(href.replace("#chunk-", ""), 10);
-                            return (
-                              <button 
-                                onClick={() => onCitationClick?.(chunkId)}
-                                onMouseEnter={() => onCitationHover?.(chunkId)}
-                                className="inline-flex items-center justify-center px-1.5 py-0.5 mx-1 text-[10px] font-bold text-blue-200 bg-blue-900/40 border border-blue-500/30 rounded-full hover:bg-blue-600/50 hover:border-blue-400 transition-all shadow-[0_0_10px_rgba(59,130,246,0.2)] hover:shadow-[0_0_15px_rgba(59,130,246,0.5)] translate-y-[-2px]"
-                              >
-                                {children}
-                              </button>
-                            );
-                          }
-                          return <a href={href} {...props}>{children}</a>;
-                        }
-                      }}
-                    >
-                      {msg.content.replace(/\[Chunk (\d+)\]/g, "[[$1]](#chunk-$1)")}
+                    <ReactMarkdown>
+                      {msg.content}
                     </ReactMarkdown>
                   </div>
                   
+                  {msg.role === "assistant" && msg.sources && msg.sources.length > 0 && (
+                    <div className="mt-2 pt-2 border-t border-white/5 flex flex-wrap items-center">
+                      {msg.sources.map(source => (
+                        <SourcePill key={source.chunk.id} source={source} />
+                      ))}
+                    </div>
+                  )}
+
                   {msg.role === "assistant" && msg.content && (
                     <button
                       onClick={() => handleCopy(msg.id, msg.content)}
@@ -225,7 +248,7 @@ export const ChatInterface = ({
       </div>
 
       <div className="p-4 bg-black/30 border-t border-[var(--color-border)]">
-        <form onSubmit={handleSubmit} className="relative flex items-center w-full">
+        <form onSubmit={handleSubmit} className="relative flex items-center w-full max-w-4xl mx-auto">
           <input
             type="text"
             value={input}
@@ -243,6 +266,6 @@ export const ChatInterface = ({
           </button>
         </form>
       </div>
-    </div>
+    </motion.div>
   );
 };

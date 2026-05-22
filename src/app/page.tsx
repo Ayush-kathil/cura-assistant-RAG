@@ -7,8 +7,6 @@ import { ApiKeyModal } from "@/components/ui/ApiKeyModal";
 import { DocumentUploader } from "@/components/ui/DocumentUploader";
 import { ChatInterface, Message, GenerationState } from "@/components/chat/ChatInterface";
 import { Sidebar } from "@/components/ui/Sidebar";
-import { SplitWorkspace } from "@/components/ui/SplitWorkspace";
-import { DocumentViewer } from "@/components/ui/DocumentViewer";
 import { chunkText, ChunkedDocument, searchVectorStore } from "@/lib/vectorStore";
 import { generateEmbeddingsBatch, generateStreamingResponse, generateEmbedding, reformulateQuery } from "@/lib/gemini";
 import { ChatSession, getSessions, saveSessions, createSession, deleteSession, renameSession } from "@/lib/storage";
@@ -23,7 +21,6 @@ export default function Home() {
   
   const [isProcessing, setIsProcessing] = useState(false);
   const [generationState, setGenerationState] = useState<GenerationState>("idle");
-  const [activeChunkIndex, setActiveChunkIndex] = useState<number | null>(null);
 
   useEffect(() => {
     const envKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
@@ -94,7 +91,7 @@ export default function Home() {
     setIsProcessing(true);
     
     try {
-      const chunks = chunkText(text, 1000, 200);
+      const chunks = chunkText(text);
       const docs: ChunkedDocument[] = [];
       const allEmbeddings = await generateEmbeddingsBatch(chunks, apiKey);
       
@@ -147,6 +144,14 @@ export default function Home() {
         });
         return;
       }
+
+      setSessions(prev => prev.map(s => {
+        if (s.id !== activeSessionId) return s;
+        const newMsgs = [...s.messages];
+        const lastIdx = newMsgs.findIndex(m => m.id === assistantId);
+        if (lastIdx > -1) newMsgs[lastIdx] = { ...newMsgs[lastIdx], sources: topScoredChunks };
+        return { ...s, messages: newMsgs };
+      }));
       
       let fullResponse = "";
       await generateStreamingResponse(reformulatedQuery, topScoredChunks, activeSession.documentName || "Document", apiKey, (chunkText) => {
@@ -215,38 +220,25 @@ export default function Home() {
           onRenameSession={handleRenameSession}
         />
         
-        <div className="flex-1 flex w-full h-full relative">
+        <div className="flex-1 flex flex-col items-center justify-center relative w-full h-full lg:p-8">
           <AnimatePresence mode="wait">
             {activeSession && activeSession.vectorStore.length === 0 ? (
-              <div className="flex flex-col items-center justify-center w-full h-full lg:p-8">
-                <DocumentUploader 
-                  key={`upload-${activeSession.id}`} 
-                  onDocumentProcessed={handleDocumentProcessed} 
-                  isProcessing={isProcessing} 
+              <DocumentUploader 
+                key={`upload-${activeSession.id}`} 
+                onDocumentProcessed={handleDocumentProcessed} 
+                isProcessing={isProcessing} 
+              />
+            ) : activeSession ? (
+              <div className="w-full max-w-4xl mx-auto h-full flex flex-col">
+                <ChatInterface 
+                  key={`chat-${activeSession.id}`}
+                  messages={activeSession.messages}
+                  onSendMessage={handleSendMessage}
+                  generationState={generationState}
+                  filename={activeSession.documentName || "Unknown Document"}
+                  onActionRequest={handleActionRequest}
                 />
               </div>
-            ) : activeSession ? (
-              <SplitWorkspace 
-                key={`workspace-${activeSession.id}`}
-                leftPanel={
-                  <ChatInterface 
-                    messages={activeSession.messages}
-                    onSendMessage={handleSendMessage}
-                    generationState={generationState}
-                    filename={activeSession.documentName || "Unknown Document"}
-                    onCitationClick={(idx) => setActiveChunkIndex(idx)}
-                    onCitationHover={(idx) => setActiveChunkIndex(idx)}
-                    onActionRequest={handleActionRequest}
-                  />
-                }
-                rightPanel={
-                  <DocumentViewer 
-                    documentName={activeSession.documentName || "Unknown Document"}
-                    chunks={activeSession.vectorStore}
-                    activeChunkIndex={activeChunkIndex}
-                  />
-                }
-              />
             ) : null}
           </AnimatePresence>
         </div>

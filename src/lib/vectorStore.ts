@@ -10,7 +10,7 @@ export interface ScoredChunk {
   score: number;
 }
 
-export const chunkText = (text: string, chunkSize: number = 1000, overlap: number = 200): string[] => {
+export const chunkText = (text: string, chunkSize: number = 1200, overlap: number = 300): string[] => {
   const chunks: string[] = [];
   let index = 0;
   

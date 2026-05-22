@@ -69,21 +69,26 @@ export const generateStreamingResponse = async (
   apiKey: string,
   onChunk: (text: string) => void
 ) => {
-  const genAI = getGeminiClient(apiKey);
-  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-
-  const contextStr = contextChunks.length > 0 
-    ? `\n\nCONTEXT INFORMATION:\n${contextChunks.map(c => `[Citation: Chunk ${c.chunk.chunkIndex}]\n${c.chunk.text}`).join("\n---\n")}\n\nBased ONLY on the above context information, answer the user query: ${prompt}`
-    : prompt;
-
-  const result = await model.generateContentStream({
-    contents: [{ role: "user", parts: [{ text: contextStr }] }],
-    systemInstruction: `You are an elite AI assistant named Cura. Use the provided context to answer questions accurately. 
-CRITICAL: When using information from the context, you MUST include inline citation markers matching the source chunk, formatted exactly like this: [Chunk X], where X is the number provided in the context.
-If the context does not contain the answer, say you do not know based on the provided document.`,
+  const response = await fetch("/api/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ prompt, contextChunks, apiKey }),
   });
 
-  for await (const chunk of result.stream) {
-    onChunk(chunk.text());
+  if (!response.ok || !response.body) {
+    const errText = await response.text();
+    throw new Error(errText || "Failed to fetch response");
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let done = false;
+
+  while (!done) {
+    const { value, done: doneReading } = await reader.read();
+    done = doneReading;
+    if (value) {
+      onChunk(decoder.decode(value, { stream: true }));
+    }
   }
 };
