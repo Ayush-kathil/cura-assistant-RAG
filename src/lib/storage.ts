@@ -17,6 +17,7 @@ export interface Message {
 export interface ChatDocument {
   id: string;
   filename: string;
+  sizeBytes?: number;
 }
 
 export interface ChatSession {

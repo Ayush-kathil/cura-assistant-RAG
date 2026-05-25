@@ -10,14 +10,16 @@ export default function DashboardPage() {
   const [docCount, setDocCount] = useState(0);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUser(user);
-    });
-    
-    supabase.from("documents").select("id", { count: "exact" }).then(({ count }) => {
+    const fetchStats = async () => {
+      const { data } = await supabase.auth.getUser();
+      setUser(data.user);
+      
+      const { count } = await supabase.from("documents").select("id", { count: "exact" });
       setDocCount(count || 0);
-    });
-  }, []);
+    };
+    
+    fetchStats();
+  }, [supabase]);
 
   return (
     <div className="min-h-screen bg-[#0A0A15] text-white p-8 font-sans">

@@ -11,7 +11,7 @@ export const DinoGame: React.FC<DinoGameProps> = ({ isActive }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [score, setScore] = useState(0);
   const [isGameOver, setIsGameOver] = useState(false);
-  const requestRef = useRef<number>();
+  const requestRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!isActive) return;

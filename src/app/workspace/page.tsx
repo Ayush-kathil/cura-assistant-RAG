@@ -15,6 +15,7 @@ interface DocumentItem {
   file_size_bytes: number;
   storage_path: string;
   vector_status: string;
+  chunks?: string[];
 }
 
 export default function WorkspacePage() {
@@ -56,7 +57,7 @@ export default function WorkspacePage() {
     const { data: messages } = await supabase.from('chat_messages').select('*').eq('session_id', sessionId).order('created_at', { ascending: true });
     if (messages) {
       // Reconstruct messages for UI
-      const uiMessages: Message[] = messages.map(m => ({
+      const uiMessages: Message[] = messages.map((m: any) => ({
         id: m.id,
         role: m.role as "user" | "assistant",
         content: m.content,
