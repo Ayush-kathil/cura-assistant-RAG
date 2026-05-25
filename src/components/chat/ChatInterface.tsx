@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Copy, CheckCircle2, Bot, User, Loader2, Sparkles, Wand2, FileText, ChevronLeft, ChevronRight, Settings, Code2, AlertTriangle, Play, Activity } from "lucide-react";
+import { Copy, CheckCircle2, Bot, User, Loader2, Sparkles, Wand2, FileText, ChevronLeft, ChevronRight, Settings, Code2, AlertTriangle, Play, Activity, Network, RefreshCw, ThumbsUp, ThumbsDown, ChevronDown } from "lucide-react";
 import clsx from "clsx";
 import ReactMarkdown from "react-markdown";
 import { useVirtualizer } from "@tanstack/react-virtual";
@@ -194,8 +194,8 @@ export const ChatInterface = ({
             return (
               <div key={virtualItem.key} data-index={virtualItem.index} ref={virtualizer.measureElement} style={{ position: 'absolute', top: 0, left: 0, width: '100%', transform: `translateY(${virtualItem.start}px)` }} className="pb-6">
                 <div className={clsx("flex gap-3 md:gap-4 max-w-[95%] md:max-w-[85%]", msg.role === "user" ? "ml-auto flex-row-reverse" : "mr-auto")}>
-                  <div className={clsx("w-8 h-8 flex-shrink-0 rounded-full flex items-center justify-center mt-1", msg.role === "user" ? "bg-white/10" : "bg-[var(--color-accent)]")}>
-                    {msg.role === "user" ? <User className="w-4 h-4 text-white" /> : <Bot className="w-4 h-4 text-white" />}
+                  <div className={clsx("w-8 h-8 flex-shrink-0 rounded-full flex items-center justify-center mt-1", msg.role === "user" ? "bg-white/10" : "hidden")}>
+                    {msg.role === "user" && <User className="w-4 h-4 text-white" />}
                   </div>
                   <div className="flex flex-col gap-1 w-full max-w-full">
                     {msg.orchestrationPath && msg.orchestrationPath.length > 0 && msg.role === "assistant" && (
@@ -207,7 +207,14 @@ export const ChatInterface = ({
                        </details>
                     )}
 
-                    <div className={clsx("group relative p-4 rounded-2xl text-sm leading-relaxed", msg.role === "user" ? "bg-white/10 text-white rounded-tr-sm" : "bg-black/40 border border-white/5 text-gray-200 rounded-tl-sm shadow-inner flex flex-col")}>
+                    <div className={clsx("group relative p-4 rounded-xl text-sm leading-relaxed", msg.role === "user" ? "bg-white/10 text-white rounded-tr-sm" : "bg-black/40 border-l-[3px] border-cyan-400 text-gray-200 shadow-lg flex flex-col")}>
+                      
+                      {msg.role === "assistant" && (
+                        <div className="flex items-center gap-2 mb-3">
+                          <Network className="w-5 h-5 text-cyan-400" />
+                          <span className="font-bold text-cyan-400 tracking-wide text-sm">Nexus Engine</span>
+                        </div>
+                      )}
                       
                       {msg.requiresApproval && !msg.isApproved ? (
                         <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 flex flex-col gap-3">
@@ -234,11 +241,47 @@ export const ChatInterface = ({
                           <motion.div animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }} transition={{ repeat: Infinity, duration: 1, delay: 0.4 }} className="w-2 h-2 rounded-full bg-[var(--color-accent)]" />
                         </div>
                       ) : (
-                        <div className="prose prose-invert max-w-none prose-p:leading-relaxed prose-p:tracking-wide prose-li:leading-relaxed prose-blockquote:border-blue-500/50 prose-blockquote:bg-blue-500/5 prose-blockquote:px-4 prose-blockquote:py-1 prose-blockquote:rounded-r-lg">
-                          <ReactMarkdown components={{ code: (props) => <CodeBlock {...props} onViewArtifact={onViewArtifact} />, p: ({ children, node }) => <p className="mb-4 last:mb-0 text-[15px]">{children}</p>, a: ({ children, node }) => <CitationNode node={node} sources={msg.sources}>{children}</CitationNode> }}>
-                            {msg.content}
-                          </ReactMarkdown>
-                        </div>
+                        <>
+                          <div className="prose prose-invert max-w-none prose-p:leading-relaxed prose-p:tracking-wide prose-li:leading-relaxed prose-blockquote:border-cyan-500/50 prose-blockquote:bg-cyan-500/5 prose-blockquote:px-4 prose-blockquote:py-1 prose-blockquote:rounded-r-lg">
+                            <ReactMarkdown components={{ code: (props) => <CodeBlock {...props} onViewArtifact={onViewArtifact} />, p: ({ children, node }) => <p className="mb-4 last:mb-0 text-[15px]">{children}</p>, a: ({ children, node }) => <CitationNode node={node} sources={msg.sources}>{children}</CitationNode> }}>
+                              {msg.content}
+                            </ReactMarkdown>
+                          </div>
+
+                          {msg.sources && msg.sources.length > 0 && (
+                            <details className="mt-4 border-t border-white/5 pt-4 group">
+                              <summary className="flex items-center justify-between text-xs font-semibold text-gray-400 uppercase tracking-widest cursor-pointer outline-none hover:text-white transition-colors">
+                                CITATIONS ({msg.sources.length})
+                                <ChevronDown className="w-4 h-4 transition-transform group-open:rotate-180" />
+                              </summary>
+                              <div className="mt-4 space-y-2">
+                                {msg.sources.map((source, idx) => (
+                                  <div key={idx} className="flex gap-2 text-xs text-gray-400">
+                                    <span className="font-bold text-cyan-400">[{idx + 1}]</span>
+                                    <span className="italic">{source.chunk.filename}</span>
+                                    <span className="text-gray-500">- Score: {source.score.toFixed(2)}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </details>
+                          )}
+                          
+                          {/* Premium Action Footer */}
+                          <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                              <button className="flex items-center gap-2 text-xs font-semibold text-gray-400 hover:text-white transition-colors uppercase tracking-wider">
+                                <Copy className="w-4 h-4" /> Copy
+                              </button>
+                              <button className="flex items-center gap-2 text-xs font-semibold text-gray-400 hover:text-white transition-colors uppercase tracking-wider">
+                                <RefreshCw className="w-4 h-4" /> Regenerate
+                              </button>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <button className="text-gray-400 hover:text-cyan-400 transition-colors"><ThumbsUp className="w-4 h-4" /></button>
+                              <button className="text-gray-400 hover:text-red-400 transition-colors"><ThumbsDown className="w-4 h-4" /></button>
+                            </div>
+                          </div>
+                        </>
                       )}
                       
                       {msg.role === "user" && isEditingId !== msg.id && generationState === "idle" && (
@@ -263,6 +306,16 @@ export const ChatInterface = ({
                         <button disabled={siblingIndex === siblings.length - 1} onClick={() => onNavigateBranch(siblings[siblingIndex + 1].id)} className="p-1 hover:text-white disabled:opacity-30 flex items-center justify-center"><ChevronRight className="w-3 h-3"/></button>
                       </div>
                     )}
+                    {msg.role === "assistant" && generationState === "idle" && (
+                      <div className="flex flex-wrap gap-2 mt-4 ml-1">
+                        {["Summarize the key points", "Explain the data processing requirements", "What are the specific Top-K parameters?"].map((suggestion, idx) => (
+                          <button key={idx} onClick={() => setInput(suggestion)} className="text-xs px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-gray-300 transition-colors truncate max-w-[250px]">
+                            {suggestion}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
                   </div>
                 </div>
               </div>

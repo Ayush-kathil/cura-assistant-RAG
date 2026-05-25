@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Nexus RAG | Enterprise AI Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Geist:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glass-panel { backdrop-filter: blur(12px); background: rgba(14, 19, 30, 0.8); }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #464554; border-radius: 10px; }
+        .custom-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 12px;
+            height: 12px;
+            background: #c0c1ff;
+            cursor: pointer;
+            border-radius: 2px;
+        }
+
+        @media (prefers-reduced-motion: no-preference) {
+            .message-enter {
+                animation: slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            .message-enter:nth-child(1) { animation-delay: 0.1s; }
+            .message-enter:nth-child(2) { animation-delay: 0.2s; }
+            .message-enter:nth-child(3) { animation-delay: 0.3s; }
+
+            @keyframes slideUpFade {
+                from { opacity: 0; transform: translateY(15px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+
+            .shimmer {
+                position: relative;
+                overflow: hidden;
+            }
+            .shimmer::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 50%;
+                height: 100%;
+                background: linear-gradient(to right, transparent, rgba(255,255,255,0.2), transparent);
+                transform: skewX(-20deg);
+                animation: shimmer 3s infinite;
+            }
+            @keyframes shimmer {
+                0% { left: -100%; }
+                20% { left: 200%; }
+                100% { left: 200%; }
+            }
+        }
+        
+        .accordion-content {
+            display: grid;
+            grid-template-rows: 0fr;
+            transition: grid-template-rows 0.3s ease-out;
+        }
+        .accordion-content.expanded {
+            grid-template-rows: 1fr;
+        }
+        .accordion-inner {
+            overflow: hidden;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary": "#4cd7f6",
+                        "primary": "#c0c1ff",
+                        "on-primary-fixed": "#07006c",
+                        "error-container": "#93000a",
+                        "surface-container": "#1b202b",
+                        "outline": "#908fa0",
+                        "on-tertiary-fixed-variant": "#703700",
+                        "secondary-container": "#03b5d3",
+                        "secondary-fixed": "#acedff",
+                        "tertiary-fixed": "#ffdcc5",
+                        "tertiary-container": "#d97721",
+                        "on-primary-fixed-variant": "#2f2ebe",
+                        "surface-container-low": "#171c27",
+                        "primary-fixed-dim": "#c0c1ff",
+                        "on-background": "#dee2f2",
+                        "surface-dim": "#0e131e",
+                        "on-error-container": "#ffdad6",
+                        "on-secondary": "#003640",
+                        "on-tertiary-container": "#452000",
+                        "on-tertiary": "#4f2500",
+                        "on-secondary-container": "#00424e",
+                        "on-error": "#690005",
+                        "inverse-on-surface": "#2b303c",
+                        "surface-container-lowest": "#090e19",
+                        "on-surface-variant": "#c7c4d7",
+                        "primary-fixed": "#e1e0ff",
+                        "surface-tint": "#c0c1ff",
+                        "surface": "#0e131e",
+                        "on-tertiary-fixed": "#301400",
+                        "primary-container": "#8083ff",
+                        "outline-variant": "#464554",
+                        "on-secondary-fixed-variant": "#004e5c",
+                        "on-primary-container": "#0d0096",
+                        "on-primary": "#1000a9",
+                        "background": "#0e131e",
+                        "inverse-surface": "#dee2f2",
+                        "error": "#ffb4ab",
+                        "secondary-fixed-dim": "#4cd7f6",
+                        "surface-container-highest": "#303541",
+                        "tertiary": "#ffb783",
+                        "on-secondary-fixed": "#001f26",
+                        "inverse-primary": "#494bd6",
+                        "surface-container-high": "#252a35",
+                        "tertiary-fixed-dim": "#ffb783",
+                        "on-surface": "#dee2f2",
+                        "surface-variant": "#303541",
+                        "surface-bright": "#343945"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "xl": "40px",
+                        "sm": "8px",
+                        "sidebar-width": "260px",
+                        "md": "16px",
+                        "lg": "24px",
+                        "base": "4px",
+                        "container-max": "1440px"
+                    },
+                    "fontFamily": {
+                        "headline-sm": ["Geist"],
+                        "mono-code": ["jetbrainsMono"],
+                        "label-md": ["Geist"],
+                        "display-lg": ["Geist"],
+                        "headline-md": ["Geist"],
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-sm": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "mono-code": ["13px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "label-md": ["13px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "body-sm": ["12px", {"lineHeight": "18px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface overflow-hidden">
+<!-- Mobile Top Header -->
+<header class="md:hidden flex items-center justify-between px-md py-sm bg-surface-container border-b border-outline-variant/30 sticky top-0 z-50">
+<button class="p-xs text-on-surface" onclick="toggleMobileNav()">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<span class="font-headline-sm text-headline-sm text-primary tracking-tight">Nexus RAG</span>
+<button class="p-xs text-on-surface" onclick="toggleSettings()">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</header>
+<div class="flex h-screen overflow-hidden">
+<!-- Navigation Drawer (Left Sidebar) -->
+<aside class="bg-surface-container h-screen w-sidebar-width fixed md:relative z-40 transform -translate-x-full md:translate-x-0 transition-transform duration-300 border-r border-outline-variant/20 flex flex-col py-lg" id="sidebar">
+<!-- Workspace Switcher -->
+<div class="px-md mb-lg">
+<div class="flex items-center gap-sm bg-surface-container-high p-sm rounded-xl cursor-pointer hover:bg-surface-container-highest transition-all border border-outline-variant/20">
+<div class="w-8 h-8 rounded bg-primary flex items-center justify-center text-on-primary font-bold">E</div>
+<div class="flex-1 overflow-hidden">
+<p class="font-label-md text-label-md truncate">Enterprise Docs</p>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-widest">Workspace</p>
+</div>
+<span class="material-symbols-outlined text-sm">unfold_more</span>
+</div>
+</div>
+<!-- New Chat Button -->
+<div class="px-md mb-md">
+<button class="w-full flex items-center justify-center gap-sm bg-primary-container text-on-primary-container font-label-md text-label-md py-md rounded-lg active:scale-95 transition-transform">
+<span class="material-symbols-outlined">add_comment</span>
+                    New Chat
+                </button>
+</div>
+<!-- History Navigation -->
+<nav class="flex-1 overflow-y-auto px-xs space-y-sm">
+<div class="px-md py-xs">
+<span class="text-[11px] font-bold text-outline uppercase tracking-wider">Today</span>
+</div>
+<div class="bg-primary-container/10 text-primary rounded-lg mx-2 p-sm flex items-center gap-sm cursor-pointer border-l-2 border-primary">
+<span class="material-symbols-outlined text-md">chat</span>
+<span class="font-label-md text-label-md truncate">Q3 Compliance Analysis</span>
+</div>
+<div class="text-on-surface-variant hover:bg-surface-container-highest rounded-lg mx-2 p-sm flex items-center gap-sm cursor-pointer transition-all">
+<span class="material-symbols-outlined text-md">chat</span>
+<span class="font-label-md text-label-md truncate">Vector Search Optimization</span>
+</div>
+<div class="px-md py-xs mt-lg">
+<span class="text-[11px] font-bold text-outline uppercase tracking-wider">Yesterday</span>
+</div>
+<div class="text-on-surface-variant hover:bg-surface-container-highest rounded-lg mx-2 p-sm flex items-center gap-sm cursor-pointer transition-all">
+<span class="material-symbols-outlined text-md">chat</span>
+<span class="font-label-md text-label-md truncate">Onboarding PDF Parser</span>
+</div>
+<div class="px-md py-xs mt-lg">
+<span class="text-[11px] font-bold text-outline uppercase tracking-wider">Last 7 Days</span>
+</div>
+<div class="text-on-surface-variant hover:bg-surface-container-highest rounded-lg mx-2 p-sm flex items-center gap-sm cursor-pointer transition-all">
+<span class="material-symbols-outlined text-md">database</span>
+<span class="font-label-md text-label-md truncate">Data Sources Overview</span>
+</div>
+</nav>
+<!-- Profile Snippet -->
+<div class="mt-auto px-md pt-md border-t border-outline-variant/10">
+<div class="flex items-center gap-sm p-sm rounded-lg hover:bg-surface-container-high transition-all cursor-pointer">
+<img alt="User Profile" class="w-9 h-9 rounded-full border border-primary/30" data-alt="A professional headshot of a software engineer in a high-tech studio setting. The lighting is moody with purple and blue rim lights, reflecting a modern dark-mode AI dashboard aesthetic. The subject is wearing a dark minimalist sweater, looking confidently toward the camera. The background is softly blurred with subtle circuit-like bokeh effects, emphasizing a high-tech, enterprise workspace mood." src="https://lh3.googleusercontent.com/aida-public/AB6AXuADdu_IbWpPpzKq5hhomAi3Gvc1W3t8qVxmijT1Z-gZAM9nKRgVxSsL4x7nJhhwpc-sTrEOg7nbHsij3pq6TciAU9s_lHOehIe6g7XSBS5Uc37v43A4Epu_rTE4zXJWoFDMi0cccPRMaedldzPRqzoz5be1SpOeU2NsWehfQw6ovJ9qKDtsZhQH_Kr3iWyAgfQCNXgeMYDOnZ5Q4rlsdLNEPuUOvjbkjJwVDoLyM7VJhg505WFd1IR2c2qS6hz8d8OgIpGBND-QhgQ"/>
+<div class="flex-1">
+<p class="font-label-md text-label-md text-on-surface">Alex Chen</p>
+<p class="text-[11px] text-on-surface-variant">Pro Plan • v2.4.0</p>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">settings</span>
+</div>
+</div>
+</aside>
+<!-- Main View (Center) -->
+<main class="flex-1 flex flex-col relative bg-background min-w-0">
+<!-- Header Stats -->
+<header class="flex items-center justify-between px-lg py-md border-b border-outline-variant/10 glass-panel sticky top-0 z-30">
+<div class="flex items-center gap-lg">
+<div class="flex flex-col">
+<span class="text-[10px] text-outline uppercase font-bold tracking-widest">KB Status</span>
+<div class="flex items-center gap-xs">
+<span class="w-2 h-2 rounded-full bg-secondary animate-[pulse_2s_ease-in-out_infinite]"></span>
+<span class="font-label-md text-label-md text-on-surface">14 Sources Active</span>
+</div>
+</div>
+<div class="hidden sm:flex flex-col">
+<span class="text-[10px] text-outline uppercase font-bold tracking-widest">Latency</span>
+<span class="font-label-md text-label-md text-secondary">0.42s Avg</span>
+</div>
+</div>
+<div class="flex-1 max-w-md mx-lg hidden lg:block">
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors">search</span>
+<input class="w-full bg-surface-container-low border border-outline-variant/20 rounded-full py-xs pl-xl pr-md text-body-sm focus:ring-1 focus:ring-primary focus:border-primary bg-transparent transition-all" placeholder="Search knowledge base..." type="text"/>
+</div>
+</div>
+<div class="flex gap-sm">
+<button class="p-sm text-on-surface-variant hover:text-primary transition-colors hover:scale-110 active:scale-95">
+<span class="material-symbols-outlined">share</span>
+</button>
+<button class="p-sm text-on-surface-variant hover:text-primary transition-colors hover:scale-110 active:scale-95">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</header>
+<!-- Chat Stream -->
+<section class="flex-1 overflow-y-auto px-md md:px-xl py-lg space-y-lg">
+<!-- User Message -->
+<div class="flex flex-col items-end max-w-3xl ml-auto w-full group message-enter">
+<div class="bg-surface-container-low border border-primary/30 p-md rounded-xl rounded-tr-none text-on-surface shadow-sm transition-transform hover:-translate-y-0.5 duration-200">
+<p class="font-body-md text-body-md">Can you analyze the compliance requirements for our Q3 offshore data processing according to the new EU regulations?</p>
+</div>
+<span class="text-[10px] text-outline mt-xs mr-xs uppercase font-bold">14:02 · Delivered</span>
+</div>
+<!-- AI Message -->
+<div class="flex flex-col items-start max-w-3xl mr-auto w-full group message-enter">
+<div class="bg-surface-container border-l-4 border-secondary p-md rounded-xl rounded-tl-none text-on-surface shadow-md transition-transform hover:-translate-y-0.5 duration-200">
+<div class="flex items-center gap-xs mb-sm">
+<span class="material-symbols-outlined text-secondary text-md">hub</span>
+<span class="font-label-md text-label-md text-secondary tracking-wide">Nexus Engine</span>
+</div>
+<p class="font-body-md text-body-md leading-relaxed">Based on the uploaded <span class="bg-secondary/10 border border-secondary/20 px-1 rounded text-secondary hover:bg-secondary/20 transition-colors cursor-pointer">EU_Reg_2024_Update.pdf</span>, offshore data processing now requires an enhanced "Tier-2 Transparency Audit" if PII is involved. Specifically, your Q3 projects must comply with the 72-hour notification protocol for any transfer anomalies.<sup class="text-[10px] text-secondary font-bold px-1 border border-secondary/30 rounded ml-xs cursor-pointer hover:bg-secondary/20 transition-colors">[1]</sup></p>
+<!-- Citation Accordion -->
+<div class="mt-md border border-outline-variant/10 rounded-lg overflow-hidden bg-surface-container-low">
+<button class="w-full flex items-center justify-between px-sm py-xs hover:bg-surface-container-highest transition-colors group/acc" onclick="toggleAccordion(this)">
+<span class="text-[11px] font-bold text-outline uppercase tracking-wider group-hover/acc:text-on-surface transition-colors">Citations (3)</span>
+<span class="material-symbols-outlined text-sm transition-transform duration-300 chevron-icon">expand_more</span>
+</button>
+<div class="accordion-content">
+<div class="accordion-inner p-sm space-y-sm text-[12px] border-t border-outline-variant/10">
+<div class="flex gap-sm">
+<span class="text-secondary font-bold">[1]</span>
+<p class="text-on-surface-variant italic">Section 4.2.1: "Cross-border Data Flows and Reporting Standards", Page 142.</p>
+</div>
+<div class="flex gap-sm">
+<span class="text-secondary font-bold">[2]</span>
+<p class="text-on-surface-variant italic">Nexus RAG: Internal Compliance Policy v3.1, Chapter 2.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Action Utilities -->
+<div class="mt-md pt-sm border-t border-outline-variant/10 flex items-center justify-between">
+<div class="flex gap-md">
+<button class="text-outline hover:text-primary transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-xs">
+<span class="material-symbols-outlined text-sm">content_copy</span>
+<span class="text-[10px] font-bold uppercase tracking-wider">Copy</span>
+</button>
+<button class="text-outline hover:text-secondary transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-xs">
+<span class="material-symbols-outlined text-sm">refresh</span>
+<span class="text-[10px] font-bold uppercase tracking-wider">Regenerate</span>
+</button>
+</div>
+<div class="flex gap-sm">
+<button class="p-xs text-outline hover:text-green-400 transition-all duration-200 hover:scale-110 active:scale-90 rounded-full hover:bg-green-400/10">
+<span class="material-symbols-outlined text-sm">thumb_up</span>
+</button>
+<button class="p-xs text-outline hover:text-red-400 transition-all duration-200 hover:scale-110 active:scale-90 rounded-full hover:bg-red-400/10">
+<span class="material-symbols-outlined text-sm">thumb_down</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- User Message (New) -->
+<div class="flex flex-col items-end max-w-3xl ml-auto w-full group message-enter">
+<div class="bg-surface-container-low border border-primary/30 p-md rounded-xl rounded-tr-none text-on-surface shadow-sm transition-transform hover:-translate-y-0.5 duration-200">
+<p class="font-body-md text-body-md">What are the specific Top-K parameters used for this retrieval?</p>
+</div>
+</div>
+</section>
+<!-- Input Bar Area -->
+<footer class="p-md md:p-lg pb-xl bg-background/50 backdrop-blur-sm">
+<div class="max-w-4xl mx-auto">
+<div class="bg-surface-container border border-outline-variant/30 rounded-2xl shadow-2xl p-sm transition-all duration-300 focus-within:border-primary/50 focus-within:shadow-[0_0_15px_rgba(192,193,255,0.15)] focus-within:bg-surface-container-high group">
+<!-- Toolbar -->
+<div class="flex items-center justify-between px-sm pb-sm border-b border-outline-variant/10 mb-sm transition-colors group-focus-within:border-outline-variant/30">
+<div class="flex items-center gap-md">
+<select class="bg-transparent border-none text-[11px] font-bold text-primary uppercase tracking-wider focus:ring-0 p-0 cursor-pointer hover:text-primary-container transition-colors">
+<option>GPT-4o RAG (Optimized)</option>
+<option>Claude 3.5 Sonnet</option>
+<option>Llama 3 70B</option>
+</select>
+<button class="flex items-center gap-xs text-outline hover:text-on-surface transition-colors hover:scale-105 active:scale-95">
+<span class="material-symbols-outlined text-sm">library_books</span>
+<span class="text-[11px] font-bold uppercase">Prompt Lib</span>
+</button>
+</div>
+<span class="text-[10px] text-outline font-mono">1.2k Tokens Used</span>
+</div>
+<!-- Main Input -->
+<div class="flex items-end gap-sm">
+<button class="p-sm text-outline hover:text-primary transition-colors hover:scale-110 active:scale-90">
+<span class="material-symbols-outlined">attach_file</span>
+</button>
+<textarea class="flex-1 bg-transparent border-none focus:ring-0 text-body-md resize-none py-sm px-xs max-h-40 placeholder:text-outline-variant transition-colors" placeholder="Type your query for Nexus Engine..." rows="1"></textarea>
+<button class="bg-primary hover:bg-primary-container text-on-primary w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-90 hover:shadow-lg shimmer">
+<span class="material-symbols-outlined">send</span>
+</button>
+</div>
+</div>
+</div>
+</footer>
+</main>
+<!-- Settings/Advanced Panel (Right Sidebar) -->
+<aside class="hidden xl:flex w-[320px] bg-surface-container-low border-l border-outline-variant/20 flex-col py-lg px-md overflow-y-auto transform xl:translate-x-0 transition-transform duration-300" id="settings-panel">
+<div class="flex items-center justify-between mb-lg">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">System Metrics</h3>
+<span class="material-symbols-outlined text-outline">query_stats</span>
+</div>
+<!-- RAG Parameters -->
+<div class="space-y-lg mb-xl">
+<div>
+<div class="flex justify-between mb-xs">
+<label class="text-[11px] font-bold text-outline uppercase tracking-widest">Temperature</label>
+<span class="text-secondary font-mono text-xs">0.7</span>
+</div>
+<input class="w-full h-1 bg-surface-container-highest rounded-lg appearance-none cursor-pointer custom-slider" type="range" value="70"/>
+</div>
+<div>
+<div class="flex justify-between mb-xs">
+<label class="text-[11px] font-bold text-outline uppercase tracking-widest">Top-K Retrieval</label>
+<span class="text-secondary font-mono text-xs">25</span>
+</div>
+<input class="w-full h-1 bg-surface-container-highest rounded-lg appearance-none cursor-pointer custom-slider" type="range" value="50"/>
+</div>
+</div>
+<!-- Micro-Graphs -->
+<div class="grid grid-cols-2 gap-md mb-xl">
+<div class="bg-surface-container p-sm rounded-xl border border-outline-variant/10">
+<p class="text-[10px] text-outline font-bold uppercase mb-sm">Token Rate</p>
+<div class="h-10 flex items-end gap-1">
+<div class="flex-1 bg-primary/20 h-[60%] rounded-t-sm"></div>
+<div class="flex-1 bg-primary/40 h-[40%] rounded-t-sm"></div>
+<div class="flex-1 bg-primary/30 h-[80%] rounded-t-sm"></div>
+<div class="flex-1 bg-primary/60 h-[100%] rounded-t-sm"></div>
+<div class="flex-1 bg-primary/50 h-[70%] rounded-t-sm"></div>
+</div>
+</div>
+<div class="bg-surface-container p-sm rounded-xl border border-outline-variant/10">
+<p class="text-[10px] text-outline font-bold uppercase mb-sm">DB Health</p>
+<div class="h-10 flex items-end gap-1">
+<div class="flex-1 bg-secondary/20 h-[30%] rounded-t-sm"></div>
+<div class="flex-1 bg-secondary/40 h-[50%] rounded-t-sm"></div>
+<div class="flex-1 bg-secondary/30 h-[90%] rounded-t-sm"></div>
+<div class="flex-1 bg-secondary/60 h-[85%] rounded-t-sm"></div>
+<div class="flex-1 bg-secondary/50 h-[95%] rounded-t-sm"></div>
+</div>
+</div>
+</div>
+<!-- Ingestion Zone -->
+<div class="mt-auto">
+<p class="text-[11px] font-bold text-outline uppercase tracking-widest mb-md">Data Ingestion</p>
+<div class="border-2 border-dashed border-outline-variant/30 rounded-2xl p-lg flex flex-col items-center justify-center text-center hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer group">
+<span class="material-symbols-outlined text-outline text-3xl mb-sm group-hover:text-primary transition-colors group-hover:scale-110 duration-200">cloud_upload</span>
+<p class="font-label-md text-label-md text-on-surface">Drop files to ingest</p>
+<p class="text-[11px] text-outline mt-xs">PDF, CSV, JSON, Markdown</p>
+</div>
+<!-- Progress Indicator -->
+<div class="mt-lg">
+<div class="flex justify-between items-center mb-xs">
+<span class="text-[10px] font-bold text-on-surface truncate">indexing_new_docs.pdf</span>
+<span class="text-[10px] text-secondary font-mono">82%</span>
+</div>
+<div class="w-full h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="bg-secondary h-full rounded-full" style="width: 82%"></div>
+</div>
+</div>
+</div>
+</aside>
+</div>
+<!-- Bottom Nav for Mobile -->
+<nav class="md:hidden fixed bottom-0 w-full bg-surface-container-highest z-50 flex justify-around items-center h-16 border-t border-outline-variant/30 shadow-lg px-md">
+<div class="flex flex-col items-center justify-center text-secondary bg-secondary/10 rounded-xl px-4 py-1">
+<span class="material-symbols-outlined">chat</span>
+<span class="font-label-md text-label-md">Chat</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">storage</span>
+<span class="font-label-md text-label-md">Data</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">bar_chart</span>
+<span class="font-label-md text-label-md">Stats</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-md text-label-md">Profile</span>
+</div>
+</nav>
+<script>
+        function toggleMobileNav() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('-translate-x-full');
+        }
+
+        function toggleSettings() {
+            const panel = document.getElementById('settings-panel');
+            if (panel.classList.contains('hidden')) {
+                panel.classList.remove('hidden');
+                panel.classList.add('flex', 'fixed', 'right-0', 'top-0', 'h-full', 'z-50', 'w-full', 'md:w-80', 'bg-surface-container');
+            } else {
+                panel.classList.add('hidden');
+                panel.classList.remove('flex', 'fixed', 'right-0', 'top-0', 'h-full', 'z-50', 'w-full', 'md:w-80', 'bg-surface-container');
+            }
+        }
+        
+        function toggleAccordion(btn) {
+            const content = btn.nextElementSibling;
+            const icon = btn.querySelector('.chevron-icon');
+            
+            content.classList.toggle('expanded');
+            
+            if (content.classList.contains('expanded')) {
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        // Simple text area auto-resize
+        const tx = document.getElementsByTagName('textarea');
+        for (let i = 0; i < tx.length; i++) {
+          tx[i].setAttribute('style', 'height:' + (tx[i].scrollHeight) + 'px;overflow-y:hidden;');
+          tx[i].addEventListener("input", OnInput, false);
+        }
+
+        function OnInput() {
+          this.style.height = 'auto';
+          this.style.height = (this.scrollHeight) + 'px';
+        }
+    </script>
+</body></html>

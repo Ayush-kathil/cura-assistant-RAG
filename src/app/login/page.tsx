@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
+import { Turnstile } from '@marsidev/react-turnstile';
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -11,6 +12,7 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const router = useRouter();
 
   const supabase = createClient();
@@ -21,6 +23,11 @@ export default function LoginPage() {
       return;
     }
     
+    if (!captchaToken) {
+      setError("Please complete the security check.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
     setSuccessMsg(null);
@@ -30,6 +37,7 @@ export default function LoginPage() {
         email,
         options: {
           shouldCreateUser: true,
+          captchaToken,
         }
       });
       
@@ -69,10 +77,15 @@ export default function LoginPage() {
   };
 
   const handleOAuth = async (provider: 'google' | 'github') => {
+    if (!captchaToken) {
+      setError("Please complete the security check before logging in with " + provider + ".");
+      return;
+    }
     await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`
+        redirectTo: `${window.location.origin}/auth/callback`,
+        captchaToken,
       }
     });
   };
@@ -181,6 +194,15 @@ export default function LoginPage() {
                   </div>
                 </div>
               )}
+
+              {/* Turnstile Captcha Widget */}
+              <div className="flex justify-center mt-xs">
+                <Turnstile 
+                  siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'} 
+                  onSuccess={(token) => setCaptchaToken(token)}
+                  options={{ theme: 'dark' }}
+                />
+              </div>
             </form>
 
             <div className="flex items-center gap-md mt-sm">
