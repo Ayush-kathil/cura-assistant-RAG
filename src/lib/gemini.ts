@@ -17,17 +17,17 @@ export const generateEmbedding = async (text: string, apiKey: string): Promise<n
 
 export const generateEmbeddingsBatch = async (texts: string[], apiKey: string): Promise<number[][]> => {
   const embeddings: number[][] = [];
+  const batchSize = 10;
   
-  for (let i = 0; i < texts.length; i++) {
+  for (let i = 0; i < texts.length; i += batchSize) {
+    const chunkBatch = texts.slice(i, i + batchSize);
     try {
-      const embedding = await generateEmbedding(texts[i], apiKey);
-      embeddings.push(embedding);
-      if (i < texts.length - 1) {
-        await new Promise(resolve => setTimeout(resolve, 300));
-      }
+      const batchPromises = chunkBatch.map(text => generateEmbedding(text, apiKey));
+      const batchResults = await Promise.all(batchPromises);
+      embeddings.push(...batchResults);
     } catch (error: any) {
-      console.error(`Error embedding chunk ${i}:`, error);
-      throw new Error(`Embedding failed on chunk ${i}: ${error?.message || error}`);
+      console.error(`Error embedding batch starting at ${i}:`, error);
+      throw new Error(`Embedding failed on batch starting at ${i}: ${error?.message || error}`);
     }
   }
   
@@ -117,7 +117,6 @@ export const generateStreamingResponse = async (
       for (const word of words) {
         if (word) {
           onChunk(word);
-          await new Promise(r => setTimeout(r, 25)); // 25ms per word for typewriter effect
         }
       }
     }

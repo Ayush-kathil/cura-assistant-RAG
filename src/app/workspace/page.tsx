@@ -132,18 +132,18 @@ export default function WorkspacePage() {
 
     // Save to Supabase
     const { data: { user } } = await supabase.auth.getUser();
+    let activeSessionId = currentSessionId;
     if (user) {
-      let sessionId = currentSessionId;
-      if (!sessionId) {
+      if (!activeSessionId) {
         const { data: session } = await supabase.from('chat_sessions').insert({ user_id: user.id, title: msg.substring(0, 30) }).select().single();
         if (session) {
-          sessionId = session.id;
-          setCurrentSessionId(sessionId);
+          activeSessionId = session.id;
+          setCurrentSessionId(activeSessionId);
           setChatSessions(prev => [session, ...prev]);
         }
       }
-      if (sessionId) {
-        await supabase.from('chat_messages').insert({ session_id: sessionId, role: 'user', content: msg });
+      if (activeSessionId) {
+        await supabase.from('chat_messages').insert({ session_id: activeSessionId, role: 'user', content: msg });
       }
     }
 
@@ -251,34 +251,13 @@ export default function WorkspacePage() {
         selectedModel
       );
       
-      // Save AI message to Supabase
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        // Use the functional state pattern to get the most up to date sessionId
-        setMessages(prev => {
-           // This is just a trick to ensure we execute after state updates, 
-           // but actually we already have the ID in `currentSessionId` from before, 
-           // or we can use a ref. Wait, the state `currentSessionId` might be stale 
-           // in this closure if it was just created.
-           return prev;
-        });
-        // We know we updated currentSessionId earlier or it was already set. 
-        // Let's use the local variable `sessionId` we created at the top.
-      }
     } catch (err: any) {
       console.error(err);
       finalAssistantText += `\n\n**Error:** ${err.message}`;
       setMessages(prev => prev.map(m => m.id === botMsgId ? { ...m, content: m.content + `\n\n**Error:** ${err.message}` } : m));
     } finally {
-      // Re-fetch user and save using the closure's latest data
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-         // To avoid stale closure on currentSessionId, we should fetch the most recent session for this user if we don't have it locally.
-         // Actually, we can fetch the latest session since we just created it or are using it.
-         const { data: recentSession } = await supabase.from('chat_sessions').select('id').eq('user_id', user.id).order('created_at', { ascending: false }).limit(1).single();
-         if (recentSession) {
-           await supabase.from('chat_messages').insert({ session_id: recentSession.id, role: 'assistant', content: finalAssistantText });
-         }
+      if (user && activeSessionId) {
+        await supabase.from('chat_messages').insert({ session_id: activeSessionId, role: 'assistant', content: finalAssistantText });
       }
       setGenerationState("idle");
     }
@@ -363,18 +342,18 @@ export default function WorkspacePage() {
 
   const executeDocumentDeletion = async (docId: string, storagePath: string) => {
     try {
+      const { error: storageError } = await supabase.storage
+        .from('nexus_docs')
+        .remove([storagePath]);
+
+      if (storageError) throw storageError;
+
       const { error: dbError } = await supabase
         .from('documents')
         .delete()
         .eq('id', docId);
 
       if (dbError) throw dbError;
-
-      const { error: storageError } = await supabase.storage
-        .from('nexus_docs')
-        .remove([storagePath]);
-
-      if (storageError) throw storageError;
 
       setDocuments(prev => prev.filter(d => d.id !== docId));
     } catch (err: any) {
