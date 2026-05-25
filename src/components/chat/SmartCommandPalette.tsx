@@ -16,6 +16,8 @@ interface SmartCommandPaletteProps {
   activeDocumentIds: string[];
   onSetScopedDocument: (docId: string | null) => void;
   threadMessages: Message[];
+  selectedModel: string;
+  onModelChange: (val: string) => void;
 }
 
 export const SmartCommandPalette = ({
@@ -28,12 +30,14 @@ export const SmartCommandPalette = ({
   onPersonaChange,
   activeDocumentIds,
   onSetScopedDocument,
-  threadMessages
+  threadMessages,
+  selectedModel,
+  onModelChange
 }: SmartCommandPaletteProps) => {
   const [showMenu, setShowMenu] = useState<"persona" | "doc" | null>(null);
   const [filterText, setFilterText] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [modelMenuOpen, setModelMenuOpen] = useState(false);
-  const [selectedModel, setSelectedModel] = useState("Gemini 3.1 Flash");
   const [showGame, setShowGame] = useState(true);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -135,8 +139,8 @@ export const SmartCommandPalette = ({
             <AnimatePresence>
               {modelMenuOpen && (
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="absolute bottom-full mb-2 left-0 w-48 bg-[#0B1120] border border-blue-500/30 rounded-2xl shadow-2xl overflow-hidden z-50 backdrop-blur-xl">
-                  {["Gemini 3.1 Flash", "Gemini 2.5 Flash", "Gemini 3.1 Pro"].map(m => (
-                    <button key={m} type="button" onClick={() => { setSelectedModel(m); setModelMenuOpen(false); }} className="w-full text-left px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-blue-100 hover:text-white hover:bg-blue-600 transition-colors border-b border-white/5 last:border-0 flex items-center justify-between">
+                  {["Gemini 3.5 Flash", "Gemini 3.1 Pro", "Gemini 2.5 Flash-Lite"].map(m => (
+                    <button key={m} type="button" onClick={() => { onModelChange(m); setModelMenuOpen(false); }} className="w-full text-left px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-blue-100 hover:text-white hover:bg-blue-600 transition-colors border-b border-white/5 last:border-0 flex items-center justify-between">
                       {m}
                       {selectedModel === m && <span className="material-symbols-outlined text-[14px] text-white">check</span>}
                     </button>

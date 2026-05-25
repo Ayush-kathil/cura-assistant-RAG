@@ -30,7 +30,9 @@ interface ChatInterfaceProps {
   onSetScopedDocument: (docId: string | null) => void;
   onApproveAction: (msgId: string) => void;
   onViewArtifact: (content: string) => void;
-  isDevMode: boolean;
+  isDevMode?: boolean;
+  selectedModel: string;
+  onModelChange: (model: string) => void;
 }
 
 const CodeBlock = ({ node, inline, className, children, onViewArtifact, ...props }: any) => {
@@ -121,7 +123,9 @@ export const ChatInterface = ({
   onSetScopedDocument,
   onApproveAction,
   onViewArtifact,
-  isDevMode
+  isDevMode = false,
+  selectedModel,
+  onModelChange
 }: ChatInterfaceProps) => {
   const [input, setInput] = useState("");
   const parentRef = useRef<HTMLDivElement>(null);
@@ -365,6 +369,8 @@ export const ChatInterface = ({
            activeDocumentIds={activeDocumentIds}
            onSetScopedDocument={onSetScopedDocument}
            threadMessages={threadMessages}
+           selectedModel={selectedModel}
+           onModelChange={onModelChange}
         />
       </div>
     </motion.div>

@@ -37,6 +37,7 @@ export default function WorkspacePage() {
   const [chatSessions, setChatSessions] = useState<any[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string>("");
+  const [selectedModel, setSelectedModel] = useState("Gemini 3.5 Flash");
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -246,7 +247,8 @@ export default function WorkspacePage() {
           finalAssistantText += text;
           setMessages(prev => prev.map(m => m.id === botMsgId ? { ...m, content: m.content + text } : m));
         },
-        personaInstruction
+        personaInstruction,
+        selectedModel
       );
       
       // Save AI message to Supabase
@@ -522,6 +524,8 @@ export default function WorkspacePage() {
               onApproveAction={() => {}}
               onViewArtifact={() => {}}
               isDevMode={true}
+              selectedModel={selectedModel}
+              onModelChange={setSelectedModel}
             />
           </div>
         </main>

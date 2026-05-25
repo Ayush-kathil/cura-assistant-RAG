@@ -3,7 +3,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export async function POST(req: NextRequest) {
   try {
-    const { prompt, contextChunks, apiKey, personaInstruction } = await req.json();
+    const { prompt, contextChunks, apiKey, personaInstruction, selectedModel } = await req.json();
 
     const finalApiKey = apiKey || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
@@ -12,7 +12,16 @@ export async function POST(req: NextRequest) {
     }
 
     const genAI = new GoogleGenerativeAI(finalApiKey);
-    const fallbackModels = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.5-pro"];
+    let defaultFallbackModels = ["gemini-3.5-flash", "gemini-3.1-pro", "gemini-2.5-flash-lite"];
+
+    // Map UI friendly names to actual Google model names
+    let requestedModelId = "gemini-3.5-flash";
+    if (selectedModel === "Gemini 3.1 Pro") requestedModelId = "gemini-3.1-pro";
+    else if (selectedModel === "Gemini 2.5 Flash-Lite") requestedModelId = "gemini-2.5-flash-lite";
+    
+    // Put the user's selected model at the top of the fallback queue
+    const fallbackModels = [requestedModelId, ...defaultFallbackModels.filter(m => m !== requestedModelId)];
+
     const contextStr = contextChunks && contextChunks.length > 0 
       ? `\n\nCONTEXT INFORMATION:\n${contextChunks.map((c: any) => `--- Chunk ${c.chunk.chunkIndex} ---\n${c.chunk.text}`).join("\n\n")}\n\nBased ONLY on the above context information, answer the user query: ${prompt}`
       : prompt;

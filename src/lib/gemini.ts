@@ -42,7 +42,7 @@ export const reformulateQuery = async (
   if (history.length === 0) return currentQuery;
 
   const genAI = getGeminiClient(apiKey);
-  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+  const model = genAI.getGenerativeModel({ model: "gemini-3.5-flash" });
 
   const historyText = history
     .slice(-4)
@@ -67,7 +67,7 @@ export const compressContextSnapshot = async (
   apiKey: string
 ): Promise<string> => {
   const genAI = getGeminiClient(apiKey);
-  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+  const model = genAI.getGenerativeModel({ model: "gemini-3.5-flash" });
 
   const historyText = messagesToCompress
     .map(m => `${m.role.toUpperCase()}: ${m.content}`)
@@ -90,12 +90,13 @@ export const generateStreamingResponse = async (
   documentName: string,
   apiKey: string,
   onChunk: (text: string) => void,
-  personaInstruction?: string
+  personaInstruction?: string,
+  selectedModel?: string
 ) => {
   const response = await fetch("/api/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ prompt, contextChunks, apiKey, personaInstruction }),
+    body: JSON.stringify({ prompt, contextChunks, apiKey, personaInstruction, selectedModel }),
   });
 
   if (!response.ok || !response.body) {
