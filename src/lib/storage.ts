@@ -1,5 +1,18 @@
-import { ChunkedDocument } from "./vectorStore";
-import { Message } from "@/components/chat/ChatInterface";
+import { VectorStoreData, ScoredChunk } from "./vectorStore";
+
+export interface Message {
+  id: string;
+  parentId: string | null;
+  childrenIds: string[];
+  role: "user" | "assistant";
+  content: string;
+  sources?: ScoredChunk[];
+  isWelcome?: boolean;
+  orchestrationPath?: string[];
+  telemetry?: { vectorSearchMs?: number; rerankerMs?: number; ttftMs?: number; };
+  requiresApproval?: boolean;
+  isApproved?: boolean;
+}
 
 export interface ChatDocument {
   id: string;
@@ -12,8 +25,10 @@ export interface ChatSession {
   createdAt: number;
   documents: ChatDocument[];
   activeDocumentIds: string[];
-  vectorStore: ChunkedDocument[];
+  vectorStore: VectorStoreData;
   messages: Message[];
+  currentLeafId: string | null;
+  devModeEnabled?: boolean;
 }
 
 const STORAGE_KEY = "cura_sessions";
@@ -24,11 +39,11 @@ export const getSessions = (): ChatSession[] => {
   return data ? JSON.parse(data) : [];
 };
 
-export const saveSessions = (sessions: ChatSession[]) => {
-  if (typeof window === "undefined") return;
+export const saveSessions = (sessions: ChatSession[], isTracePrivacyEnabled: boolean = false) => {
+  if (typeof window === "undefined" || isTracePrivacyEnabled) return;
   const strippedSessions = sessions.map(session => ({
     ...session,
-    vectorStore: []
+    vectorStore: { parents: [], children: [] }
   }));
   localStorage.setItem(STORAGE_KEY, JSON.stringify(strippedSessions));
 };
@@ -40,8 +55,10 @@ export const createSession = (name: string = "New Chat"): ChatSession => {
     createdAt: Date.now(),
     documents: [],
     activeDocumentIds: [],
-    vectorStore: [],
-    messages: []
+    vectorStore: { parents: [], children: [] },
+    messages: [],
+    currentLeafId: null,
+    devModeEnabled: false
   };
 };
 
