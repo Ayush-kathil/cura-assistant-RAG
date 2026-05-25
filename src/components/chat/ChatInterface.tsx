@@ -207,14 +207,32 @@ export const ChatInterface = ({
                        </details>
                     )}
 
-                    <div className={clsx("group relative p-4 rounded-xl text-sm leading-relaxed", msg.role === "user" ? "bg-white/10 text-white rounded-tr-sm" : "bg-black/40 border-l-[3px] border-cyan-400 text-gray-200 shadow-lg flex flex-col")}>
+                    <div className={clsx("group relative p-3 sm:p-4 rounded-xl text-sm leading-relaxed", msg.role === "user" ? "bg-white/10 text-white rounded-tr-sm" : "bg-black/40 border-l-[3px] border-cyan-400 text-gray-200 shadow-lg flex flex-col")}>
                       
-                      {msg.role === "assistant" && (
-                        <div className="flex items-center gap-2 mb-3">
-                          <Network className="w-5 h-5 text-cyan-400" />
-                          <span className="font-bold text-cyan-400 tracking-wide text-sm">Nexus Engine</span>
-                        </div>
-                      )}
+                      {(() => {
+                        let displayContent = msg.content;
+                        let dynamicSuggestions = ["Summarize the key points", "Explain the data processing requirements", "What are the specific Top-K parameters?"];
+                        
+                        if (msg.role === "assistant" && typeof displayContent === "string") {
+                          const suggestionsMatch = displayContent.match(/---SUGGESTIONS---\s*(\[[\s\S]*?\])/);
+                          if (suggestionsMatch) {
+                            try {
+                              dynamicSuggestions = JSON.parse(suggestionsMatch[1]);
+                              displayContent = displayContent.replace(/---SUGGESTIONS---[\s\S]*/, "").trim();
+                            } catch (e) {
+                              console.error("Failed to parse suggestions", e);
+                            }
+                          }
+                        }
+
+                        return (
+                          <>
+                            {msg.role === "assistant" && (
+                              <div className="flex items-center gap-2 mb-3">
+                                <Network className="w-5 h-5 text-cyan-400" />
+                                <span className="font-bold text-cyan-400 tracking-wide text-sm">Nexus Engine</span>
+                              </div>
+                            )}
                       
                       {msg.requiresApproval && !msg.isApproved ? (
                         <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 flex flex-col gap-3">
@@ -244,7 +262,7 @@ export const ChatInterface = ({
                         <>
                           <div className="prose prose-invert max-w-none prose-p:leading-relaxed prose-p:tracking-wide prose-li:leading-relaxed prose-blockquote:border-cyan-500/50 prose-blockquote:bg-cyan-500/5 prose-blockquote:px-4 prose-blockquote:py-1 prose-blockquote:rounded-r-lg">
                             <ReactMarkdown components={{ code: (props) => <CodeBlock {...props} onViewArtifact={onViewArtifact} />, p: ({ children, node }) => <p className="mb-4 last:mb-0 text-[15px]">{children}</p>, a: ({ children, node }) => <CitationNode node={node} sources={msg.sources}>{children}</CitationNode> }}>
-                              {msg.content}
+                              {displayContent}
                             </ReactMarkdown>
                           </div>
 
@@ -283,13 +301,15 @@ export const ChatInterface = ({
                           </div>
                         </>
                       )}
-                      
                       {msg.role === "user" && isEditingId !== msg.id && generationState === "idle" && (
                          <button onClick={() => { setIsEditingId(msg.id); setEditValue(msg.content); }} className="absolute -left-12 top-2 p-1.5 min-h-[44px] min-w-[44px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-lg hover:bg-white/10 text-gray-400 hover:text-white">
                             <Settings className="w-4 h-4" />
                          </button>
                       )}
-                    </div>
+                     </>
+                   );
+                 })()}
+               </div>
                     
                     {isDevMode && msg.telemetry && msg.role === "assistant" && (
                        <div className="flex items-center gap-4 text-[10px] text-gray-500 font-mono mt-1 px-2 border-t border-white/5 pt-1 w-fit">
@@ -308,11 +328,20 @@ export const ChatInterface = ({
                     )}
                     {msg.role === "assistant" && generationState === "idle" && (
                       <div className="flex flex-wrap gap-2 mt-4 ml-1">
-                        {["Summarize the key points", "Explain the data processing requirements", "What are the specific Top-K parameters?"].map((suggestion, idx) => (
-                          <button key={idx} onClick={() => setInput(suggestion)} className="text-xs px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-gray-300 transition-colors truncate max-w-[250px]">
-                            {suggestion}
-                          </button>
-                        ))}
+                        {(() => {
+                          const suggestionsMatch = msg.content?.match(/---SUGGESTIONS---\s*(\[[\s\S]*?\])/);
+                          let suggestions = ["Summarize the key points", "Explain the data processing requirements", "What are the specific Top-K parameters?"];
+                          if (suggestionsMatch) {
+                            try {
+                              suggestions = JSON.parse(suggestionsMatch[1]);
+                            } catch (e) {}
+                          }
+                          return suggestions.map((suggestion, idx) => (
+                            <button key={idx} onClick={() => setInput(suggestion)} className="text-xs px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-gray-300 transition-colors truncate max-w-[450px]">
+                              {suggestion}
+                            </button>
+                          ));
+                        })()}
                       </div>
                     )}
 

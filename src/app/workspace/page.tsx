@@ -403,8 +403,17 @@ export default function WorkspacePage() {
         </button>
       </header>
 
-      <div className="flex h-[calc(100vh)] overflow-hidden p-2 gap-2">
-        <aside className={`bg-[#0A0A15] relative h-full w-sidebar-width fixed md:relative z-40 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:hidden'} transition-all duration-300 border border-white/10 flex flex-col py-lg overflow-hidden rounded-3xl shadow-2xl`}>
+      <div className="flex h-[calc(100vh)] overflow-hidden p-2 gap-2 relative">
+        
+        {/* Mobile overlay for left sidebar */}
+        {isSidebarOpen && (
+          <div 
+            className="md:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-30" 
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
+
+        <aside className={`bg-[#0A0A15] relative h-full w-[280px] sm:w-sidebar-width fixed md:relative z-40 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:hidden'} transition-all duration-300 border border-white/10 flex flex-col py-lg overflow-hidden rounded-3xl shadow-2xl`}>
           
           {/* 3D Animated Background */}
           <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
@@ -517,7 +526,15 @@ export default function WorkspacePage() {
           </div>
         </main>
 
-        <aside className={`${isSettingsOpen ? 'flex fixed inset-y-0 right-0 z-50 w-full sm:w-[320px]' : 'hidden'} xl:flex w-[320px] bg-surface-container-low border-l border-outline-variant/20 flex-col py-lg px-md overflow-y-auto transform transition-transform duration-300`}>
+        {/* Mobile overlay for right settings panel */}
+        {isSettingsOpen && (
+          <div 
+            className="xl:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-40" 
+            onClick={() => setIsSettingsOpen(false)}
+          />
+        )}
+
+        <aside className={`${isSettingsOpen ? 'flex fixed inset-y-2 right-2 rounded-3xl z-50 w-[calc(100%-16px)] sm:w-[320px] shadow-2xl' : 'hidden'} xl:flex w-[320px] bg-surface-container-low border border-outline-variant/20 flex-col py-lg px-md overflow-y-auto transform transition-transform duration-300`}>
           {isSettingsOpen && (
             <button onClick={() => setIsSettingsOpen(false)} className="xl:hidden absolute top-4 right-4 text-outline hover:text-on-surface">
               <span className="material-symbols-outlined">close</span>

@@ -1,9 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function LandingPage() {
   const router = useRouter();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
     <div className="selection:bg-primary selection:text-on-primary-container overflow-x-hidden bg-background text-on-surface font-body-md min-h-screen">
@@ -20,8 +22,14 @@ export default function LandingPage() {
             <a href="#docs" onClick={(e) => { e.preventDefault(); document.getElementById('docs')?.scrollIntoView({ behavior: 'smooth' }); }} className="font-label-md text-label-md text-on-surface-variant hover:text-secondary transition-colors duration-200">Docs</a>
           </nav>
           
-          <div className="flex items-center gap-md">
-            <button className="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">dark_mode</button>
+          <div className="flex items-center gap-2 sm:gap-md">
+            <button className="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors hidden sm:block">dark_mode</button>
+            <button 
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="md:hidden material-symbols-outlined text-on-surface-variant p-2"
+            >
+              {isMobileMenuOpen ? "close" : "menu"}
+            </button>
             <button 
               onClick={() => router.push('/workspace')}
               className="bg-primary text-on-primary-container px-lg py-sm rounded-lg font-label-md text-label-md font-bold scale-95 active:scale-90 transition-transform"
@@ -29,7 +37,17 @@ export default function LandingPage() {
               Launch App
             </button>
           </div>
+
         </div>
+
+        {/* Mobile Menu Dropdown */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden absolute top-full left-0 w-full bg-surface-dim border-b border-outline-variant/30 flex flex-col p-4 gap-4 shadow-xl">
+            <a href="#features" onClick={(e) => { e.preventDefault(); document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' }); setIsMobileMenuOpen(false); }} className="font-label-md text-label-md text-on-surface">Features</a>
+            <a href="#pricing" onClick={(e) => { e.preventDefault(); document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' }); setIsMobileMenuOpen(false); }} className="font-label-md text-label-md text-on-surface">Pricing</a>
+            <a href="#docs" onClick={(e) => { e.preventDefault(); document.getElementById('docs')?.scrollIntoView({ behavior: 'smooth' }); setIsMobileMenuOpen(false); }} className="font-label-md text-label-md text-on-surface">Docs</a>
+          </div>
+        )}
       </header>
 
       <main>
@@ -39,7 +57,7 @@ export default function LandingPage() {
             <div className="absolute top-1/2 -left-1/4 w-[600px] h-[600px] bg-secondary/5 rounded-full blur-[120px]"></div>
           </div>
           
-          <div className="relative z-10 max-w-container-max mx-auto px-lg text-center">
+          <div className="relative z-10 max-w-container-max mx-auto px-4 sm:px-lg text-center">
             <div className="inline-flex items-center gap-xs px-sm py-xs bg-surface-container rounded-full border border-outline-variant/30 mb-lg">
               <span className="flex h-2 w-2 rounded-full bg-secondary animate-pulse"></span>
               <span className="font-label-md text-label-md text-secondary uppercase tracking-widest">Now in Enterprise Beta</span>

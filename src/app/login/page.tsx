@@ -110,8 +110,8 @@ export default function LoginPage() {
           <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-secondary/5 rounded-full blur-[128px]"></div>
         </div>
 
-        <div className="auth-container w-full max-w-[440px] relative z-10">
-          <div className="glass-panel glow-effect rounded-xl p-xl shadow-2xl flex flex-col gap-lg bg-surface-dim/70 backdrop-blur-xl border border-outline-variant/20">
+        <div className="auth-container w-full max-w-[440px] relative z-10 px-4 sm:px-0">
+          <div className="glass-panel glow-effect rounded-xl p-md sm:p-xl shadow-2xl flex flex-col gap-lg bg-surface-dim/70 backdrop-blur-xl border border-outline-variant/20">
             
             <div className="flex flex-col gap-xs text-center mb-sm">
               <h2 className="font-headline-md text-headline-md text-on-surface">
@@ -211,7 +211,7 @@ export default function LoginPage() {
               <div className="h-px flex-grow bg-outline-variant/20"></div>
             </div>
 
-            <div className="grid grid-cols-2 gap-md">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-md">
               <button onClick={() => handleOAuth('google')} className="flex items-center justify-center gap-sm py-sm px-md bg-surface-container-high border border-outline-variant/30 rounded-lg font-label-md text-label-md text-on-surface hover:bg-surface-container-highest transition-all active:scale-95">
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
                   <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="currentColor"></path>
