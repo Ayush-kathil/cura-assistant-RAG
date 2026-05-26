@@ -205,18 +205,10 @@ export const ChatInterface = ({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="text-2xl font-bold text-slate-900 mb-2 tracking-tight relative z-10"
+              className="text-2xl font-bold text-slate-900 mb-8 tracking-tight relative z-10"
             >
               How can I help you today?
             </motion.h2>
-            <motion.p 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="text-slate-500 w-full max-w-md mx-auto text-sm mb-10 relative z-10"
-            >
-              I can analyze your PDFs, help you brainstorm ideas, write code, or just have a friendly conversation!
-            </motion.p>
             
             <motion.div 
               initial={{ opacity: 0, y: 10 }}
@@ -412,7 +404,7 @@ export const ChatInterface = ({
         )}
       </div>
 
-      <div className="flex-none p-4 max-md:fixed max-md:bottom-0 max-md:left-0 max-md:w-full max-md:z-[100] max-md:pb-[max(env(safe-area-inset-bottom),16px)] max-md:bg-white/90 max-md:backdrop-blur-xl md:sticky md:bottom-0 bg-white/80 backdrop-blur-xl border-t border-slate-200 shrink-0">
+      <div className="flex-none p-4 max-md:fixed max-md:bottom-0 max-md:left-0 max-md:w-full max-md:z-[100] max-md:pb-[max(env(safe-area-inset-bottom),16px)] max-md:bg-white/90 max-md:backdrop-blur-xl md:sticky md:bottom-0 md:z-50 bg-white/80 backdrop-blur-xl border-t border-slate-200 shrink-0">
         <SmartCommandPalette 
            input={input}
            setInput={setInput}

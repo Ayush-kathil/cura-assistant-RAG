@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CURA | AI Assistant",
+  title: "Curio | AI Assistant",
   description: "Premium RAG Chatbot Application",
 };
 

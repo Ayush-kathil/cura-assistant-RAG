@@ -120,7 +120,8 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="bg-slate-50 py-12 border-t border-slate-200 text-center text-slate-500 text-sm font-medium">
-        <p>© 2024 Curio AI. All rights reserved.</p>
+        <p className="mb-2 font-bold text-blue-600">Curio AI</p>
+        <p className="text-xs text-slate-400">Developed by Kathil Softwares Limited by Ayush</p>
       </footer>
     </div>
   );

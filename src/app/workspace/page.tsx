@@ -256,8 +256,8 @@ export default function WorkspacePage() {
             </div>
           </div>
 
-          <div className="mt-auto px-6 pt-4 border-t border-slate-100">
-            <div onClick={handleLogout} className="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 transition-all cursor-pointer">
+          <div className="mt-auto px-6 pt-4 border-t border-slate-100 pb-2">
+            <div onClick={handleLogout} className="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 transition-all cursor-pointer mb-4">
               <div className="w-8 h-8 rounded-full border border-slate-200 bg-slate-100 flex items-center justify-center text-slate-500">
                 <span className="material-symbols-outlined text-[18px]">person</span>
               </div>
@@ -265,6 +265,9 @@ export default function WorkspacePage() {
                 <p className="font-medium text-sm text-slate-700">Logout</p>
               </div>
               <span className="material-symbols-outlined text-slate-400 text-[18px]">logout</span>
+            </div>
+            <div className="text-center pb-2">
+               <p className="text-[10px] text-slate-400 font-medium">Developed by Kathil Softwares Limited by Ayush</p>
             </div>
           </div>
         </aside>
