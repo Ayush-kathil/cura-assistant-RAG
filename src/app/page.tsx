@@ -31,7 +31,7 @@ export default function Home() {
       <main className="relative pt-32 pb-20 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 relative z-10 flex flex-col md:flex-row items-center gap-12">
           
-          <div className="flex-1 text-center md:text-left">
+          <div className="flex-1 min-w-0 w-full text-center md:text-left flex flex-col items-center md:items-start">
             <motion.div 
               initial={{ opacity: 0, y: 20 }} 
               animate={{ opacity: 1, y: 0 }} 

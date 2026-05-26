@@ -52,6 +52,50 @@ export default function WorkspacePage() {
     }
   };
 
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    
+    setIsUploading(true);
+    setUploadProgress(10);
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+      
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
+      const filePath = `${user.id}/${fileName}`;
+      
+      setUploadProgress(40);
+      const { error: uploadError } = await supabase.storage.from('nexus_docs').upload(filePath, file);
+      if (uploadError) throw uploadError;
+      
+      setUploadProgress(70);
+      
+      const { data, error: dbError } = await supabase.from('documents').insert({
+        user_id: user.id,
+        file_name: file.name,
+        file_size_bytes: file.size,
+        storage_path: filePath,
+        vector_status: 'pending'
+      }).select().single();
+      
+      if (dbError) throw dbError;
+      
+      setDocuments(prev => [data, ...prev]);
+      setUploadProgress(100);
+      
+    } catch (e) {
+      console.error(e);
+      alert("Failed to upload document");
+    } finally {
+      setIsUploading(false);
+      setUploadProgress(0);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
   return (
     <div className="bg-slate-50 text-slate-900 font-sans overflow-hidden min-h-[100dvh]">
       
@@ -116,25 +160,82 @@ export default function WorkspacePage() {
             </button>
           </div>
 
-          <nav className="flex-1 overflow-y-auto px-4 space-y-1 relative z-10 custom-scrollbar">
-            {chatSessions.length === 0 ? (
-              <div className="px-4 py-2 mt-4 text-center">
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">No history yet</span>
+          <div className="flex-1 overflow-y-auto px-4 space-y-6 relative z-10 custom-scrollbar">
+            {/* Knowledge Base Section */}
+            <div>
+              <div className="flex items-center justify-between mb-3 px-2">
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Knowledge Base</span>
+                <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-bold">{documents.length}</span>
               </div>
-            ) : (
-              chatSessions.map(session => (
-                <div key={session.id} onClick={() => loadChatSession(session.id)} className={`text-slate-600 hover:bg-slate-50 rounded-2xl p-3 flex items-center justify-between cursor-pointer transition-all group ${currentSessionId === session.id ? 'bg-blue-50 text-blue-700 font-medium' : ''}`}>
-                  <div className="flex items-center gap-2 overflow-hidden">
-                    <span className="material-symbols-outlined text-[18px]">chat</span>
-                    <span className="text-sm truncate">{session.title}</span>
+              
+              <div 
+                onClick={() => fileInputRef.current?.click()}
+                className="border-2 border-dashed border-slate-200 rounded-2xl p-4 text-center cursor-pointer hover:bg-slate-50 hover:border-blue-400 transition-all mb-3 group relative overflow-hidden"
+              >
+                {isUploading ? (
+                  <div className="flex flex-col items-center gap-2">
+                    <span className="material-symbols-outlined text-blue-500 animate-spin">refresh</span>
+                    <span className="text-xs font-bold text-blue-600">Uploading {uploadProgress}%</span>
+                    <div className="w-full h-1 bg-slate-100 rounded-full mt-1 overflow-hidden">
+                      <div className="h-full bg-blue-500 transition-all duration-300" style={{ width: `${uploadProgress}%` }}></div>
+                    </div>
                   </div>
-                  <button onClick={(e) => { e.stopPropagation(); deleteChatSession(session.id); }} className="opacity-0 group-hover:opacity-100 p-1 hover:text-red-500 hover:bg-red-50 rounded transition-all">
-                    <span className="material-symbols-outlined text-[16px]">delete</span>
-                  </button>
-                </div>
-              ))
-            )}
-          </nav>
+                ) : (
+                  <div className="flex flex-col items-center gap-1 opacity-70 group-hover:opacity-100 transition-opacity">
+                    <span className="material-symbols-outlined text-slate-400 group-hover:text-blue-500 transition-colors">cloud_upload</span>
+                    <span className="text-xs font-bold text-slate-600 group-hover:text-blue-600">Upload PDF</span>
+                  </div>
+                )}
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  onChange={handleFileUpload} 
+                  className="hidden" 
+                  accept=".pdf,.txt,.md" 
+                />
+              </div>
+
+              <div className="space-y-1">
+                {documents.slice(0, 3).map(doc => (
+                  <div key={doc.id} className="text-slate-600 bg-white border border-slate-100 rounded-xl p-2.5 flex items-center gap-2 text-xs hover:border-slate-200 transition-all shadow-sm">
+                    <span className="material-symbols-outlined text-[16px] text-blue-500">description</span>
+                    <span className="truncate flex-1 font-medium">{doc.file_name}</span>
+                  </div>
+                ))}
+                {documents.length > 3 && (
+                  <div className="text-center mt-2">
+                    <button className="text-[10px] font-bold text-blue-500 hover:text-blue-700 uppercase tracking-wider">View All ({documents.length})</button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Chat History Section */}
+            <div>
+              <div className="mb-3 px-2">
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Chat History</span>
+              </div>
+              <div className="space-y-1">
+                {chatSessions.length === 0 ? (
+                  <div className="px-2 py-2 text-center">
+                    <span className="text-xs font-medium text-slate-400">No history yet</span>
+                  </div>
+                ) : (
+                  chatSessions.map(session => (
+                    <div key={session.id} onClick={() => loadChatSession(session.id)} className={`text-slate-600 hover:bg-slate-50 rounded-2xl p-2.5 flex items-center justify-between cursor-pointer transition-all group ${currentSessionId === session.id ? 'bg-blue-50 text-blue-700 font-medium' : ''}`}>
+                      <div className="flex items-center gap-2 overflow-hidden">
+                        <span className="material-symbols-outlined text-[16px]">chat</span>
+                        <span className="text-xs truncate font-medium">{session.title}</span>
+                      </div>
+                      <button onClick={(e) => { e.stopPropagation(); deleteChatSession(session.id); }} className="opacity-0 group-hover:opacity-100 p-1 hover:text-red-500 hover:bg-red-50 rounded transition-all">
+                        <span className="material-symbols-outlined text-[14px]">delete</span>
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
 
           <div className="mt-auto px-6 pt-4 border-t border-slate-100">
             <div onClick={handleLogout} className="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 transition-all cursor-pointer">

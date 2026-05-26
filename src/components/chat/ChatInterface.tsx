@@ -188,8 +188,63 @@ export const ChatInterface = ({
          </div>
       )}
 
-      <div ref={parentRef} className="flex-1 min-h-0 overflow-y-auto px-4 md:px-6 pt-20 pb-6 max-md:pb-36 space-y-6 scroll-smooth">
+      <div ref={parentRef} className="flex-1 min-h-0 overflow-y-auto px-4 md:px-6 pt-20 pb-6 max-md:pb-36 space-y-6 scroll-smooth custom-scrollbar">
+        {threadMessages.length === 0 ? (
+          <div className="h-full flex flex-col items-center justify-center text-center px-4 relative">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-blue-100 rounded-full blur-[100px] pointer-events-none opacity-50"></div>
+            <motion.img 
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, type: "spring" }}
+              src="/mobile-assets/curio.png" 
+              alt="Curio AI" 
+              className="w-24 h-24 object-contain mb-6 drop-shadow-2xl relative z-10"
+              style={{ animation: 'bounce 3s infinite' }}
+            />
+            <motion.h2 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="text-2xl font-bold text-slate-900 mb-2 tracking-tight relative z-10"
+            >
+              How can I help you today?
+            </motion.h2>
+            <motion.p 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="text-slate-500 max-w-md text-sm mb-10 relative z-10"
+            >
+              I can analyze your PDFs, help you brainstorm ideas, write code, or just have a friendly conversation!
+            </motion.p>
+            
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-2xl relative z-10"
+            >
+              {[
+                { title: 'Summarize a document', icon: 'description', prompt: 'Can you summarize the main points of my uploaded document?' },
+                { title: 'Brainstorm ideas', icon: 'lightbulb', prompt: 'Help me brainstorm ideas for my new project.' },
+                { title: 'Write an email', icon: 'mail', prompt: 'Write a professional email to my team about the upcoming deadline.' },
+                { title: 'Analyze data', icon: 'analytics', prompt: 'What insights can you pull from this dataset?' }
+              ].map((card, i) => (
+                <button 
+                  key={i}
+                  onClick={() => { setInput(card.prompt); document.querySelector('form')?.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true })); }}
+                  className="bg-white border border-slate-100 p-4 rounded-2xl text-left hover:border-blue-200 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300 group flex flex-col gap-2 hover:-translate-y-1"
+                >
+                  <span className="material-symbols-outlined text-blue-500 opacity-80 group-hover:opacity-100 transition-opacity">{card.icon}</span>
+                  <span className="font-bold text-slate-700 group-hover:text-blue-600 text-sm transition-colors">{card.title}</span>
+                  <span className="text-[11px] text-slate-400 truncate">{card.prompt}</span>
+                </button>
+              ))}
+            </motion.div>
+          </div>
+        ) : (
         <div style={{ height: `${virtualizer.getTotalSize()}px`, width: '100%', position: 'relative' }}>
+
           {virtualizer.getVirtualItems().map((virtualItem) => {
             const msg = threadMessages[virtualItem.index];
             const siblings = messages.filter(m => m.parentId === msg.parentId);
@@ -354,6 +409,7 @@ export const ChatInterface = ({
             );
           })}
         </div>
+        )}
       </div>
 
       <div className="flex-none p-4 max-md:fixed max-md:bottom-0 max-md:left-0 max-md:w-full max-md:z-[100] max-md:pb-[max(env(safe-area-inset-bottom),16px)] max-md:bg-white/90 max-md:backdrop-blur-xl md:sticky md:bottom-0 bg-white/80 backdrop-blur-xl border-t border-slate-200 shrink-0">
