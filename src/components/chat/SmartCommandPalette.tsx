@@ -103,14 +103,14 @@ export const SmartCommandPalette = ({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
-            className="absolute bottom-full mb-4 w-full max-w-4xl bg-[#0A0A15]/95 backdrop-blur-3xl border border-white/10 rounded-xl shadow-2xl p-2 z-50 left-0"
+            className="absolute bottom-full mb-4 w-full max-w-4xl bg-white/95 backdrop-blur-3xl border border-slate-200 rounded-xl shadow-2xl p-2 z-50 left-0"
           >
             {showMenu === "persona" && (
               <div className="space-y-1">
-                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider px-2 py-1">Set Persona</p>
+                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider px-2 py-1">Set Persona</p>
                 {filteredPersonas.map(p => (
-                  <button key={p.id} onClick={() => { onPersonaChange(p.id); handleSelect("persona", p.id, p.label); }} className="w-full text-left px-3 py-2 text-sm text-gray-200 hover:bg-white/10 rounded-lg flex items-center gap-2">
-                    <span className="text-gray-400">/</span>{p.label}
+                  <button key={p.id} onClick={() => { onPersonaChange(p.id); handleSelect("persona", p.id, p.label); }} className="w-full text-left px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 rounded-lg flex items-center gap-2">
+                    <span className="text-slate-400">/</span>{p.label}
                   </button>
                 ))}
               </div>
@@ -129,20 +129,20 @@ export const SmartCommandPalette = ({
         )}
       </AnimatePresence>
 
-      <div className="w-full max-w-4xl mx-auto bg-black/40 border border-white/10 rounded-2xl shadow-2xl transition-all duration-300 focus-within:border-white/30 focus-within:shadow-[0_0_15px_rgba(192,193,255,0.15)] flex flex-col">
-        <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-white/5">
+      <div className="w-full max-w-4xl mx-auto bg-white border border-slate-200 rounded-2xl shadow-xl transition-all duration-300 focus-within:border-blue-400 focus-within:shadow-[0_0_20px_rgba(59,130,246,0.1)] flex flex-col">
+        <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-slate-100">
           <div className="flex items-center gap-md relative">
-            <button type="button" onClick={() => setModelMenuOpen(!modelMenuOpen)} className="flex items-center gap-1 bg-[#0F172A] hover:bg-blue-900 border border-blue-500/50 text-[11px] font-bold text-white uppercase tracking-wider px-4 py-1.5 rounded-full cursor-pointer transition-all outline-none shadow-[0_0_15px_rgba(37,99,235,0.3)]">
+            <button type="button" onClick={() => setModelMenuOpen(!modelMenuOpen)} className="flex items-center gap-1 bg-blue-50 hover:bg-blue-100 text-[11px] font-bold text-blue-600 uppercase tracking-wider px-4 py-1.5 rounded-full cursor-pointer transition-all outline-none">
               {selectedModel}
               <span className="material-symbols-outlined text-[14px]">expand_more</span>
             </button>
             <AnimatePresence>
               {modelMenuOpen && (
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="absolute bottom-full mb-2 left-0 w-48 bg-[#0B1120] border border-blue-500/30 rounded-2xl shadow-2xl overflow-hidden z-50 backdrop-blur-xl">
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="absolute bottom-full mb-2 left-0 w-48 bg-white border border-slate-200 rounded-2xl shadow-2xl overflow-hidden z-50">
                   {["Gemini 3.5 Flash", "Gemini 3.1 Pro", "Gemini 2.5 Flash-Lite"].map(m => (
-                    <button key={m} type="button" onClick={() => { onModelChange(m); setModelMenuOpen(false); }} className="w-full text-left px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-blue-100 hover:text-white hover:bg-blue-600 transition-colors border-b border-white/5 last:border-0 flex items-center justify-between">
+                    <button key={m} type="button" onClick={() => { onModelChange(m); setModelMenuOpen(false); }} className="w-full text-left px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-slate-700 hover:text-blue-700 hover:bg-blue-50 transition-colors border-b border-slate-100 last:border-0 flex items-center justify-between">
                       {m}
-                      {selectedModel === m && <span className="material-symbols-outlined text-[14px] text-white">check</span>}
+                      {selectedModel === m && <span className="material-symbols-outlined text-[14px] text-blue-600">check</span>}
                     </button>
                   ))}
                 </motion.div>
@@ -160,9 +160,9 @@ export const SmartCommandPalette = ({
               onKeyDown={handleKeyDown}
               placeholder="Ask a question... (Type '/' for personas, '@' for docs)" 
               disabled={generationState !== "idle"} 
-              className="w-full bg-transparent py-4 pl-6 pr-16 text-base text-white placeholder:text-gray-500 focus:outline-none focus:ring-0 focus:border-transparent border-transparent transition-all disabled:opacity-50 relative z-10 font-medium" 
+              className="w-full bg-transparent py-4 pl-6 pr-16 text-base text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-0 focus:border-transparent border-transparent transition-all disabled:opacity-50 relative z-10 font-medium" 
             />
-            <button type="submit" disabled={!input.trim() || generationState !== "idle"} className="absolute right-2 p-3 min-h-[44px] min-w-[44px] flex items-center justify-center bg-[var(--color-accent)] hover:bg-blue-400 disabled:bg-white/10 disabled:text-gray-500 text-white rounded-xl transition-all z-20 shadow-lg cursor-pointer">
+            <button type="submit" disabled={!input.trim() || generationState !== "idle"} className="absolute right-2 p-3 min-h-[44px] min-w-[44px] flex items-center justify-center bg-blue-500 hover:bg-blue-600 disabled:bg-slate-100 disabled:text-slate-400 text-white rounded-xl transition-all z-20 shadow-lg cursor-pointer">
               <Send className="w-5 h-5 ml-0.5" />
             </button>
           </div>

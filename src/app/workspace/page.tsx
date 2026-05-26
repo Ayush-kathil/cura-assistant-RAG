@@ -1,571 +1,184 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
-import { ChatInterface, GenerationState } from "@/components/chat/ChatInterface";
-import { Message } from "@/lib/storage";
-import { generateStreamingResponse, generateEmbedding, generateEmbeddingsBatch } from "@/lib/gemini";
-import { VectorStoreData, chunkText, hybridSearchVectorStore } from "@/lib/vectorStore";
+import { ChatInterface } from "@/components/chat/ChatInterface";
+import { useChatSession } from "@/hooks/useChatSession";
+import { MobileCurioHome } from "@/components/chat/MobileCurioHome";
+import { MobileCurioChat } from "@/components/chat/MobileCurioChat";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { useTheme } from "@/components/ThemeProvider";
-
-interface DocumentItem {
-  id: string;
-  file_name: string;
-  file_size_bytes: number;
-  storage_path: string;
-  vector_status: string;
-  chunks?: string[];
-}
 
 export default function WorkspacePage() {
   const router = useRouter();
   const supabase = createClient();
-  const { theme, toggleTheme } = useTheme();
-  
-  const [documents, setDocuments] = useState<DocumentItem[]>([]);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [mobileView, setMobileView] = useState<'home' | 'chat' | 'kb'>('home');
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [generationState, setGenerationState] = useState<GenerationState>("idle");
-  const [currentLeafId, setCurrentLeafId] = useState<string | null>(null);
-  const [activeDocumentIds, setActiveDocumentIds] = useState<string[]>([]);
-  const [personaInstruction, setPersonaInstruction] = useState<string>("");
-  const [vectorStore, setVectorStore] = useState<VectorStoreData>({ parents: [], children: [] });
-  const [chatSessions, setChatSessions] = useState<any[]>([]);
-  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
-  const [userEmail, setUserEmail] = useState<string>("");
-  const [selectedModel, setSelectedModel] = useState("Gemini 3.5 Flash");
-
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    fetchDocuments();
-    fetchChatSessions();
-  }, []);
-
-  const fetchChatSessions = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    setUserEmail(user.email || "U");
-    const { data } = await supabase.from('chat_sessions').select('*').order('created_at', { ascending: false });
-    if (data) setChatSessions(data);
-  };
-
-  const loadChatSession = async (sessionId: string) => {
-    const { data: messages } = await supabase.from('chat_messages').select('*').eq('session_id', sessionId).order('created_at', { ascending: true });
-    if (messages) {
-      // Reconstruct messages for UI
-      const uiMessages: Message[] = messages.map((m: any) => ({
-        id: m.id,
-        role: m.role as "user" | "assistant",
-        content: m.content,
-        parentId: null, // simplify for loaded history
-        childrenIds: []
-      }));
-      setMessages(uiMessages);
-      setCurrentSessionId(sessionId);
-    }
-  };
-
-  const deleteChatSession = async (sessionId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    await supabase.from('chat_sessions').delete().eq('id', sessionId);
-    setChatSessions(prev => prev.filter(s => s.id !== sessionId));
-    if (currentSessionId === sessionId) {
-      setMessages([]);
-      setCurrentSessionId(null);
-    }
-  };
-
-  const fetchDocuments = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    
-    const { data, error } = await supabase
-      .from('documents')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false });
-      
-    if (error) {
-      console.error(error);
-    } else if (data) {
-      setDocuments(data);
-    }
-  };
-
-  const handleSendMessage = async (msg: string, parentId: string | null) => {
-    const userMsgId = `msg-${Date.now()}`;
-    const userMsg: Message = {
-      id: userMsgId,
-      parentId,
-      childrenIds: [],
-      role: "user",
-      content: msg
-    };
-
-    setMessages(prev => {
-      const parent = prev.find(p => p.id === parentId);
-      if (parent) parent.childrenIds.push(userMsgId);
-      return [...prev, userMsg];
-    });
-    setCurrentLeafId(userMsgId);
-
-    const botMsgId = `bot-${Date.now()}`;
-    const botMsg: Message = {
-      id: botMsgId,
-      parentId: userMsgId,
-      childrenIds: [],
-      role: "assistant",
-      content: ""
-    };
-
-    setMessages(prev => {
-      const parent = prev.find(p => p.id === userMsgId);
-      if (parent) parent.childrenIds.push(botMsgId);
-      return [...prev, botMsg];
-    });
-    setCurrentLeafId(botMsgId);
-
-    // Save to Supabase
-    const { data: { user } } = await supabase.auth.getUser();
-    let activeSessionId = currentSessionId;
-    if (user) {
-      if (!activeSessionId) {
-        const { data: session } = await supabase.from('chat_sessions').insert({ user_id: user.id, title: msg.substring(0, 30) }).select().single();
-        if (session) {
-          activeSessionId = session.id;
-          setCurrentSessionId(activeSessionId);
-          setChatSessions(prev => [session, ...prev]);
-        }
-      }
-      if (activeSessionId) {
-        await supabase.from('chat_messages').insert({ session_id: activeSessionId, role: 'user', content: msg });
-      }
-    }
-
-    setGenerationState("synthesizing");
-    let contextChunks: any[] = [];
-    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || "";
-
-    if (activeDocumentIds.length > 0) {
-      // Index any active documents that haven't been indexed yet
-      const docsToIndex = documents.filter(d => 
-        activeDocumentIds.includes(d.id) && 
-        !vectorStore.parents.some(p => p.documentId === d.id)
-      );
-
-      if (docsToIndex.length > 0) {
-        let newParents = [...vectorStore.parents];
-        let newChildren = [...vectorStore.children];
-
-        for (const doc of docsToIndex) {
-          try {
-            let extractedChunks = doc.chunks && doc.chunks.length > 0 ? doc.chunks : null;
-
-            if (!extractedChunks) {
-              const { data, error } = await supabase.storage.from('nexus_docs').download(doc.storage_path);
-              if (error || !data) continue;
-
-              let fullText = "";
-              if (doc.file_name.toLowerCase().endsWith('.pdf')) {
-                const arrayBuffer = await data.arrayBuffer();
-                const pdfjsLib = await import("pdfjs-dist");
-                pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
-                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-                for (let i = 1; i <= pdf.numPages; i++) {
-                  const page = await pdf.getPage(i);
-                  const textContent = await page.getTextContent();
-                  const pageText = textContent.items.map((item: any) => item.str).join(" ");
-                  fullText += pageText + "\n";
-                }
-              } else {
-                fullText = await data.text();
-              }
-
-              if (!fullText.trim()) continue;
-              extractedChunks = chunkText(fullText);
-            }
-
-            const parentChunks = extractedChunks.map((text: string, i: number) => ({
-              id: crypto.randomUUID(),
-              documentId: doc.id,
-              filename: doc.file_name,
-              text,
-              chunkIndex: i
-            }));
-
-            const embeddings = await generateEmbeddingsBatch(extractedChunks, apiKey);
-            const childChunks = extractedChunks.map((text: string, i: number) => ({
-              id: crypto.randomUUID(),
-              parentId: parentChunks[i].id,
-              documentId: doc.id,
-              filename: doc.file_name,
-              text,
-              embedding: embeddings[i],
-              chunkIndex: i
-            }));
-
-            newParents = [...newParents, ...parentChunks];
-            newChildren = [...newChildren, ...childChunks];
-          } catch (e) {
-            console.error("Failed to index doc:", doc.file_name, e);
-          }
-        }
-
-        const newStore = { parents: newParents, children: newChildren };
-        setVectorStore(newStore);
-        
-        try {
-          const queryEmbedding = await generateEmbedding(msg, apiKey);
-          contextChunks = hybridSearchVectorStore(msg, queryEmbedding, newStore, activeDocumentIds, 3);
-        } catch (e) {
-          console.error("Search failed", e);
-        }
-      } else {
-        try {
-          const queryEmbedding = await generateEmbedding(msg, apiKey);
-          contextChunks = hybridSearchVectorStore(msg, queryEmbedding, vectorStore, activeDocumentIds, 3);
-        } catch (e) {
-          console.error("Search failed", e);
-        }
-      }
-    }
-
-    let finalAssistantText = "";
-
-    try {
-      await generateStreamingResponse(
-        msg, 
-        contextChunks, 
-        "no-doc", 
-        apiKey, 
-        (text) => {
-          finalAssistantText += text;
-          setMessages(prev => prev.map(m => m.id === botMsgId ? { ...m, content: m.content + text } : m));
-        },
-        personaInstruction,
-        selectedModel
-      );
-      
-    } catch (err: any) {
-      console.error(err);
-      finalAssistantText += `\n\n**Error:** ${err.message}`;
-      setMessages(prev => prev.map(m => m.id === botMsgId ? { ...m, content: m.content + `\n\n**Error:** ${err.message}` } : m));
-    } finally {
-      if (user && activeSessionId) {
-        await supabase.from('chat_messages').insert({ session_id: activeSessionId, role: 'assistant', content: finalAssistantText });
-      }
-      setGenerationState("idle");
-    }
-  };
-
-  const executeDocumentUpload = async (file: File) => {
-    setIsUploading(true);
-    setUploadProgress(10);
-    
-    try {
-      if (file.size > 50 * 1024 * 1024) throw new Error("File exceeds 50MB limit");
-      
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
-
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
-      const filePath = `${user.id}/${fileName}`;
-
-      setUploadProgress(40);
-
-      const { error: uploadError, data: uploadData } = await supabase.storage
-        .from('nexus_docs')
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      setUploadProgress(60);
-
-      // Extract and chunk the document before saving to DB
-      let fullText = "";
-      try {
-        if (file.name.toLowerCase().endsWith('.pdf')) {
-          const arrayBuffer = await file.arrayBuffer();
-          const pdfjsLib = await import("pdfjs-dist");
-          pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
-          const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-          for (let i = 1; i <= pdf.numPages; i++) {
-            const page = await pdf.getPage(i);
-            const textContent = await page.getTextContent();
-            const pageText = textContent.items.map((item: any) => item.str).join(" ");
-            fullText += pageText + "\n";
-          }
-        } else {
-          fullText = await file.text();
-        }
-      } catch (err) {
-        console.warn("Failed to parse document on upload, it will be parsed later.", err);
-      }
-
-      const extractedChunks = fullText.trim() ? chunkText(fullText) : [];
-
-      setUploadProgress(80);
-
-      const { data: docData, error: dbError } = await supabase
-        .from('documents')
-        .insert({
-          user_id: user.id,
-          file_name: file.name,
-          file_size_bytes: file.size,
-          storage_path: uploadData.path,
-          vector_status: 'indexing',
-          chunks: extractedChunks
-        })
-        .select()
-        .single();
-
-      if (dbError) throw dbError;
-
-      setUploadProgress(100);
-      setDocuments(prev => [docData, ...prev]);
-
-    } catch (err: any) {
-      alert(`Upload Failed: ${err.message}`);
-    } finally {
-      setTimeout(() => {
-        setIsUploading(false);
-        setUploadProgress(0);
-      }, 500);
-    }
-  };
-
-  const executeDocumentDeletion = async (docId: string, storagePath: string) => {
-    try {
-      const { error: storageError } = await supabase.storage
-        .from('nexus_docs')
-        .remove([storagePath]);
-
-      if (storageError) throw storageError;
-
-      const { error: dbError } = await supabase
-        .from('documents')
-        .delete()
-        .eq('id', docId);
-
-      if (dbError) throw dbError;
-
-      setDocuments(prev => prev.filter(d => d.id !== docId));
-    } catch (err: any) {
-      alert(`Delete Failed: ${err.message}`);
-    }
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      executeDocumentUpload(e.target.files[0]);
-    }
-  };
+  const {
+    documents,
+    setDocuments,
+    messages,
+    generationState,
+    currentLeafId,
+    activeDocumentIds,
+    setActiveDocumentIds,
+    personaInstruction,
+    setPersonaInstruction,
+    chatSessions,
+    currentSessionId,
+    userEmail,
+    selectedModel,
+    setSelectedModel,
+    sendMessage,
+    loadChatSession,
+    deleteChatSession,
+    clearChat
+  } = useChatSession();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.push('/login');
   };
 
+  const handleStartMobileChat = (initialMessage?: string) => {
+    setMobileView('chat');
+    if (initialMessage) {
+      sendMessage(initialMessage);
+    }
+  };
+
   return (
-    <div className="bg-[#020617] text-white font-body-md overflow-hidden min-h-[100dvh]">
-      <header className="md:hidden flex items-center justify-between px-md py-sm bg-surface-container border-b border-outline-variant/30 sticky top-0 z-50">
-        <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-xs text-on-surface">
-          <span className="material-symbols-outlined">menu</span>
-        </button>
-        <span className="font-headline-sm text-headline-sm text-primary tracking-tight">Cura</span>
-        <button onClick={() => setIsSettingsOpen(!isSettingsOpen)} className="p-xs text-on-surface">
-          <span className="material-symbols-outlined">settings</span>
-        </button>
-      </header>
-
-      <div className="flex h-[100dvh] overflow-hidden p-2 gap-2 relative">
-        
-        <AnimatePresence>
-          {isSidebarOpen && (
-            <>
-              <motion.div 
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                className="md:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-30" 
-                onClick={() => setIsSidebarOpen(false)}
-              />
-              <motion.aside 
-                initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }} transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                className="md:hidden bg-[#0A0A15] fixed inset-y-0 left-0 w-[80vw] max-w-[320px] z-40 flex flex-col py-lg overflow-hidden shadow-2xl border-r border-white/10"
-              >
-                {/* Mobile Sidebar Content */}
-                <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-                  <div className="absolute top-[-10%] left-[-20%] w-[150%] h-[50%] bg-blue-900/20 blur-[100px] rounded-full animate-[spin_20s_linear_infinite]" />
-                  <div className="absolute bottom-[-10%] right-[-20%] w-[120%] h-[60%] bg-cyan-900/10 blur-[120px] rounded-full animate-[spin_25s_linear_infinite_reverse]" />
-                  <div className="absolute top-[40%] left-[10%] w-[80%] h-[40%] bg-indigo-900/10 blur-[90px] rounded-full animate-pulse" />
-                </div>
+    <div className="bg-slate-50 text-slate-900 font-sans overflow-hidden min-h-[100dvh]">
       
-                <div className="px-md mb-lg relative z-10">
-                  <div className="flex items-center gap-sm bg-surface-container-high p-sm rounded-xl cursor-pointer hover:bg-surface-container-highest transition-all border border-outline-variant/20">
-                    <div className="w-8 h-8 rounded bg-primary flex items-center justify-center text-on-primary font-bold">E</div>
-                    <div className="flex-1 overflow-hidden">
-                      <p className="font-label-md text-label-md truncate">Enterprise Docs</p>
-                      <p className="text-[10px] text-on-surface-variant uppercase tracking-widest">Workspace</p>
-                    </div>
-                  </div>
+      {/* --- MOBILE VIEW --- */}
+      <div className="md:hidden h-full flex flex-col">
+        {mobileView === 'home' && (
+          <MobileCurioHome 
+            userEmail={userEmail} 
+            onNavigate={setMobileView} 
+            onStartChat={handleStartMobileChat} 
+          />
+        )}
+        {mobileView === 'chat' && (
+          <MobileCurioChat 
+            messages={messages} 
+            userEmail={userEmail} 
+            generationState={generationState}
+            onNavigate={setMobileView} 
+            onSendMessage={(msg) => sendMessage(msg, currentLeafId)} 
+          />
+        )}
+        {mobileView === 'kb' && (
+          <div className="flex flex-col h-full bg-white p-6">
+            <header className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold">Knowledge Base</h2>
+              <button onClick={() => setMobileView('home')} className="p-2">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </header>
+            <div className="flex-1 overflow-y-auto">
+              <p className="text-slate-500 mb-4 text-sm">Upload documents to allow Curio to answer questions based on your data.</p>
+              {documents.map(doc => (
+                <div key={doc.id} className="flex justify-between items-center p-3 border border-slate-100 rounded-xl mb-2 shadow-sm">
+                  <span className="text-sm font-medium truncate">{doc.file_name}</span>
                 </div>
-      
-                <div className="px-md mb-md">
-                  <button onClick={() => { setMessages([]); setCurrentLeafId(null); setCurrentSessionId(null); setIsSidebarOpen(false); }} className="w-full flex items-center justify-center gap-sm bg-blue-600 text-white font-label-md text-label-md py-md rounded-2xl active:scale-95 transition-all hover:bg-blue-500 shadow-[0_0_15px_rgba(37,99,235,0.3)] min-h-[44px]">
-                    <span className="material-symbols-outlined">add_comment</span>
-                    New Chat
-                  </button>
-                </div>
-      
-                <nav className="flex-1 overflow-y-auto px-xs space-y-sm relative z-10 custom-scrollbar">
-                  {chatSessions.length === 0 ? (
-                    <div className="px-md py-xs mt-4">
-                      <span className="text-[11px] font-bold text-outline uppercase tracking-wider text-center block opacity-50">Your chat history will appear here</span>
-                    </div>
-                  ) : (
-                    chatSessions.map(session => (
-                      <div key={`mob-${session.id}`} onClick={() => { loadChatSession(session.id); setIsSidebarOpen(false); }} className={`text-on-surface-variant hover:bg-white/5 rounded-2xl mx-2 p-sm flex items-center justify-between cursor-pointer transition-all group min-h-[44px] ${currentSessionId === session.id ? 'bg-white/10 text-white' : ''}`}>
-                        <div className="flex items-center gap-sm overflow-hidden">
-                          <span className="material-symbols-outlined text-md">chat</span>
-                          <span className="font-label-md text-label-md truncate">{session.title}</span>
-                        </div>
-                        <button onClick={(e) => deleteChatSession(session.id, e)} className="opacity-100 p-1 hover:text-red-400 hover:bg-red-400/10 rounded transition-all min-h-[44px] min-w-[44px] flex items-center justify-center">
-                          <span className="material-symbols-outlined text-sm">delete</span>
-                        </button>
-                      </div>
-                    ))
-                  )}
-                </nav>
-      
-                <div className="mt-auto px-md pt-md border-t border-white/10 relative z-10">
-                  <div onClick={handleLogout} className="flex items-center gap-sm p-sm rounded-lg hover:bg-surface-container-high transition-all cursor-pointer min-h-[44px]">
-                    <div className="w-9 h-9 rounded-full border border-primary/30 bg-surface-container-highest flex items-center justify-center">
-                      <span className="material-symbols-outlined text-sm">person</span>
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-label-md text-label-md text-on-surface">Logout</p>
-                    </div>
-                    <span className="material-symbols-outlined text-on-surface-variant">logout</span>
-                  </div>
-                </div>
-              </motion.aside>
-            </>
-          )}
-        </AnimatePresence>
-
-        <aside className="hidden md:flex bg-[#0A0A15] relative h-full w-[280px] sm:w-sidebar-width z-40 border border-white/10 flex-col py-lg overflow-hidden rounded-3xl shadow-2xl">
-          
-          {/* 3D Animated Background */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-            <div className="absolute top-[-10%] left-[-20%] w-[150%] h-[50%] bg-blue-900/20 blur-[100px] rounded-full animate-[spin_20s_linear_infinite]" />
-            <div className="absolute bottom-[-10%] right-[-20%] w-[120%] h-[60%] bg-cyan-900/10 blur-[120px] rounded-full animate-[spin_25s_linear_infinite_reverse]" />
-            <div className="absolute top-[40%] left-[10%] w-[80%] h-[40%] bg-indigo-900/10 blur-[90px] rounded-full animate-pulse" />
+              ))}
+              {documents.length === 0 && <p className="text-sm text-slate-400 italic">No documents uploaded yet.</p>}
+            </div>
           </div>
+        )}
+      </div>
 
-          <div className="px-md mb-lg relative z-10">
-            <div className="flex items-center gap-sm bg-surface-container-high p-sm rounded-xl cursor-pointer hover:bg-surface-container-highest transition-all border border-outline-variant/20">
-              <div className="w-8 h-8 rounded bg-primary flex items-center justify-center text-on-primary font-bold">E</div>
+      {/* --- DESKTOP VIEW --- */}
+      <div className="hidden md:flex h-[100dvh] overflow-hidden p-2 gap-2 relative bg-slate-100">
+        
+        {/* Left Sidebar */}
+        <aside className="bg-white border border-slate-200 relative h-full w-[280px] z-40 flex flex-col py-6 overflow-hidden rounded-3xl shadow-sm">
+          <div className="px-6 mb-6">
+            <div className="flex items-center gap-3 bg-blue-50 p-3 rounded-xl border border-blue-100">
+              <div className="w-8 h-8 rounded bg-blue-500 flex items-center justify-center text-white font-bold">C</div>
               <div className="flex-1 overflow-hidden">
-                <p className="font-label-md text-label-md truncate">Enterprise Docs</p>
-                <p className="text-[10px] text-on-surface-variant uppercase tracking-widest">Workspace</p>
+                <p className="font-bold text-sm text-blue-900 truncate">Curio Workspace</p>
+                <p className="text-[10px] text-blue-600 uppercase tracking-widest">Personal</p>
               </div>
-              <span className="material-symbols-outlined text-sm">unfold_more</span>
             </div>
           </div>
 
-          <div className="px-md mb-md">
-            <button onClick={() => { setMessages([]); setCurrentLeafId(null); setCurrentSessionId(null); }} className="w-full flex items-center justify-center gap-sm bg-blue-600 text-white font-label-md text-label-md py-md rounded-2xl active:scale-95 transition-all hover:bg-blue-500 shadow-[0_0_15px_rgba(37,99,235,0.3)]">
-              <span className="material-symbols-outlined">add_comment</span>
+          <div className="px-6 mb-4">
+            <button onClick={clearChat} className="w-full flex items-center justify-center gap-2 bg-blue-500 text-white font-bold text-sm py-3 rounded-2xl active:scale-95 transition-all hover:bg-blue-600 shadow-md">
+              <span className="material-symbols-outlined text-[18px]">add_comment</span>
               New Chat
             </button>
           </div>
 
-          <nav className="flex-1 overflow-y-auto px-xs space-y-sm relative z-10 custom-scrollbar">
+          <nav className="flex-1 overflow-y-auto px-4 space-y-1 relative z-10 custom-scrollbar">
             {chatSessions.length === 0 ? (
-              <div className="px-md py-xs mt-4">
-                <span className="text-[11px] font-bold text-outline uppercase tracking-wider text-center block opacity-50">Your chat history will appear here</span>
+              <div className="px-4 py-2 mt-4 text-center">
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">No history yet</span>
               </div>
             ) : (
               chatSessions.map(session => (
-                <div key={session.id} onClick={() => loadChatSession(session.id)} className={`text-on-surface-variant hover:bg-white/5 rounded-2xl mx-2 p-sm flex items-center justify-between cursor-pointer transition-all group ${currentSessionId === session.id ? 'bg-white/10 text-white' : ''}`}>
-                  <div className="flex items-center gap-sm overflow-hidden">
-                    <span className="material-symbols-outlined text-md">chat</span>
-                    <span className="font-label-md text-label-md truncate">{session.title}</span>
+                <div key={session.id} onClick={() => loadChatSession(session.id)} className={`text-slate-600 hover:bg-slate-50 rounded-2xl p-3 flex items-center justify-between cursor-pointer transition-all group ${currentSessionId === session.id ? 'bg-blue-50 text-blue-700 font-medium' : ''}`}>
+                  <div className="flex items-center gap-2 overflow-hidden">
+                    <span className="material-symbols-outlined text-[18px]">chat</span>
+                    <span className="text-sm truncate">{session.title}</span>
                   </div>
-                  <button onClick={(e) => deleteChatSession(session.id, e)} className="opacity-100 md:opacity-0 md:group-hover:opacity-100 p-1 hover:text-red-400 hover:bg-red-400/10 rounded transition-all min-h-[44px] min-w-[44px] flex items-center justify-center">
-                    <span className="material-symbols-outlined text-sm">delete</span>
+                  <button onClick={(e) => { e.stopPropagation(); deleteChatSession(session.id); }} className="opacity-0 group-hover:opacity-100 p-1 hover:text-red-500 hover:bg-red-50 rounded transition-all">
+                    <span className="material-symbols-outlined text-[16px]">delete</span>
                   </button>
                 </div>
               ))
             )}
           </nav>
 
-          <div className="mt-auto px-md pt-md border-t border-white/10 relative z-10">
-            <div onClick={handleLogout} className="flex items-center gap-sm p-sm rounded-lg hover:bg-surface-container-high transition-all cursor-pointer">
-              <div className="w-9 h-9 rounded-full border border-primary/30 bg-surface-container-highest flex items-center justify-center">
-                <span className="material-symbols-outlined text-sm">person</span>
+          <div className="mt-auto px-6 pt-4 border-t border-slate-100">
+            <div onClick={handleLogout} className="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 transition-all cursor-pointer">
+              <div className="w-8 h-8 rounded-full border border-slate-200 bg-slate-100 flex items-center justify-center text-slate-500">
+                <span className="material-symbols-outlined text-[18px]">person</span>
               </div>
               <div className="flex-1">
-                <p className="font-label-md text-label-md text-on-surface">Logout</p>
+                <p className="font-medium text-sm text-slate-700">Logout</p>
               </div>
-              <span className="material-symbols-outlined text-on-surface-variant">logout</span>
+              <span className="material-symbols-outlined text-slate-400 text-[18px]">logout</span>
             </div>
           </div>
         </aside>
 
-        <main className="flex-1 flex flex-col relative bg-[#0B1120] min-w-0 rounded-3xl border border-white/10 shadow-2xl overflow-hidden">
-          {/* 3D Animated Background */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-            <div className="absolute -top-[50%] -left-[50%] w-[200%] h-[200%] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-900/10 via-[#0B1120]/80 to-[#0B1120] animate-[spin_90s_linear_infinite_reverse]"></div>
-            <div className="absolute bottom-0 left-0 w-full h-full bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-cyan-900/10 via-transparent to-transparent opacity-50"></div>
-          </div>
-          <header className="flex items-center justify-between px-lg py-md border-b border-white/10 glass-panel sticky top-0 z-30 bg-[#0F172A]/80 backdrop-blur-md">
-            <div className="flex items-center gap-lg">
-              <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="hidden md:flex items-center justify-center p-2 rounded-xl hover:bg-white/10 transition-colors">
-                <span className="material-symbols-outlined text-white">{isSidebarOpen ? 'menu_open' : 'menu'}</span>
-              </button>
-              <h2 className="font-headline-md text-headline-md font-bold tracking-tight text-white hidden sm:block">
-                Workspace
+        {/* Main Chat Area */}
+        <main className="flex-1 flex flex-col relative bg-[#FAFCFF] min-w-0 rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+          <header className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-white/80 backdrop-blur-md sticky top-0 z-30">
+            <div className="flex items-center gap-4">
+              <h2 className="text-lg font-bold tracking-tight text-slate-900 flex items-center gap-2">
+                <img src="/mobile-assets/curio.png" className="w-6 h-6 object-contain" /> Curio AI
               </h2>
             </div>
-            <div className="flex items-center gap-lg">
-              <div className="flex flex-col">
-                <span className="text-[10px] text-outline uppercase font-bold tracking-widest">KB Status</span>
-                <div className="flex items-center gap-xs">
-                  <span className="w-2 h-2 rounded-full bg-secondary animate-[pulse_2s_ease-in-out_infinite]"></span>
-                  <span className="font-label-md text-label-md text-on-surface">{documents.length} Sources Active</span>
-                </div>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 px-3 py-1 bg-green-50 text-green-700 rounded-full border border-green-100">
+                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                <span className="font-bold text-[11px] uppercase tracking-wider">{documents.length} Docs Indexed</span>
               </div>
-            </div>
-            <div className="flex gap-sm">
-              <button onClick={toggleTheme} className="w-10 h-10 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/10 transition-colors border border-white/10 shadow-[0_0_15px_rgba(255,255,255,0.1)]">
-                <span className="material-symbols-outlined text-white">{theme === 'dark' ? 'light_mode' : 'dark_mode'}</span>
-              </button>
-              <Link href="/dashboard" className="w-10 h-10 rounded-full overflow-hidden object-cover bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold cursor-pointer hover:scale-105 transition-all shadow-[0_0_15px_rgba(59,130,246,0.5)] border-2 border-white/20">
+              <div className="w-9 h-9 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold shadow-sm">
                 {userEmail?.[0]?.toUpperCase() || "U"}
-              </Link>
+              </div>
             </div>
           </header>
 
           <div className="flex-1 overflow-hidden relative">
             <ChatInterface 
               messages={messages}
-              onSendMessage={handleSendMessage}
+              onSendMessage={(msg, parentId) => sendMessage(msg, parentId)}
               generationState={generationState}
-              onNewSession={() => { setMessages([]); setCurrentLeafId(null); }}
+              onNewSession={clearChat}
               documents={documents.map(d => ({ id: d.id, filename: d.file_name }))}
               activeDocumentIds={activeDocumentIds}
               onToggleDocument={(id) => setActiveDocumentIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])}
               currentLeafId={currentLeafId}
-              onNavigateBranch={(id) => setCurrentLeafId(id)}
+              onNavigateBranch={(id) => {}}
               onToggleKbExplorer={() => {}}
               personaInstruction={personaInstruction}
               onPersonaChange={setPersonaInstruction}
@@ -578,131 +191,8 @@ export default function WorkspacePage() {
             />
           </div>
         </main>
-
-        <AnimatePresence>
-          {isSettingsOpen && (
-            <>
-              <motion.div 
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                className="xl:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-40" 
-                onClick={() => setIsSettingsOpen(false)}
-              />
-              <motion.aside 
-                initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                className="flex fixed inset-x-0 bottom-0 top-16 rounded-t-3xl z-50 w-full shadow-2xl xl:hidden bg-surface-container-low border-t border-outline-variant/20 flex-col py-lg px-md overflow-y-auto"
-              >
-                <button onClick={() => setIsSettingsOpen(false)} className="absolute top-4 right-4 text-outline hover:text-on-surface min-h-[44px] min-w-[44px] flex items-center justify-center bg-white/10 rounded-full">
-                  <span className="material-symbols-outlined">close</span>
-                </button>
-                
-                {/* Mobile settings content duplicated or use same component */}
-                <div className="mt-8 mb-lg flex justify-center">
-                   <Link href="/upload-pro" className="inline-block px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-400 hover:from-amber-400 hover:to-orange-300 rounded-2xl text-sm font-bold shadow-[0_0_15px_rgba(245,158,11,0.4)] transition-all text-black">
-                     Upgrade to Pro
-                   </Link>
-                </div>
-                
-                <div className="mt-auto pt-8">
-                  <p className="text-[11px] font-bold text-outline uppercase tracking-widest mb-md">Data Ingestion</p>
-                  
-                  <div 
-                    onClick={() => fileInputRef.current?.click()}
-                    className="border-2 border-dashed border-outline-variant/30 rounded-2xl p-lg flex flex-col items-center justify-center text-center hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer group"
-                  >
-                    <span className="material-symbols-outlined text-outline text-3xl mb-sm group-hover:text-primary transition-colors group-hover:scale-110 duration-200">cloud_upload</span>
-                    <p className="font-label-md text-label-md text-on-surface">Click to ingest files</p>
-                  </div>
-      
-                  <div className="mt-8 space-y-2 max-h-48 overflow-y-auto">
-                    <p className="text-[11px] font-bold text-outline uppercase tracking-widest mb-sm">Active Documents</p>
-                    {documents.map(doc => (
-                      <div key={doc.id} className="flex items-center justify-between bg-surface-container p-2 rounded border border-outline-variant/20">
-                        <span className="text-xs truncate max-w-[180px]" title={doc.file_name}>{doc.file_name}</span>
-                        <button 
-                          onClick={() => executeDocumentDeletion(doc.id, doc.storage_path)}
-                          className="text-error hover:text-error-container p-1 rounded hover:bg-error/10 min-h-[44px] min-w-[44px] flex items-center justify-center"
-                        >
-                          <span className="material-symbols-outlined text-sm">delete</span>
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </motion.aside>
-            </>
-          )}
-        </AnimatePresence>
-
-        <aside className="hidden xl:flex w-[320px] bg-surface-container-low border border-outline-variant/20 flex-col py-lg px-md overflow-y-auto">
-          <div className="mt-8 xl:mt-0 mb-lg flex justify-center">
-             <Link href="/upload-pro" className="inline-block px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-400 hover:from-amber-400 hover:to-orange-300 rounded-2xl text-sm font-bold shadow-[0_0_15px_rgba(245,158,11,0.4)] transition-all text-black">
-               Upgrade to Pro
-             </Link>
-          </div>
-
-          <div className="mt-auto pt-8">
-            <p className="text-[11px] font-bold text-outline uppercase tracking-widest mb-md">Data Ingestion</p>
-            
-            <input 
-              type="file" 
-              ref={fileInputRef} 
-              onChange={handleFileChange} 
-              className="hidden" 
-              accept=".pdf,.txt,.csv,.md"
-            />
-            
-            <div 
-              onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-outline-variant/30 rounded-2xl p-lg flex flex-col items-center justify-center text-center hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer group"
-            >
-              <span className="material-symbols-outlined text-outline text-3xl mb-sm group-hover:text-primary transition-colors group-hover:scale-110 duration-200">cloud_upload</span>
-              <p className="font-label-md text-label-md text-on-surface">Click to ingest files</p>
-              <p className="text-[11px] text-outline mt-xs">PDF, CSV, JSON, Markdown</p>
-            </div>
-
-            {isUploading && (
-              <div className="mt-lg">
-                <div className="flex justify-between items-center mb-xs">
-                  <span className="text-[10px] font-bold text-on-surface truncate">Uploading to Nexus...</span>
-                  <span className="text-[10px] text-secondary font-mono">{uploadProgress}%</span>
-                </div>
-                <div className="w-full h-1 bg-surface-container-highest rounded-full overflow-hidden">
-                  <div className="bg-secondary h-full rounded-full transition-all duration-300" style={{ width: `${uploadProgress}%` }}></div>
-                </div>
-              </div>
-            )}
-
-            <div className="mt-8 space-y-2 max-h-48 overflow-y-auto">
-              <p className="text-[11px] font-bold text-outline uppercase tracking-widest mb-sm">Active Documents</p>
-              {documents.map(doc => (
-                <div key={doc.id} className="flex items-center justify-between bg-surface-container p-2 rounded border border-outline-variant/20">
-                  <span className="text-xs truncate max-w-[180px]" title={doc.file_name}>{doc.file_name}</span>
-                  <button 
-                    onClick={() => executeDocumentDeletion(doc.id, doc.storage_path)}
-                    className="text-error hover:text-error-container p-1 rounded hover:bg-error/10 min-h-[44px] min-w-[44px] flex items-center justify-center"
-                  >
-                    <span className="material-symbols-outlined text-sm">delete</span>
-                  </button>
-                </div>
-              ))}
-              {documents.length === 0 && !isUploading && (
-                <p className="text-xs text-outline italic">No documents indexed.</p>
-              )}
-            </div>
-          </div>
-        </aside>
       </div>
 
-      <nav className="md:hidden fixed bottom-0 w-full bg-surface-container-highest z-50 flex justify-around items-center h-16 border-t border-outline-variant/30 shadow-lg px-md">
-        <div className="flex flex-col items-center justify-center text-secondary bg-secondary/10 rounded-xl px-4 py-1">
-          <span className="material-symbols-outlined">chat</span>
-          <span className="font-label-md text-label-md">Chat</span>
-        </div>
-        <div className="flex flex-col items-center justify-center text-on-surface-variant">
-          <span className="material-symbols-outlined">storage</span>
-          <span className="font-label-md text-label-md">Data</span>
-        </div>
-      </nav>
     </div>
   );
 }
