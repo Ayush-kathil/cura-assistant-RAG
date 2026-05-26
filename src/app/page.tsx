@@ -55,14 +55,7 @@ export default function Home() {
               Say hello to <span className="text-blue-500">Curio.</span>
             </motion.h1>
             
-            <motion.p 
-              initial={{ opacity: 0, y: 20 }} 
-              animate={{ opacity: 1, y: 0 }} 
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="text-lg text-slate-600 mb-10 max-w-xl mx-auto md:mx-0 leading-relaxed font-medium"
-            >
-              Curio is a friendly, intelligent assistant designed to help you organize your life, study smarter, and generate creative ideas in an instant.
-            </motion.p>
+
             
             <motion.div 
               initial={{ opacity: 0, y: 20 }} 
