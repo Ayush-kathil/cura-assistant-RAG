@@ -295,7 +295,7 @@ export default function WorkspacePage() {
                 <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
                 <span className="font-bold text-[11px] uppercase tracking-wider">{documents.length} Docs Indexed</span>
               </div>
-              <div className="w-9 h-9 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold shadow-sm">
+              <div onClick={() => setIsDashboardOpen(true)} className="w-9 h-9 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold shadow-sm cursor-pointer hover:bg-blue-600 transition-colors">
                 {userEmail?.[0]?.toUpperCase() || "U"}
               </div>
             </div>

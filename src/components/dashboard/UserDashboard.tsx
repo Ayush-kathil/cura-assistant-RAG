@@ -41,12 +41,15 @@ export function UserDashboard({ isOpen, onClose, userEmail, totalStorageBytes }:
           >
             <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-slate-50/50">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xl shadow-sm border border-blue-200">
+                <div className="w-16 h-16 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-2xl shadow-sm border-2 border-blue-200">
                   {userEmail?.[0]?.toUpperCase() || "U"}
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-slate-900 tracking-tight">Dashboard & Plans</h2>
-                  <p className="text-sm text-slate-500">{userEmail}</p>
+                  <h2 className="text-2xl font-bold text-slate-900 tracking-tight">{userEmail?.split('@')[0] || "User"}</h2>
+                  <p className="text-sm text-slate-500 mb-1">{userEmail}</p>
+                  <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-slate-200 text-slate-600">
+                    Free Plan
+                  </span>
                 </div>
               </div>
               <button 
@@ -92,7 +95,6 @@ export function UserDashboard({ isOpen, onClose, userEmail, totalStorageBytes }:
               <section>
                 <div className="text-center mb-8">
                   <h3 className="text-2xl font-bold text-slate-900 tracking-tight mb-2">Upgrade your Curio Experience</h3>
-                  <p className="text-slate-500 max-w-md mx-auto">Get more space for your Knowledge Base and unlock advanced generative capabilities.</p>
                 </div>
 
                 <div className="grid md:grid-cols-3 gap-6 px-2">
