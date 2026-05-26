@@ -1,186 +1,116 @@
 "use client";
 
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 
 const ms = "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24";
 const msFill = "'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24";
 
 export default function MobileHome() {
-  const [isDark, setIsDark] = useState(true);
-
   return (
-    <div className={`${isDark ? 'dark' : ''} flex flex-col h-full bg-[#0e131e] text-[#dee2f2]`}>
-
+    <div className="flex flex-col h-full bg-white text-slate-900 font-sans relative">
+      
       {/* Header */}
-      <header className="shrink-0 bg-[rgba(14,19,30,0.95)] backdrop-blur-md border-b border-[#464554]/30 px-4 py-3 flex justify-between items-center z-10">
-        <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-[#c0c1ff] text-[24px]" style={{ fontVariationSettings: ms }}>hub</span>
-          <span className="font-bold text-[17px] text-[#dee2f2] tracking-tight" style={{ fontFamily: 'Geist, sans-serif' }}>Nexus RAG</span>
+      <header className="shrink-0 px-6 py-5 flex justify-between items-center z-10">
+        <div className="w-10 h-10 rounded-full bg-slate-200 overflow-hidden shadow-sm">
+          <img src="https://ui-avatars.com/api/?name=Alice&background=random" alt="Alice" className="w-full h-full object-cover" />
         </div>
-        <div className="flex items-center gap-3">
-          <button onClick={() => setIsDark(!isDark)} className="text-[#c7c4d7] active:text-[#4cd7f6] transition-colors">
-            <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: ms }}>{isDark ? 'light_mode' : 'dark_mode'}</span>
+        <div className="flex items-center gap-4">
+          <button className="text-slate-700 active:scale-95 transition-transform">
+            <span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: ms }}>notifications</span>
           </button>
-          <button className="bg-[#c0c1ff] text-[#1000a9] text-[12px] font-semibold px-3 py-1.5 rounded-xl active:scale-95 transition-transform" style={{ fontFamily: 'Geist, sans-serif' }}>
-            Launch App
+          <button className="text-slate-700 active:scale-95 transition-transform">
+            <span className="material-symbols-outlined text-[26px]" style={{ fontVariationSettings: ms }}>menu</span>
           </button>
         </div>
       </header>
 
-      {/* Scrollable content */}
-      <main className="flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-5 pb-2">
-
-        {/* Hero Section */}
-        <section className="relative rounded-2xl overflow-hidden min-h-[200px] flex flex-col justify-center items-center text-center p-5">
-          <div className="absolute inset-0 z-0 opacity-40">
-            <img
-              alt="AI visual"
-              className="w-full h-full object-cover"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDtruSoqWekJhz8Lw6OPILJOzqfU2eqyzrtVY8m5YxW4dqWIngCLhLEAR7fbyjhBcyJyqOhkkKg0DwbcRSSkHbLcFFRgjXI0Oyv4pIFTaAcHbrMOh3fCMlTk9TpeaNRNt4cRu9SBbw3hiNh7UWF3zeziPsPwa6zHd7E5ooQ1Tkyh3ceCwp_V4Le0Vk28pRL3MBtJsYprWCSxOiIw6N767gQh_KLfhNN543YfDefeAft8Aw73UkzOu1vzAKshGVXyte7p5La4FQc6HU"
-            />
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-b from-[#0e131e]/40 via-[#0e131e]/70 to-[#0e131e] z-10"></div>
-          <div className="relative z-20">
-            <h1 className="text-[24px] font-bold text-[#dee2f2] leading-tight mb-2" style={{ fontFamily: 'Geist, sans-serif' }}>
-              Your Data. Your AI.<br /><span className="text-[#4cd7f6]">Instant Answers.</span>
-            </h1>
-            <p className="text-[13px] text-[#c7c4d7] mb-4" style={{ fontFamily: 'Inter, sans-serif' }}>
-              Enterprise-grade RAG for your private knowledge base.
-            </p>
-            <div className="flex gap-3 justify-center">
-              <button className="bg-[#c0c1ff] text-[#1000a9] text-[13px] font-bold px-5 py-2.5 rounded-xl flex items-center gap-1.5 active:scale-95 transition-transform" style={{ fontFamily: 'Geist, sans-serif' }}>
-                <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: ms }}>bolt</span>
-                Get Started
-              </button>
-              <button className="border border-[#464554] text-[#dee2f2] text-[13px] px-5 py-2.5 rounded-xl flex items-center gap-1.5 active:scale-95 transition-transform" style={{ fontFamily: 'Geist, sans-serif' }}>
-                <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: ms }}>menu_book</span>
-                Docs
-              </button>
-            </div>
-          </div>
-        </section>
-
-        {/* Stats Grid */}
-        <div className="grid grid-cols-3 gap-3">
-          {/* Indexed Docs */}
-          <div className="bg-[rgba(27,32,43,0.8)] border border-[#908fa0]/20 rounded-xl p-3 flex flex-col gap-2">
-            <div className="flex justify-between items-start">
-              <span className="text-[10px] text-[#908fa0] leading-tight" style={{ fontFamily: 'Geist, sans-serif' }}>Indexed Docs</span>
-              <span className="material-symbols-outlined text-[#4cd7f6] text-[14px]" style={{ fontVariationSettings: ms }}>description</span>
-            </div>
-            <div>
-              <span className="text-[17px] font-bold text-[#c0c1ff]" style={{ fontFamily: 'Geist, sans-serif' }}>12.8k</span>
-            </div>
-            <div className="w-full bg-[#303541] h-1 rounded-full overflow-hidden">
-              <div className="bg-[#4cd7f6] h-full shadow-[0_0_6px_rgba(76,215,246,0.6)]" style={{ width: '74%' }}></div>
-            </div>
-          </div>
-
-          {/* Latency */}
-          <div className="bg-[rgba(27,32,43,0.8)] border border-[#908fa0]/20 rounded-xl p-3 flex flex-col gap-2">
-            <div className="flex justify-between items-start">
-              <span className="text-[10px] text-[#908fa0] leading-tight" style={{ fontFamily: 'Geist, sans-serif' }}>Latency</span>
-              <span className="material-symbols-outlined text-[#ffb783] text-[14px]" style={{ fontVariationSettings: ms }}>speed</span>
-            </div>
-            <span className="text-[17px] font-bold text-[#dee2f2]" style={{ fontFamily: 'Geist, sans-serif' }}>142ms</span>
-            <div className="flex items-end gap-0.5 h-5">
-              {[40, 60, 100, 35, 70, 50].map((h, i) => (
-                <div key={i} className="flex-1 bg-[#c0c1ff]/40 rounded-t-[2px]" style={{ height: `${h}%` }}></div>
-              ))}
-            </div>
-          </div>
-
-          {/* Sync */}
-          <div className="bg-[rgba(27,32,43,0.8)] border border-[#908fa0]/20 rounded-xl p-3 flex flex-col gap-2">
-            <div className="flex justify-between items-start">
-              <span className="text-[10px] text-[#908fa0] leading-tight" style={{ fontFamily: 'Geist, sans-serif' }}>Sync</span>
-              <span className="material-symbols-outlined text-[#03b5d3] text-[14px]" style={{ fontVariationSettings: ms }}>sync</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#4cd7f6]"></span>
-              <span className="text-[13px] font-semibold text-[#dee2f2]" style={{ fontFamily: 'Geist, sans-serif' }}>80%</span>
-            </div>
-            <p className="text-[10px] text-[#908fa0]" style={{ fontFamily: 'Inter, sans-serif' }}>12m ago</p>
+      {/* Main Content */}
+      <main className="flex-1 min-h-0 overflow-y-auto px-6 pb-6 scroll-smooth">
+        
+        {/* Greeting & Robot */}
+        <div className="relative mt-2 mb-8 flex justify-between items-start">
+          <h1 className="text-[34px] leading-[1.15] font-bold text-slate-900 tracking-tight max-w-[65%]" style={{ fontFamily: 'Geist, sans-serif' }}>
+            <span className="text-blue-500 font-medium">Hi Alice!</span> How can I help you today?
+          </h1>
+          
+          <div className="absolute right-[-20px] top-[-10px] w-36 h-36 flex items-center justify-center animate-bounce" style={{ animationDuration: '3s' }}>
+            <img src="/mobile-assets/curio.png" alt="Curio Robot" className="w-full h-full object-contain drop-shadow-xl" />
           </div>
         </div>
 
-        {/* Recent Activity */}
-        <section>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-[15px] font-semibold text-[#dee2f2] flex items-center gap-1.5" style={{ fontFamily: 'Geist, sans-serif' }}>
-              <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: ms }}>history</span>
-              Recent Activity
-            </h2>
-            <button className="text-[12px] text-[#4cd7f6] active:underline" style={{ fontFamily: 'Geist, sans-serif' }}>View All</button>
+        {/* Suggestion Chips */}
+        <div className="flex gap-3 overflow-x-auto pb-4 pt-1 mb-4 -mx-6 px-6 hide-scrollbar">
+          {['Study planner', 'Daily inspiration', 'API Explorer', 'Code Helper', 'Quick facts', 'Fun Quizzes'].map((chip, i) => (
+            <button key={i} className="shrink-0 px-4 py-2 bg-slate-50 border border-slate-100 rounded-2xl text-[13px] font-medium text-slate-700 shadow-sm hover:bg-slate-100 active:scale-95 transition-all">
+              {chip}
+            </button>
+          ))}
+        </div>
+
+        {/* Action Grid */}
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          {/* Talk with bot */}
+          <Link href="/mobile/chatbot" className="bg-[#EBF3FF] rounded-3xl p-5 flex flex-col gap-4 active:scale-95 transition-transform shadow-sm">
+            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm">
+              <span className="material-symbols-outlined text-blue-500" style={{ fontVariationSettings: ms }}>mic</span>
+            </div>
+            <div>
+              <h3 className="font-bold text-slate-900 text-[15px] mb-1">Talk with bot</h3>
+              <p className="text-slate-500 text-[11px] leading-tight font-medium">Chat naturally and get instant answers.</p>
+            </div>
+          </Link>
+          
+          {/* Chat with bot */}
+          <Link href="/mobile/chatbot" className="bg-[#EBF3FF] rounded-3xl p-5 flex flex-col gap-4 active:scale-95 transition-transform shadow-sm">
+            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm">
+              <span className="material-symbols-outlined text-blue-500" style={{ fontVariationSettings: ms }}>chat</span>
+            </div>
+            <div>
+              <h3 className="font-bold text-slate-900 text-[15px] mb-1">Chat with Bot</h3>
+              <p className="text-slate-500 text-[11px] leading-tight font-medium">Get responses and advice in real time.</p>
+            </div>
+          </Link>
+        </div>
+
+        {/* Generate Image Card */}
+        <div className="bg-[#EBF3FF] rounded-3xl p-4 flex gap-4 active:scale-[0.98] transition-transform shadow-sm">
+          <div className="w-24 h-24 rounded-2xl bg-[#1a1a2e] overflow-hidden shrink-0">
+             <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDtruSoqWekJhz8Lw6OPILJOzqfU2eqyzrtVY8m5YxW4dqWIngCLhLEAR7fbyjhBcyJyqOhkkKg0DwbcRSSkHbLcFFRgjXI0Oyv4pIFTaAcHbrMOh3fCMlTk9TpeaNRNt4cRu9SBbw3hiNh7UWF3zeziPsPwa6zHd7E5ooQ1Tkyh3ceCwp_V4Le0Vk28pRL3MBtJsYprWCSxOiIw6N767gQh_KLfhNN543YfDefeAft8Aw73UkzOu1vzAKshGVXyte7p5La4FQc6HU" className="w-full h-full object-cover" alt="Generative AI" />
           </div>
-
-          <div className="space-y-3">
-            {/* AI Response */}
-            <div className="bg-[#171c27] border-l-[3px] border-[#4cd7f6] px-3 py-3 rounded-xl rounded-tl-none flex flex-col gap-2">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <div className="bg-[#4cd7f6]/10 p-1 rounded-lg">
-                    <span className="material-symbols-outlined text-[#4cd7f6] text-[15px]" style={{ fontVariationSettings: ms }}>smart_toy</span>
-                  </div>
-                  <span className="text-[12px] font-medium text-[#4cd7f6]" style={{ fontFamily: 'Geist, sans-serif' }}>Nexus Assistant</span>
-                </div>
-                <span className="text-[10px] text-[#c7c4d7] uppercase tracking-wider" style={{ fontFamily: 'monospace' }}>2m ago</span>
-              </div>
-              <p className="text-[13px] text-[#dee2f2]" style={{ fontFamily: 'Inter, sans-serif' }}>The Q3 revenue projections indicate a 14% growth in the APAC region, primarily driven by SaaS adoption...</p>
-              <span className="inline-flex items-center bg-[#4cd7f6]/10 border border-[#4cd7f6]/20 px-2 py-0.5 rounded text-[10px] text-[#4cd7f6] self-start" style={{ fontFamily: 'monospace' }}>
-                DOC_REF_241
-              </span>
-            </div>
-
-            {/* User Query */}
-            <div className="bg-[#090e19] border border-[#c0c1ff]/20 px-3 py-3 rounded-xl flex flex-col gap-1">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <div className="bg-[#c0c1ff]/10 p-1 rounded-lg">
-                    <span className="material-symbols-outlined text-[#c0c1ff] text-[15px]" style={{ fontVariationSettings: ms }}>person</span>
-                  </div>
-                  <span className="text-[12px] font-medium text-[#c0c1ff]" style={{ fontFamily: 'Geist, sans-serif' }}>You</span>
-                </div>
-                <span className="text-[10px] text-[#c7c4d7] uppercase tracking-wider" style={{ fontFamily: 'monospace' }}>15m ago</span>
-              </div>
-              <p className="text-[13px] text-[#c7c4d7] italic" style={{ fontFamily: 'Inter, sans-serif' }}>"Summarize the recent financial disclosures for Q3 2024 from the global folder."</p>
-            </div>
-
-            {/* System Event */}
-            <div className="bg-[#171c27] border border-[#464554]/10 px-3 py-3 rounded-xl flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <span className="material-symbols-outlined text-[#c7c4d7] text-[20px]" style={{ fontVariationSettings: ms }}>data_object</span>
-                <div>
-                  <p className="text-[13px] font-medium text-[#dee2f2]" style={{ fontFamily: 'Geist, sans-serif' }}>New Data Source Connected</p>
-                  <p className="text-[11px] text-[#908fa0]" style={{ fontFamily: 'Inter, sans-serif' }}>SharePoint: Engineering Docs</p>
-                </div>
-              </div>
-              <span className="text-[10px] text-[#908fa0]" style={{ fontFamily: 'monospace' }}>1h ago</span>
-            </div>
+          <div className="flex flex-col justify-center">
+            <h3 className="font-bold text-slate-900 text-[16px] mb-1">Generate Image</h3>
+            <p className="text-slate-500 text-[12px] leading-tight mb-3 font-medium">Create unique images from your prompts.</p>
+            <button className="bg-white text-slate-800 text-[11px] font-bold px-3 py-1.5 rounded-full w-fit flex items-center gap-1 shadow-sm">
+              Try it now <span className="material-symbols-outlined text-[14px]">call_made</span>
+            </button>
           </div>
-        </section>
+        </div>
+
       </main>
 
       {/* Bottom Nav */}
-      <nav className="shrink-0 bg-[#303541] border-t border-[#464554]/30 flex justify-around items-center min-h-[56px] pb-[env(safe-area-inset-bottom)] px-4">
-        <Link href="/mobile/chatbot" className="flex flex-col items-center justify-center text-secondary bg-[rgba(76,215,246,0.1)] rounded-xl px-3 py-1">
-          <span className="material-symbols-outlined text-[22px] text-[#4cd7f6]" style={{ fontVariationSettings: msFill }}>chat</span>
-          <span className="text-[11px] text-[#4cd7f6]" style={{ fontFamily: 'Geist, sans-serif' }}>Chat</span>
+      <nav className="shrink-0 bg-white flex justify-around items-center min-h-[70px] pb-[env(safe-area-inset-bottom)] px-6 shadow-[0_-10px_20px_rgba(0,0,0,0.02)] z-20">
+        <Link href="/mobile/home" className="flex flex-col items-center justify-center p-2 text-slate-900 active:scale-90 transition-transform">
+          <span className="material-symbols-outlined text-[28px]" style={{ fontVariationSettings: msFill }}>home</span>
         </Link>
-        <Link href="/mobile/kb" className="flex flex-col items-center justify-center text-[#c7c4d7]">
-          <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: ms }}>storage</span>
-          <span className="text-[11px]" style={{ fontFamily: 'Geist, sans-serif' }}>Data</span>
+        <Link href="/mobile/kb" className="flex flex-col items-center justify-center p-2 text-slate-400 active:scale-90 transition-transform">
+          <span className="material-symbols-outlined text-[28px]" style={{ fontVariationSettings: ms }}>segment</span>
         </Link>
-        <div className="flex flex-col items-center justify-center text-[#c7c4d7]">
-          <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: ms }}>bar_chart</span>
-          <span className="text-[11px]" style={{ fontFamily: 'Geist, sans-serif' }}>Stats</span>
-        </div>
-        <div className="flex flex-col items-center justify-center text-[#c7c4d7]">
-          <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: ms }}>person</span>
-          <span className="text-[11px]" style={{ fontFamily: 'Geist, sans-serif' }}>Profile</span>
-        </div>
+        <Link href="#" className="flex flex-col items-center justify-center p-2 text-slate-400 active:scale-90 transition-transform">
+          <span className="material-symbols-outlined text-[28px]" style={{ fontVariationSettings: ms }}>person</span>
+        </Link>
       </nav>
+      
+      <style>{`
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .hide-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
     </div>
   );
 }

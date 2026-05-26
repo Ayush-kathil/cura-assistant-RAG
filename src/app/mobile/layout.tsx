@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 
 export default function MobileLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="fixed inset-0 overflow-hidden bg-gray-950 flex items-center justify-center">
+    <div className="fixed inset-0 overflow-hidden bg-slate-100 flex items-center justify-center">
       <link
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
         rel="stylesheet"
@@ -23,7 +23,7 @@ export default function MobileLayout({ children }: { children: React.ReactNode }
         href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Inter:wght@100..900&family=JetBrains+Mono:wght@100..800&display=swap"
         rel="stylesheet"
       />
-      <div className="w-full h-full sm:max-w-sm sm:h-[844px] sm:rounded-[40px] sm:shadow-2xl sm:shadow-black/60 overflow-hidden bg-[#0e131e] relative flex flex-col">
+      <div className="w-full h-full sm:max-w-sm sm:h-[844px] sm:rounded-[40px] sm:shadow-2xl sm:shadow-black/20 overflow-hidden bg-white text-slate-900 relative flex flex-col">
         {children}
       </div>
     </div>
