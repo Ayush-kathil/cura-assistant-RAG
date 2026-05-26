@@ -7,6 +7,7 @@ interface UserDashboardProps {
   onClose: () => void;
   userEmail: string;
   totalStorageBytes: number;
+  onLogout: () => void;
 }
 
 const plans = [
@@ -15,7 +16,7 @@ const plans = [
   { id: "5gb", name: "5 GB Ultra", price: "₹200", limit: "5 GB Storage", color: "bg-purple-500", highlight: "border-purple-200" }
 ];
 
-export function UserDashboard({ isOpen, onClose, userEmail, totalStorageBytes }: UserDashboardProps) {
+export function UserDashboard({ isOpen, onClose, userEmail, totalStorageBytes, onLogout }: UserDashboardProps) {
   const freeLimit = 500 * 1024 * 1024; // 500 MB
   const percentage = Math.min((totalStorageBytes / freeLimit) * 100, 100);
   const usedMB = (totalStorageBytes / (1024 * 1024)).toFixed(1);
@@ -52,12 +53,18 @@ export function UserDashboard({ isOpen, onClose, userEmail, totalStorageBytes }:
                   </span>
                 </div>
               </div>
-              <button 
-                onClick={onClose}
-                className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-200 text-slate-500 transition-colors"
-              >
-                <span className="material-symbols-outlined">close</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <button onClick={onLogout} className="flex items-center gap-2 px-4 py-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold transition-colors">
+                  <span className="material-symbols-outlined text-[18px]">logout</span>
+                  Logout
+                </button>
+                <button 
+                  onClick={onClose}
+                  className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-200 text-slate-500 transition-colors"
+                >
+                  <span className="material-symbols-outlined">close</span>
+                </button>
+              </div>
             </div>
 
             <div className="flex-1 overflow-y-auto p-6 space-y-10 custom-scrollbar">
