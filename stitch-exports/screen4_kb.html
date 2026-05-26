@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Nexus RAG - Knowledge Base</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400&amp;family=Geist:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-fixed": "#acedff",
+                    "inverse-surface": "#dee2f2",
+                    "inverse-on-surface": "#2b303c",
+                    "primary-fixed": "#e1e0ff",
+                    "on-surface-variant": "#c7c4d7",
+                    "background": "#0e131e",
+                    "tertiary-fixed": "#ffdcc5",
+                    "on-secondary": "#003640",
+                    "on-primary-fixed": "#07006c",
+                    "surface-container-low": "#171c27",
+                    "on-primary-container": "#0d0096",
+                    "on-tertiary-container": "#452000",
+                    "primary-fixed-dim": "#c0c1ff",
+                    "on-secondary-fixed": "#001f26",
+                    "on-primary-fixed-variant": "#2f2ebe",
+                    "inverse-primary": "#494bd6",
+                    "surface-tint": "#c0c1ff",
+                    "on-tertiary": "#4f2500",
+                    "on-secondary-fixed-variant": "#004e5c",
+                    "secondary-container": "#03b5d3",
+                    "on-primary": "#1000a9",
+                    "on-surface": "#dee2f2",
+                    "surface-dim": "#0e131e",
+                    "on-error-container": "#ffdad6",
+                    "surface-container-high": "#252a35",
+                    "secondary": "#4cd7f6",
+                    "on-tertiary-fixed-variant": "#703700",
+                    "on-error": "#690005",
+                    "error-container": "#93000a",
+                    "outline-variant": "#464554",
+                    "surface-container-highest": "#303541",
+                    "surface": "#0e131e",
+                    "tertiary-container": "#d97721",
+                    "on-tertiary-fixed": "#301400",
+                    "error": "#ffb4ab",
+                    "on-secondary-container": "#00424e",
+                    "surface-container-lowest": "#090e19",
+                    "primary": "#c0c1ff",
+                    "outline": "#908fa0",
+                    "tertiary": "#ffb783",
+                    "surface-bright": "#343945",
+                    "secondary-fixed-dim": "#4cd7f6",
+                    "primary-container": "#8083ff",
+                    "surface-container": "#1b202b",
+                    "tertiary-fixed-dim": "#ffb783",
+                    "surface-variant": "#303541",
+                    "on-background": "#dee2f2"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "base": "4px",
+                    "sm": "8px",
+                    "sidebar-width": "260px",
+                    "xl": "40px",
+                    "md": "16px",
+                    "container-max": "1440px",
+                    "xs": "4px",
+                    "lg": "24px"
+            },
+            "fontFamily": {
+                    "display-lg": ["Geist"],
+                    "mono-code": ["jetbrainsMono"],
+                    "headline-md": ["Geist"],
+                    "label-md": ["Geist"],
+                    "headline-sm": ["Geist"],
+                    "body-md": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "body-lg": ["Inter"]
+            },
+            "fontSize": {
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "mono-code": ["13px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "label-md": ["13px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                    "headline-sm": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "body-sm": ["12px", {"lineHeight": "18px", "fontWeight": "400"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .glass-card {
+            background: rgba(27, 32, 43, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(144, 143, 160, 0.2);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body-md min-h-screen flex flex-col pb-20">
+<!-- TopAppBar -->
+<header class="bg-surface/80 dark:bg-surface-dim/80 backdrop-blur-md text-primary dark:text-primary-fixed-dim docked full-width top-0 sticky z-50 border-b border-outline-variant/30 flex justify-between items-center w-full px-lg py-md max-w-container-max mx-auto">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary" style="font-size: 24px;">hub</span>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface dark:text-on-surface">Nexus RAG</h1>
+</div>
+<div class="flex items-center gap-md">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-secondary transition-colors duration-200 cursor-pointer active:scale-90" onclick="document.documentElement.classList.toggle('dark')">
+                dark_mode
+            </button>
+<button class="bg-primary text-on-primary font-label-md px-md py-sm rounded-xl active:scale-95 transition-transform">
+                Launch App
+            </button>
+</div>
+</header>
+<main class="flex-1 p-md space-y-lg max-w-md mx-auto w-full">
+<!-- System Health Metrics (Bento Style) -->
+<section class="grid grid-cols-2 gap-md">
+<div class="glass-card p-md rounded-xl flex flex-col gap-xs">
+<div class="flex items-center justify-between text-outline">
+<span class="font-label-md text-label-md">Token Usage</span>
+<span class="material-symbols-outlined text-[16px]">data_usage</span>
+</div>
+<div class="mt-sm">
+<span class="font-headline-sm text-headline-sm text-primary">84.2k</span>
+<span class="text-body-sm text-outline ml-xs">/ 1M</span>
+</div>
+<div class="h-1 w-full bg-surface-container-highest rounded-full mt-sm overflow-hidden">
+<div class="h-full bg-primary shadow-[0_0_8px_rgba(192,193,255,0.5)]" style="width: 8.4%;"></div>
+</div>
+</div>
+<div class="glass-card p-md rounded-xl flex flex-col gap-xs">
+<div class="flex items-center justify-between text-outline">
+<span class="font-label-md text-label-md">Vector DB</span>
+<span class="material-symbols-outlined text-[16px]">database</span>
+</div>
+<div class="mt-sm">
+<span class="font-headline-sm text-headline-sm text-secondary">1.2ms</span>
+<span class="text-body-sm text-outline ml-xs">latency</span>
+</div>
+<div class="flex items-end h-8 gap-[2px] mt-sm">
+<div class="flex-1 bg-secondary/20 h-2 rounded-t-sm"></div>
+<div class="flex-1 bg-secondary/40 h-4 rounded-t-sm"></div>
+<div class="flex-1 bg-secondary/30 h-3 rounded-t-sm"></div>
+<div class="flex-1 bg-secondary/60 h-6 rounded-t-sm"></div>
+<div class="flex-1 bg-secondary h-8 rounded-t-sm"></div>
+</div>
+</div>
+</section>
+<!-- Knowledge Base Header -->
+<header class="flex flex-col gap-xs">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Knowledge Base</h2>
+<p class="text-body-sm text-outline">Manage and sync your connected data sources.</p>
+</header>
+<!-- Data Sources List -->
+<section class="space-y-md">
+<!-- Source Item 1 -->
+<div class="bg-surface-container-low border border-outline-variant/20 rounded-xl p-md flex items-center justify-between group active:bg-surface-container-high transition-colors">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-lg bg-primary-container/20 flex items-center justify-center border border-primary/20">
+<span class="material-symbols-outlined text-primary">description</span>
+</div>
+<div>
+<h3 class="font-label-md text-label-md text-on-surface">Internal_Q3_Report.pdf</h3>
+<div class="flex items-center gap-sm mt-[2px]">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span class="text-body-sm text-outline">Synced 2m ago</span>
+</div>
+</div>
+</div>
+<button class="material-symbols-outlined text-outline hover:text-on-surface">more_vert</button>
+</div>
+<!-- Source Item 2 -->
+<div class="bg-surface-container-low border border-outline-variant/20 rounded-xl p-md flex items-center justify-between group active:bg-surface-container-high transition-colors">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-lg bg-tertiary-container/20 flex items-center justify-center border border-tertiary/20">
+<span class="material-symbols-outlined text-tertiary">inventory_2</span>
+</div>
+<div>
+<h3 class="font-label-md text-label-md text-on-surface">Product Documentation</h3>
+<div class="flex items-center gap-sm mt-[2px]">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>
+<span class="text-body-sm text-outline">Indexing (45%)</span>
+</div>
+</div>
+</div>
+<div class="w-16 h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-tertiary" style="width: 45%;"></div>
+</div>
+</div>
+<!-- Source Item 3 -->
+<div class="bg-surface-container-low border border-outline-variant/20 rounded-xl p-md flex items-center justify-between group active:bg-surface-container-high transition-colors">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center border border-outline-variant/30">
+<span class="material-symbols-outlined text-on-surface-variant">link</span>
+</div>
+<div>
+<h3 class="font-label-md text-label-md text-on-surface">Engineering Wiki (Notion)</h3>
+<div class="flex items-center gap-sm mt-[2px]">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+<span class="text-body-sm text-outline">Sync failed</span>
+</div>
+</div>
+</div>
+<button class="bg-error-container/20 text-error font-label-md px-sm py-[2px] rounded-full text-xs">Retry</button>
+</div>
+<!-- Empty State Suggestion -->
+<div class="border-2 border-dashed border-outline-variant/20 rounded-xl p-xl flex flex-col items-center justify-center text-center gap-sm opacity-60">
+<span class="material-symbols-outlined text-outline" style="font-size: 32px;">post_add</span>
+<div>
+<p class="font-label-md text-label-md text-on-surface">Add more sources</p>
+<p class="text-body-sm text-outline">Connect GitHub, Slack or Google Drive</p>
+</div>
+</div>
+</section>
+</main>
+<!-- Floating Action Button -->
+<button class="fixed bottom-24 right-md w-14 h-14 bg-primary text-on-primary rounded-full shadow-lg flex items-center justify-center active:scale-90 transition-transform z-40">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">add</span>
+</button>
+<!-- NavigationDrawer (Mobile suppressed, using BottomNavBar as per logic) -->
+<nav class="fixed bottom-0 w-full z-50 md:hidden bg-surface-container-highest dark:bg-surface-container-highest border-t border-outline-variant/30 shadow-lg flex justify-around items-center h-16 px-md">
+<div class="flex flex-col items-center justify-center text-on-surface-variant active:bg-surface-bright">
+<span class="material-symbols-outlined">chat</span>
+<span class="font-label-md text-label-md">Chat</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant active:bg-surface-bright">
+<span class="material-symbols-outlined">storage</span>
+<span class="font-label-md text-label-md">Data</span>
+</div>
+<div class="flex flex-col items-center justify-center text-secondary bg-secondary/10 rounded-xl px-4 py-1">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">book</span>
+<span class="font-label-md text-label-md">Knowledge</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant active:bg-surface-bright">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-md text-label-md">Profile</span>
+</div>
+</nav>
+<!-- Footer (Embedded in mobile flow) -->
+<footer class="w-full border-t border-outline-variant/10 bg-surface-container-lowest dark:bg-surface-container-lowest">
+<div class="flex flex-col md:flex-row justify-between items-center px-lg py-xl max-w-container-max mx-auto gap-md text-outline font-body-sm text-body-sm">
+<p>© 2024 Nexus RAG Platforms Inc.</p>
+<div class="flex gap-md">
+<a class="hover:text-secondary underline transition-all" href="#">Documentation</a>
+<a class="hover:text-secondary underline transition-all" href="#">Status</a>
+</div>
+</div>
+</footer>
+<script>
+        // Micro-interaction for list items
+        document.querySelectorAll('section > div').forEach(item => {
+            item.addEventListener('touchstart', () => {
+                item.style.transform = 'scale(0.98)';
+            });
+            item.addEventListener('touchend', () => {
+                item.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body></html>

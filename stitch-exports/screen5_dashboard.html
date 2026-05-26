@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Nexus RAG | User Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Geist:wght@400;500;600;700;800;900&amp;family=JetBrains+Mono&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body {
+            background-color: #0e131e;
+            color: #dee2f2;
+            font-family: 'Inter', sans-serif;
+        }
+        .glass-panel {
+            background: rgba(23, 28, 39, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(70, 69, 84, 0.3);
+        }
+        .sidebar-rail {
+            width: 260px;
+        }
+        /* Custom scrollbar for a technical feel */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0e131e;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #303541;
+            border-radius: 2px;
+        }
+        .glow-edge {
+            box-shadow: 0 0 15px rgba(76, 215, 246, 0.3);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-highest": "#303541",
+                        "primary-fixed": "#e1e0ff",
+                        "secondary": "#4cd7f6",
+                        "outline": "#908fa0",
+                        "on-secondary-fixed": "#001f26",
+                        "surface-tint": "#c0c1ff",
+                        "secondary-fixed": "#acedff",
+                        "on-tertiary": "#4f2500",
+                        "tertiary": "#ffb783",
+                        "surface-variant": "#303541",
+                        "error-container": "#93000a",
+                        "on-tertiary-container": "#452000",
+                        "inverse-surface": "#dee2f2",
+                        "error": "#ffb4ab",
+                        "tertiary-container": "#d97721",
+                        "surface-container-high": "#252a35",
+                        "on-primary-fixed": "#07006c",
+                        "primary-container": "#8083ff",
+                        "outline-variant": "#464554",
+                        "inverse-primary": "#494bd6",
+                        "surface-container-low": "#171c27",
+                        "surface-bright": "#343945",
+                        "on-tertiary-fixed-variant": "#703700",
+                        "inverse-on-surface": "#2b303c",
+                        "primary": "#c0c1ff",
+                        "surface-container-lowest": "#090e19",
+                        "on-error-container": "#ffdad6",
+                        "on-background": "#dee2f2",
+                        "on-primary-fixed-variant": "#2f2ebe",
+                        "on-primary": "#1000a9",
+                        "on-secondary-container": "#00424e",
+                        "tertiary-fixed-dim": "#ffb783",
+                        "on-primary-container": "#0d0096",
+                        "primary-fixed-dim": "#c0c1ff",
+                        "on-secondary-fixed-variant": "#004e5c",
+                        "background": "#0e131e",
+                        "on-error": "#690005",
+                        "on-surface-variant": "#c7c4d7",
+                        "on-secondary": "#003640",
+                        "tertiary-fixed": "#ffdcc5",
+                        "surface-container": "#1b202b",
+                        "on-tertiary-fixed": "#301400",
+                        "surface-dim": "#0e131e",
+                        "secondary-container": "#03b5d3",
+                        "on-surface": "#dee2f2",
+                        "surface": "#0e131e",
+                        "secondary-fixed-dim": "#4cd7f6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "lg": "24px",
+                        "sidebar-width": "260px",
+                        "container-max": "1440px",
+                        "sm": "8px",
+                        "base": "4px",
+                        "xl": "40px",
+                        "md": "16px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Geist"],
+                        "headline-sm": ["Geist"],
+                        "mono-code": ["jetbrainsMono"],
+                        "label-md": ["Geist"],
+                        "display-lg": ["Geist"],
+                        "body-sm": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "mono-code": ["13px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "label-md": ["13px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-sm": ["12px", { "lineHeight": "18px", "fontWeight": "400" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-md h-16 bg-surface-container-low/80 dark:bg-surface-container-low/80 backdrop-blur-md border-b border-outline-variant/30">
+<div class="flex items-center gap-md">
+<button class="material-symbols-outlined text-primary hover:bg-surface-variant/50 transition-colors p-sm rounded-lg active:scale-95 transition-transform duration-200" data-icon="menu">menu</button>
+<span class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface dark:text-on-surface">Nexus RAG</span>
+</div>
+<div class="flex items-center gap-md">
+<button class="px-md py-sm bg-primary-container text-on-primary-container font-label-md rounded-xl hover:bg-surface-variant/50 transition-colors active:scale-95 duration-200">Launch App</button>
+</div>
+</header>
+<!-- Sidebar Layout Container -->
+<div class="flex min-h-screen pt-16">
+<!-- Sidebar Navigation (Desktop) -->
+<aside class="hidden md:flex flex-col w-sidebar-width fixed left-0 h-[calc(100vh-64px)] bg-surface-container-lowest border-r border-outline-variant/20 p-md z-40">
+<nav class="space-y-sm flex-1">
+<a class="flex items-center gap-md p-md rounded-xl text-outline hover:text-on-surface hover:bg-surface-variant/50 transition-all active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-md p-md rounded-xl text-outline hover:text-on-surface hover:bg-surface-variant/50 transition-all active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="database">database</span>
+<span class="font-label-md text-label-md">Knowledge Bases</span>
+</a>
+<a class="flex items-center gap-md p-md rounded-xl text-outline hover:text-on-surface hover:bg-surface-variant/50 transition-all active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="chat_bubble">chat_bubble</span>
+<span class="font-label-md text-label-md">Chat Logs</span>
+</a>
+<a class="flex flex-col items-start justify-center bg-secondary-container/20 text-secondary rounded-xl px-4 py-3 active:scale-90 duration-150" href="#">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+<span class="font-label-md text-label-md">Profile</span>
+</div>
+</a>
+</nav>
+<!-- Technical Status Card in Sidebar -->
+<div class="mt-auto p-md rounded-xl bg-surface-container-low border border-outline-variant/30">
+<div class="flex items-center justify-between mb-sm">
+<span class="font-label-md text-outline">API Status</span>
+<div class="w-2 h-2 rounded-full bg-secondary glow-edge"></div>
+</div>
+<div class="font-mono-code text-body-sm text-on-surface-variant">v2.4.0-retrieval-stable</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 md:ml-sidebar-width p-md md:p-xl bg-background pb-32">
+<div class="max-w-container-max mx-auto space-y-lg">
+<!-- Hero Header / Profile Section -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-lg">
+<div class="flex items-center gap-md">
+<div class="relative group">
+<div class="absolute -inset-1 bg-gradient-to-tr from-secondary to-primary rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+<img alt="User Avatar" class="relative w-24 h-24 rounded-full border-2 border-surface-container-high object-cover" data-alt="A cinematic close-up portrait of a tech professional in a futuristic dimly lit setting. The lighting is dominated by a cyan holographic glow reflecting off their skin. The background is a blurred server room with blinking indigo LEDs. The overall mood is intelligent, focused, and high-tech, fitting a modern SaaS dashboard aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBUf2fWzeSoCiuCLxAn8xUnaZB8FXZzcrz78ika-81BcEkzvcyMxprXXYT6hecILJGrd5F4pprgb-Ky06sIOKvFfCwRHYiIgNjImSk0b42py2bb2qOD-JFZWaaaW7S19Pdb__0wGuP0DpjXLXe9MKn1jWNz0bYOlSB5xbKVcrgITs_yk80ALkhayis8s7ZhZpavikQpT1SQiVFgG2m179PBVt7rel2rp8zElV3v0W2joFA5WvWbLiKV8fswhA4F8e04pOvakYOTfAI"/>
+</div>
+<div>
+<h1 class="font-headline-md text-headline-md text-on-surface">Alex Chen</h1>
+<p class="font-body-md text-on-surface-variant">alex.chen@nexus-rag.ai</p>
+<div class="mt-sm flex gap-sm">
+<span class="px-sm py-xs bg-secondary/10 border border-secondary/20 text-secondary text-[10px] font-bold tracking-widest uppercase rounded">Pro Plan</span>
+<span class="px-sm py-xs bg-outline-variant/30 border border-outline-variant/50 text-on-surface-variant text-[10px] font-bold tracking-widest uppercase rounded">Tier 2 Node</span>
+</div>
+</div>
+</div>
+<div class="flex gap-sm">
+<button class="flex items-center gap-sm px-md py-sm bg-surface-container-high border border-outline-variant/30 rounded-xl hover:bg-surface-variant/50 transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="settings">settings</span>
+<span class="font-label-md">Edit Profile</span>
+</button>
+<button class="flex items-center gap-sm px-md py-sm bg-surface-container-high border border-outline-variant/30 rounded-xl hover:bg-surface-variant/50 transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="security">security</span>
+<span class="font-label-md">Security</span>
+</button>
+</div>
+</div>
+<!-- Bento Grid Content -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-md">
+<!-- Storage Capacity Card (The Focus) -->
+<div class="md:col-span-8 glass-panel p-lg rounded-xl flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start mb-lg">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Storage Usage</h3>
+<p class="font-body-sm text-on-surface-variant">Global indexing capacity across all knowledge bases.</p>
+</div>
+<div class="text-right">
+<div class="font-headline-md text-secondary">342.8 <span class="text-body-sm font-normal text-outline">MB</span></div>
+<div class="font-body-sm text-outline">of 500 MB limit</div>
+</div>
+</div>
+<!-- Custom Progress Bar -->
+<div class="relative h-6 w-full bg-surface-container-highest rounded-full overflow-hidden border border-outline-variant/30 mb-md">
+<div class="absolute top-0 left-0 h-full bg-gradient-to-r from-secondary-container to-secondary rounded-full glow-edge transition-all duration-1000" style="width: 68%;">
+<div class="absolute top-0 right-0 w-1 h-full bg-white/40 animate-pulse"></div>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-md mt-lg">
+<div class="p-md bg-surface-container-low rounded-lg border border-outline-variant/20">
+<div class="text-outline font-label-md mb-xs">PDF Files</div>
+<div class="font-headline-sm">215 MB</div>
+</div>
+<div class="p-md bg-surface-container-low rounded-lg border border-outline-variant/20">
+<div class="text-outline font-label-md mb-xs">Text/MD</div>
+<div class="font-headline-sm">84 MB</div>
+</div>
+<div class="p-md bg-surface-container-low rounded-lg border border-outline-variant/20">
+<div class="text-outline font-label-md mb-xs">Other</div>
+<div class="font-headline-sm">43 MB</div>
+</div>
+</div>
+</div>
+<div class="mt-lg pt-md border-t border-outline-variant/20 flex items-center gap-md">
+<span class="material-symbols-outlined text-secondary" data-icon="info">info</span>
+<p class="font-body-sm text-on-surface-variant">
+                                You have <span class="text-secondary font-bold">157.2 MB</span> remaining. Your plan includes a <span class="text-on-surface font-semibold">500MB PDF Upload Limit</span> per source.
+                            </p>
+<button class="ml-auto px-md py-sm bg-secondary text-on-secondary-fixed font-bold rounded-lg hover:brightness-110 active:scale-95 transition-all">Upgrade Storage</button>
+</div>
+</div>
+<!-- Quick Stats Bento Card -->
+<div class="md:col-span-4 grid grid-rows-2 gap-md">
+<div class="bg-surface-container p-md rounded-xl border border-outline-variant/30 flex items-center gap-md">
+<div class="w-12 h-12 rounded-xl bg-tertiary/10 border border-tertiary/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary" data-icon="bolt">bolt</span>
+</div>
+<div>
+<div class="text-outline font-label-md">Inference Speed</div>
+<div class="font-headline-sm text-on-surface">142ms <span class="text-body-sm text-tertiary font-normal">avg</span></div>
+</div>
+</div>
+<div class="bg-surface-container p-md rounded-xl border border-outline-variant/30 flex items-center gap-md">
+<div class="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="link">link</span>
+</div>
+<div>
+<div class="text-outline font-label-md">Active Connections</div>
+<div class="font-headline-sm text-on-surface">12 Sources</div>
+</div>
+</div>
+</div>
+<!-- Recent Uploads Table -->
+<div class="md:col-span-7 bg-surface-container p-lg rounded-xl border border-outline-variant/30">
+<div class="flex justify-between items-center mb-lg">
+<h3 class="font-headline-sm text-headline-sm">Recent Uploads</h3>
+<button class="text-secondary font-label-md hover:underline">View All</button>
+</div>
+<div class="space-y-sm">
+<!-- Item 1 -->
+<div class="flex items-center justify-between p-md hover:bg-surface-variant/30 rounded-lg transition-colors border border-transparent hover:border-outline-variant/20 group">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-outline group-hover:text-secondary transition-colors" data-icon="picture_as_pdf">picture_as_pdf</span>
+<div>
+<div class="font-body-md text-on-surface">Q3_Financial_Review.pdf</div>
+<div class="text-[10px] font-mono-code text-outline uppercase tracking-wider">Indexed • 12.4 MB • 2h ago</div>
+</div>
+</div>
+<button class="material-symbols-outlined text-outline-variant hover:text-on-surface" data-icon="more_vert">more_vert</button>
+</div>
+<!-- Item 2 -->
+<div class="flex items-center justify-between p-md hover:bg-surface-variant/30 rounded-lg transition-colors border border-transparent hover:border-outline-variant/20 group">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-outline group-hover:text-secondary transition-colors" data-icon="description">description</span>
+<div>
+<div class="font-body-md text-on-surface">Project_Artemis_Specs.md</div>
+<div class="text-[10px] font-mono-code text-outline uppercase tracking-wider">Indexed • 1.2 MB • 5h ago</div>
+</div>
+</div>
+<button class="material-symbols-outlined text-outline-variant hover:text-on-surface" data-icon="more_vert">more_vert</button>
+</div>
+<!-- Item 3 -->
+<div class="flex items-center justify-between p-md hover:bg-surface-variant/30 rounded-lg transition-colors border border-transparent hover:border-outline-variant/20 group">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-outline group-hover:text-secondary transition-colors" data-icon="picture_as_pdf">picture_as_pdf</span>
+<div>
+<div class="font-body-md text-on-surface">User_Feedback_Cohort_A.pdf</div>
+<div class="text-[10px] font-mono-code text-outline uppercase tracking-wider">Indexing... • 45.8 MB • 12m ago</div>
+</div>
+</div>
+<div class="flex items-center gap-sm">
+<div class="w-32 h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[45%]"></div>
+</div>
+<button class="material-symbols-outlined text-outline-variant hover:text-on-surface" data-icon="close">close</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Active Connections -->
+<div class="md:col-span-5 bg-surface-container p-lg rounded-xl border border-outline-variant/30">
+<div class="flex justify-between items-center mb-lg">
+<h3 class="font-headline-sm text-headline-sm">Knowledge Base Connections</h3>
+<button class="w-8 h-8 rounded-full bg-outline-variant/20 flex items-center justify-center hover:bg-outline-variant/40 transition-all">
+<span class="material-symbols-outlined text-on-surface" data-icon="add">add</span>
+</button>
+</div>
+<div class="space-y-md">
+<div class="p-md bg-surface-container-low border border-outline-variant/20 rounded-xl">
+<div class="flex items-center gap-md mb-sm">
+<div class="w-8 h-8 rounded bg-[#1DA1F2]/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-[#1DA1F2]" data-icon="language">language</span>
+</div>
+<div class="flex-1">
+<div class="font-label-md">Web Crawler: Documentation</div>
+<div class="text-[10px] text-outline">Synced every 24 hours</div>
+</div>
+<div class="px-sm py-xs bg-secondary/10 text-secondary text-[10px] font-bold rounded">Active</div>
+</div>
+<div class="flex justify-between items-center">
+<div class="text-body-sm text-outline">1,240 Pages indexed</div>
+<button class="material-symbols-outlined text-outline-variant" data-icon="sync">sync</button>
+</div>
+</div>
+<div class="p-md bg-surface-container-low border border-outline-variant/20 rounded-xl opacity-60">
+<div class="flex items-center gap-md mb-sm">
+<div class="w-8 h-8 rounded bg-[#4285F4]/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-[#4285F4]" data-icon="cloud_queue">cloud_queue</span>
+</div>
+<div class="flex-1">
+<div class="font-label-md">Google Drive: Shared Lab</div>
+<div class="text-[10px] text-outline">Connection paused</div>
+</div>
+<div class="px-sm py-xs bg-outline-variant/30 text-outline text-[10px] font-bold rounded">Paused</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-sm pb-safe h-20 bg-surface-container-lowest dark:bg-surface-container-lowest border-t border-outline-variant/20 shadow-lg">
+<button class="flex flex-col items-center justify-center text-outline px-4 py-1 hover:text-on-surface transition-all active:scale-90 duration-150">
+<span class="material-symbols-outlined" data-icon="chat_bubble">chat_bubble</span>
+<span class="font-label-md text-label-md">Chat</span>
+</button>
+<button class="flex flex-col items-center justify-center text-outline px-4 py-1 hover:text-on-surface transition-all active:scale-90 duration-150">
+<span class="material-symbols-outlined" data-icon="database">database</span>
+<span class="font-label-md text-label-md">Data</span>
+</button>
+<button class="flex flex-col items-center justify-center text-outline px-4 py-1 hover:text-on-surface transition-all active:scale-90 duration-150">
+<span class="material-symbols-outlined" data-icon="query_stats">query_stats</span>
+<span class="font-label-md text-label-md">Stats</span>
+</button>
+<button class="flex flex-col items-center justify-center bg-secondary-container/20 text-secondary rounded-xl px-4 py-1 active:scale-90 duration-150">
+<span class="material-symbols-outlined" data-icon="account_circle" style="font-variation-settings: 'FILL' 1;">account_circle</span>
+<span class="font-label-md text-label-md">Profile</span>
+</button>
+</nav>
+<script>
+        // Micro-interactions and cosmetic animations
+        document.addEventListener('DOMContentLoaded', () => {
+            const progress = document.querySelector('.bg-gradient-to-r.from-secondary-container');
+            if (progress) {
+                // Trigger animation after load
+                setTimeout(() => {
+                    progress.style.width = '68%';
+                }, 100);
+            }
+
+            // Simple click interaction for cards
+            document.querySelectorAll('.glass-panel, .bg-surface-container').forEach(card => {
+                card.addEventListener('mousedown', () => {
+                    card.classList.add('scale-[0.99]');
+                });
+                card.addEventListener('mouseup', () => {
+                    card.classList.remove('scale-[0.99]');
+                });
+                card.addEventListener('mouseleave', () => {
+                    card.classList.remove('scale-[0.99]');
+                });
+            });
+        });
+    </script>
+</body></html>

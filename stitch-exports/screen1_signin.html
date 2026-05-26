@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sign In | Nexus RAG</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&amp;family=Inter:wght@100..900&amp;family=JetBrains+Mono:wght@100..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-container {
+            backdrop-filter: blur(12px);
+            background: rgba(14, 19, 30, 0.8);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed": "#acedff",
+                        "inverse-surface": "#dee2f2",
+                        "inverse-on-surface": "#2b303c",
+                        "primary-fixed": "#e1e0ff",
+                        "on-surface-variant": "#c7c4d7",
+                        "background": "#0e131e",
+                        "tertiary-fixed": "#ffdcc5",
+                        "on-secondary": "#003640",
+                        "on-primary-fixed": "#07006c",
+                        "surface-container-low": "#171c27",
+                        "on-primary-container": "#0d0096",
+                        "on-tertiary-container": "#452000",
+                        "primary-fixed-dim": "#c0c1ff",
+                        "on-secondary-fixed": "#001f26",
+                        "on-primary-fixed-variant": "#2f2ebe",
+                        "inverse-primary": "#494bd6",
+                        "surface-tint": "#c0c1ff",
+                        "on-tertiary": "#4f2500",
+                        "on-secondary-fixed-variant": "#004e5c",
+                        "secondary-container": "#03b5d3",
+                        "on-primary": "#1000a9",
+                        "on-surface": "#dee2f2",
+                        "surface-dim": "#0e131e",
+                        "on-error-container": "#ffdad6",
+                        "surface-container-high": "#252a35",
+                        "secondary": "#4cd7f6",
+                        "on-tertiary-fixed-variant": "#703700",
+                        "on-error": "#690005",
+                        "error-container": "#93000a",
+                        "outline-variant": "#464554",
+                        "surface-container-highest": "#303541",
+                        "surface": "#0e131e",
+                        "tertiary-container": "#d97721",
+                        "on-tertiary-fixed": "#301400",
+                        "error": "#ffb4ab",
+                        "on-secondary-container": "#00424e",
+                        "surface-container-lowest": "#090e19",
+                        "primary": "#c0c1ff",
+                        "outline": "#908fa0",
+                        "tertiary": "#ffb783",
+                        "surface-bright": "#343945",
+                        "secondary-fixed-dim": "#4cd7f6",
+                        "primary-container": "#8083ff",
+                        "surface-container": "#1b202b",
+                        "tertiary-fixed-dim": "#ffb783",
+                        "surface-variant": "#303541",
+                        "on-background": "#dee2f2"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "base": "4px",
+                        "sm": "8px",
+                        "sidebar-width": "260px",
+                        "xl": "40px",
+                        "md": "16px",
+                        "container-max": "1440px",
+                        "xs": "4px",
+                        "lg": "24px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Geist"],
+                        "mono-code": ["jetbrainsMono"],
+                        "headline-md": ["Geist"],
+                        "label-md": ["Geist"],
+                        "headline-sm": ["Geist"],
+                        "body-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "mono-code": ["13px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "label-md": ["13px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                        "headline-sm": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "body-sm": ["12px", {"lineHeight": "18px", "fontWeight": "400"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen flex flex-col font-body-md overflow-x-hidden">
+<!-- Top Navigation Bar (Transactional Suppression Logic Applied: Minimal version for Auth) -->
+<header class="bg-surface/80 dark:bg-surface-dim/80 backdrop-blur-md sticky top-0 z-50 border-b border-outline-variant/30 px-lg py-md flex justify-between items-center w-full">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary font-headline-md" data-icon="hub">hub</span>
+<span class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Nexus RAG</span>
+</div>
+<button class="p-sm rounded-full hover:bg-surface-container-high transition-colors text-on-surface-variant flex items-center justify-center" id="theme-toggle">
+<span class="material-symbols-outlined" id="theme-icon">dark_mode</span>
+</button>
+</header>
+<!-- Main Content Area -->
+<main class="flex-grow flex items-center justify-center px-md py-xl relative">
+<!-- Background Ambient Glow -->
+<div class="absolute inset-0 overflow-hidden pointer-events-none">
+<div class="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] bg-primary/10 blur-[120px] rounded-full"></div>
+<div class="absolute -bottom-[20%] -right-[10%] w-[50%] h-[50%] bg-secondary/10 blur-[120px] rounded-full"></div>
+</div>
+<!-- Auth Card -->
+<div class="w-full max-w-[400px] glass-container border border-outline-variant/20 rounded-xl shadow-2xl p-lg flex flex-col gap-lg z-10">
+<!-- Header Section -->
+<div class="text-center space-y-xs">
+<h1 class="font-headline-md text-headline-md text-on-surface">Welcome Back</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Access your intelligence engine</p>
+</div>
+<!-- Form Section -->
+<form class="flex flex-col gap-md" onsubmit="return false;">
+<div class="space-y-xs">
+<label class="font-label-md text-label-md text-on-surface-variant px-xs">Email Address</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-md text-outline text-[20px]" data-icon="mail">mail</span>
+<input class="w-full bg-surface-container-low border border-outline-variant/30 rounded-lg py-md pl-xl pr-md text-body-md text-on-surface focus:outline-none focus:border-primary transition-all placeholder:text-outline/50" placeholder="name@company.com" type="email"/>
+</div>
+</div>
+<div class="space-y-xs">
+<div class="flex justify-between items-center px-xs">
+<label class="font-label-md text-label-md text-on-surface-variant">Password</label>
+<a class="font-label-md text-label-md text-primary hover:text-secondary transition-colors" href="#">Forgot Password?</a>
+</div>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-md text-outline text-[20px]" data-icon="lock">lock</span>
+<input class="w-full bg-surface-container-low border border-outline-variant/30 rounded-lg py-md pl-xl pr-md text-body-md text-on-surface focus:outline-none focus:border-primary transition-all placeholder:text-outline/50" placeholder="••••••••" type="password"/>
+</div>
+</div>
+<button class="w-full bg-primary text-on-primary font-label-md text-label-md py-md rounded-lg active:scale-[0.98] transition-transform font-bold mt-sm">
+                    Sign In
+                </button>
+</form>
+<!-- Divider -->
+<div class="flex items-center gap-md">
+<div class="h-[1px] flex-grow bg-outline-variant/30"></div>
+<span class="font-label-md text-label-md text-outline">or continue with</span>
+<div class="h-[1px] flex-grow bg-outline-variant/30"></div>
+</div>
+<!-- Social Logins -->
+<div class="grid grid-cols-2 gap-md">
+<button class="flex items-center justify-center gap-sm border border-outline-variant/30 rounded-lg py-md hover:bg-surface-container-high transition-all text-on-surface">
+<img alt="Google" class="w-5 h-5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAqr7kdHQJwTdHSOuVtd1jCevCWjkR_aI2FVMjDkTxGrrSbEfcgfy7BSPj6zAXOtWc2wvYqyHnojwD3pDRMl7Muo2e9yMtq2JLXxUhvex3196M8NCo7ay4gsBbgyBzMb_GcKYxLAZjy3HYUvpch0oMXA50ptV5MbITz74ohxIGmyKrVt0fAG9q-GrxSqLjnGqnvqhmGpNuFJnev7tTTcglcjhQiqiiD8Pn6YO4MzoeAH45VxoECUqiFJDMAiOwYpIXXkTxZQ4euiiw"/>
+<span class="font-label-md text-label-md">Google</span>
+</button>
+<button class="flex items-center justify-center gap-sm border border-outline-variant/30 rounded-lg py-md hover:bg-surface-container-high transition-all text-on-surface">
+<svg class="w-5 h-5 fill-current" viewbox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"></path></svg>
+<span class="font-label-md text-label-md">GitHub</span>
+</button>
+</div>
+<!-- Footer Section -->
+<p class="text-center font-body-sm text-body-sm text-on-surface-variant">
+                Don't have an account? <a class="text-primary font-bold hover:underline" href="#">Request Access</a>
+</p>
+</div>
+</main>
+<!-- Footer (Copyright only for focused screen) -->
+<footer class="w-full px-lg py-md flex justify-center items-center">
+<p class="font-body-sm text-body-sm text-outline opacity-60">© 2024 Nexus RAG Platforms Inc.</p>
+</footer>
+<script>
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
+        const html = document.documentElement;
+
+        themeToggle.addEventListener('click', () => {
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                themeIcon.textContent = 'light_mode';
+            } else {
+                html.classList.add('dark');
+                themeIcon.textContent = 'dark_mode';
+            }
+        });
+
+        // Simple animation logic for fields
+        const inputs = document.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                input.previousElementSibling.classList.add('text-primary');
+            });
+            input.addEventListener('blur', () => {
+                input.previousElementSibling.classList.remove('text-primary');
+            });
+        });
+    </script>
+</body></html>
