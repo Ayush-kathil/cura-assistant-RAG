@@ -7,6 +7,7 @@ import { ChatInterface } from "@/components/chat/ChatInterface";
 import { useChatSession } from "@/hooks/useChatSession";
 import { MobileCurioHome } from "@/components/chat/MobileCurioHome";
 import { MobileCurioChat } from "@/components/chat/MobileCurioChat";
+import { UserDashboard } from "@/components/dashboard/UserDashboard";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -15,6 +16,7 @@ export default function WorkspacePage() {
   const supabase = createClient();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [mobileView, setMobileView] = useState<'home' | 'chat' | 'kb'>('home');
+  const [isDashboardOpen, setIsDashboardOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -257,6 +259,14 @@ export default function WorkspacePage() {
           </div>
 
           <div className="mt-auto px-6 pt-4 border-t border-slate-100 pb-2">
+            <div onClick={() => setIsDashboardOpen(true)} className="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 transition-all cursor-pointer mb-2">
+              <div className="w-8 h-8 rounded-full border border-slate-200 bg-slate-100 flex items-center justify-center text-blue-500">
+                <span className="material-symbols-outlined text-[18px]">space_dashboard</span>
+              </div>
+              <div className="flex-1">
+                <p className="font-medium text-sm text-slate-700">Dashboard & Plans</p>
+              </div>
+            </div>
             <div onClick={handleLogout} className="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 transition-all cursor-pointer mb-4">
               <div className="w-8 h-8 rounded-full border border-slate-200 bg-slate-100 flex items-center justify-center text-slate-500">
                 <span className="material-symbols-outlined text-[18px]">person</span>
@@ -277,7 +287,7 @@ export default function WorkspacePage() {
           <header className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-white/80 backdrop-blur-md sticky top-0 z-30">
             <div className="flex items-center gap-4">
               <h2 className="text-lg font-bold tracking-tight text-slate-900 flex items-center gap-2">
-                <img src="/mobile-assets/curio.png" className="w-6 h-6 object-contain" /> Curio AI
+                <img src="/mobile-assets/curio.png" className="w-8 h-8 object-cover rounded-full bg-slate-100 border border-slate-200 shadow-sm p-0.5" /> Curio AI
               </h2>
             </div>
             <div className="flex items-center gap-4">
@@ -315,6 +325,13 @@ export default function WorkspacePage() {
           </div>
         </main>
       </div>
+
+      <UserDashboard 
+        isOpen={isDashboardOpen} 
+        onClose={() => setIsDashboardOpen(false)} 
+        userEmail={userEmail}
+        totalStorageBytes={documents.reduce((acc, doc) => acc + (doc.file_size_bytes || 0), 0)}
+      />
 
     </div>
   );

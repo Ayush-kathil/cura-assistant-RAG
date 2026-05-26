@@ -20,7 +20,7 @@ const ConversationBubble = memo(function ConversationBubble({ message, userEmail
     return (
       <div className="flex items-end gap-2 max-w-[88%] mb-6">
         <div className="w-6 h-6 rounded-full shrink-0 flex items-center justify-center bg-slate-100 overflow-hidden shadow-sm mb-1">
-          <img src="/mobile-assets/curio.png" alt="Curio" className="w-full h-full object-contain p-0.5" />
+          <img src="/mobile-assets/curio.png" alt="Curio" className="w-full h-full object-cover rounded-full bg-white p-0.5" />
         </div>
         <div className="flex flex-col items-start gap-1">
           <div className="bg-white border border-slate-100 p-4 rounded-3xl rounded-bl-xl shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
@@ -88,7 +88,7 @@ export function MobileCurioChat({ messages, onSendMessage, onNavigate, userEmail
       <div ref={messageListRef} className="flex-1 min-h-0 overflow-y-auto px-4 py-6 scroll-smooth">
         {messages.length === 0 ? (
            <div className="h-full flex flex-col items-center justify-center text-center px-6 opacity-60">
-             <img src="/mobile-assets/curio.png" alt="Curio Robot" className="w-24 h-24 object-contain mb-4" />
+             <img src="/mobile-assets/curio.png" alt="Curio Robot" className="w-24 h-24 object-cover rounded-full bg-slate-100 shadow-md p-2 mx-auto mb-4" />
              <p className="text-slate-500 text-sm font-medium">I'm Curio, your intelligent assistant. How can I help you today?</p>
            </div>
         ) : (

@@ -11,7 +11,7 @@ export default function Home() {
       <nav className="fixed w-full z-50 top-0 transition-all duration-300 bg-white/80 backdrop-blur-md border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-2">
-             <img src="/mobile-assets/curio.png" alt="Curio AI" className="w-8 h-8 object-contain" />
+             <img src="/mobile-assets/curio.png" alt="Curio AI" className="w-10 h-10 object-cover rounded-full bg-slate-100 border border-slate-200 shadow-sm p-1" />
              <span className="font-bold text-xl tracking-tight text-slate-900">Curio AI</span>
           </div>
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
@@ -76,7 +76,7 @@ export default function Home() {
             className="flex-1 w-full relative flex justify-center items-center"
           >
              <div className="absolute w-[80%] max-w-[300px] aspect-square bg-blue-400/20 blur-[100px] rounded-full"></div>
-             <img src="/mobile-assets/curio.png" alt="Curio Robot 3D" className="w-full max-w-[400px] h-auto object-contain animate-bounce drop-shadow-2xl relative z-10" style={{ animationDuration: '4s' }} />
+             <img src="/mobile-assets/curio.png" alt="Curio Robot 3D" className="w-full max-w-[400px] aspect-square object-cover rounded-full bg-slate-100 border-4 border-white shadow-2xl animate-bounce relative z-10" style={{ animationDuration: '4s' }} />
           </motion.div>
 
         </div>

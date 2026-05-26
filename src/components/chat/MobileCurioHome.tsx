@@ -31,8 +31,9 @@ export function MobileCurioHome({ onStartChat, onNavigate, userEmail }: MobileCu
           <h1 className="text-[34px] leading-[1.15] font-bold text-slate-900 tracking-tight max-w-[65%]" style={{ fontFamily: 'Geist, sans-serif' }}>
             <span className="text-blue-500 font-medium">Hi {userEmail?.split('@')[0] || "User"}!</span> How can I help you today?
           </h1>
-          <div className="absolute right-[-20px] top-[-10px] w-36 h-36 flex items-center justify-center animate-bounce" style={{ animationDuration: '3s' }}>
-            <img src="/mobile-assets/curio.png" alt="Curio Robot" className="w-full h-full object-contain drop-shadow-xl" />
+          <div className="w-48 h-48 mx-auto relative mb-8">
+            <div className="absolute inset-0 bg-blue-100 rounded-full blur-3xl opacity-50 animate-pulse"></div>
+            <img src="/mobile-assets/curio.png" alt="Curio Robot" className="w-full h-full object-cover rounded-full bg-slate-100 border border-slate-200 shadow-xl p-2 relative z-10" />
           </div>
         </div>
 

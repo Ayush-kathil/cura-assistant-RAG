@@ -95,7 +95,7 @@ export default function LoginPage() {
       <header className="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-slate-100 shadow-sm">
         <div className="flex justify-between items-center w-full px-6 py-4 max-w-7xl mx-auto">
           <div className="flex items-center gap-2">
-            <img src="/mobile-assets/curio.png" alt="Curio AI" className="w-8 h-8 object-contain" />
+            <img src="/mobile-assets/curio.png" alt="Curio AI" className="w-8 h-8 object-cover rounded-full" />
             <h1 className="font-bold text-xl tracking-tight text-slate-900">Curio AI</h1>
           </div>
           <button onClick={() => router.push('/')} className="bg-slate-100 text-slate-700 font-bold text-sm px-6 py-2 rounded-full hover:bg-slate-200 transition-colors duration-200 active:scale-95">

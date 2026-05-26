@@ -198,7 +198,7 @@ export const ChatInterface = ({
               transition={{ duration: 0.6, type: "spring" }}
               src="/mobile-assets/curio.png" 
               alt="Curio AI" 
-              className="w-24 h-24 object-contain mb-6 drop-shadow-2xl relative z-10"
+              className="w-24 h-24 object-cover rounded-full bg-slate-100 border border-slate-200 shadow-md p-2 mb-6 relative z-10"
               style={{ animation: 'bounce 3s infinite' }}
             />
             <motion.h2 
@@ -246,7 +246,7 @@ export const ChatInterface = ({
               <div key={virtualItem.key} data-index={virtualItem.index} ref={virtualizer.measureElement} style={{ position: 'absolute', top: 0, left: 0, width: '100%', transform: `translateY(${virtualItem.start}px)` }} className="pb-6">
                 <div className={clsx("flex gap-3 md:gap-4 max-w-[95%] md:max-w-[85%]", msg.role === "user" ? "ml-auto flex-row-reverse" : "mr-auto")}>
                   <div className={clsx("w-8 h-8 flex-shrink-0 rounded-full flex items-center justify-center mt-1", msg.role === "user" ? "bg-blue-500 text-white text-xs font-bold" : "bg-slate-100 p-1")}>
-                    {msg.role === "user" ? "U" : <img src="/mobile-assets/curio.png" alt="Curio" className="w-full h-full object-contain" />}
+                    {msg.role === "user" ? "U" : <img src="/mobile-assets/curio.png" alt="Curio" className="w-full h-full object-cover rounded-full p-0.5" />}
                   </div>
                   <div className="flex flex-col gap-1 w-full max-w-full">
                     {msg.orchestrationPath && msg.orchestrationPath.length > 0 && msg.role === "assistant" && (
