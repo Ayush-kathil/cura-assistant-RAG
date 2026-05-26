@@ -8,6 +8,8 @@ import { Message } from "@/lib/storage";
 import { generateStreamingResponse, generateEmbedding, generateEmbeddingsBatch } from "@/lib/gemini";
 import { VectorStoreData, chunkText, hybridSearchVectorStore } from "@/lib/vectorStore";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
+import { useTheme } from "@/components/ThemeProvider";
 
 interface DocumentItem {
   id: string;
@@ -21,6 +23,7 @@ interface DocumentItem {
 export default function WorkspacePage() {
   const router = useRouter();
   const supabase = createClient();
+  const { theme, toggleTheme } = useTheme();
   
   const [documents, setDocuments] = useState<DocumentItem[]>([]);
   const [isUploading, setIsUploading] = useState(false);
@@ -373,7 +376,7 @@ export default function WorkspacePage() {
   };
 
   return (
-    <div className="bg-[#020617] text-white font-body-md overflow-hidden min-h-screen">
+    <div className="bg-[#020617] text-white font-body-md overflow-hidden min-h-[100dvh]">
       <header className="md:hidden flex items-center justify-between px-md py-sm bg-surface-container border-b border-outline-variant/30 sticky top-0 z-50">
         <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-xs text-on-surface">
           <span className="material-symbols-outlined">menu</span>
@@ -384,17 +387,81 @@ export default function WorkspacePage() {
         </button>
       </header>
 
-      <div className="flex h-[calc(100vh)] overflow-hidden p-2 gap-2 relative">
+      <div className="flex h-[100dvh] overflow-hidden p-2 gap-2 relative">
         
-        {/* Mobile overlay for left sidebar */}
-        {isSidebarOpen && (
-          <div 
-            className="md:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-30" 
-            onClick={() => setIsSidebarOpen(false)}
-          />
-        )}
+        <AnimatePresence>
+          {isSidebarOpen && (
+            <>
+              <motion.div 
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                className="md:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-30" 
+                onClick={() => setIsSidebarOpen(false)}
+              />
+              <motion.aside 
+                initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }} transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                className="md:hidden bg-[#0A0A15] fixed inset-y-0 left-0 w-[80vw] max-w-[320px] z-40 flex flex-col py-lg overflow-hidden shadow-2xl border-r border-white/10"
+              >
+                {/* Mobile Sidebar Content */}
+                <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+                  <div className="absolute top-[-10%] left-[-20%] w-[150%] h-[50%] bg-blue-900/20 blur-[100px] rounded-full animate-[spin_20s_linear_infinite]" />
+                  <div className="absolute bottom-[-10%] right-[-20%] w-[120%] h-[60%] bg-cyan-900/10 blur-[120px] rounded-full animate-[spin_25s_linear_infinite_reverse]" />
+                  <div className="absolute top-[40%] left-[10%] w-[80%] h-[40%] bg-indigo-900/10 blur-[90px] rounded-full animate-pulse" />
+                </div>
+      
+                <div className="px-md mb-lg relative z-10">
+                  <div className="flex items-center gap-sm bg-surface-container-high p-sm rounded-xl cursor-pointer hover:bg-surface-container-highest transition-all border border-outline-variant/20">
+                    <div className="w-8 h-8 rounded bg-primary flex items-center justify-center text-on-primary font-bold">E</div>
+                    <div className="flex-1 overflow-hidden">
+                      <p className="font-label-md text-label-md truncate">Enterprise Docs</p>
+                      <p className="text-[10px] text-on-surface-variant uppercase tracking-widest">Workspace</p>
+                    </div>
+                  </div>
+                </div>
+      
+                <div className="px-md mb-md">
+                  <button onClick={() => { setMessages([]); setCurrentLeafId(null); setCurrentSessionId(null); setIsSidebarOpen(false); }} className="w-full flex items-center justify-center gap-sm bg-blue-600 text-white font-label-md text-label-md py-md rounded-2xl active:scale-95 transition-all hover:bg-blue-500 shadow-[0_0_15px_rgba(37,99,235,0.3)] min-h-[44px]">
+                    <span className="material-symbols-outlined">add_comment</span>
+                    New Chat
+                  </button>
+                </div>
+      
+                <nav className="flex-1 overflow-y-auto px-xs space-y-sm relative z-10 custom-scrollbar">
+                  {chatSessions.length === 0 ? (
+                    <div className="px-md py-xs mt-4">
+                      <span className="text-[11px] font-bold text-outline uppercase tracking-wider text-center block opacity-50">Your chat history will appear here</span>
+                    </div>
+                  ) : (
+                    chatSessions.map(session => (
+                      <div key={`mob-${session.id}`} onClick={() => { loadChatSession(session.id); setIsSidebarOpen(false); }} className={`text-on-surface-variant hover:bg-white/5 rounded-2xl mx-2 p-sm flex items-center justify-between cursor-pointer transition-all group min-h-[44px] ${currentSessionId === session.id ? 'bg-white/10 text-white' : ''}`}>
+                        <div className="flex items-center gap-sm overflow-hidden">
+                          <span className="material-symbols-outlined text-md">chat</span>
+                          <span className="font-label-md text-label-md truncate">{session.title}</span>
+                        </div>
+                        <button onClick={(e) => deleteChatSession(session.id, e)} className="opacity-100 p-1 hover:text-red-400 hover:bg-red-400/10 rounded transition-all min-h-[44px] min-w-[44px] flex items-center justify-center">
+                          <span className="material-symbols-outlined text-sm">delete</span>
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </nav>
+      
+                <div className="mt-auto px-md pt-md border-t border-white/10 relative z-10">
+                  <div onClick={handleLogout} className="flex items-center gap-sm p-sm rounded-lg hover:bg-surface-container-high transition-all cursor-pointer min-h-[44px]">
+                    <div className="w-9 h-9 rounded-full border border-primary/30 bg-surface-container-highest flex items-center justify-center">
+                      <span className="material-symbols-outlined text-sm">person</span>
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-label-md text-label-md text-on-surface">Logout</p>
+                    </div>
+                    <span className="material-symbols-outlined text-on-surface-variant">logout</span>
+                  </div>
+                </div>
+              </motion.aside>
+            </>
+          )}
+        </AnimatePresence>
 
-        <aside className={`bg-[#0A0A15] relative h-full w-[280px] sm:w-sidebar-width fixed md:relative z-40 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:hidden'} transition-all duration-300 border border-white/10 flex flex-col py-lg overflow-hidden rounded-3xl shadow-2xl`}>
+        <aside className="hidden md:flex bg-[#0A0A15] relative h-full w-[280px] sm:w-sidebar-width z-40 border border-white/10 flex-col py-lg overflow-hidden rounded-3xl shadow-2xl">
           
           {/* 3D Animated Background */}
           <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
@@ -433,7 +500,7 @@ export default function WorkspacePage() {
                     <span className="material-symbols-outlined text-md">chat</span>
                     <span className="font-label-md text-label-md truncate">{session.title}</span>
                   </div>
-                  <button onClick={(e) => deleteChatSession(session.id, e)} className="opacity-0 group-hover:opacity-100 p-1 hover:text-red-400 hover:bg-red-400/10 rounded transition-all">
+                  <button onClick={(e) => deleteChatSession(session.id, e)} className="opacity-100 md:opacity-0 md:group-hover:opacity-100 p-1 hover:text-red-400 hover:bg-red-400/10 rounded transition-all min-h-[44px] min-w-[44px] flex items-center justify-center">
                     <span className="material-symbols-outlined text-sm">delete</span>
                   </button>
                 </div>
@@ -479,6 +546,9 @@ export default function WorkspacePage() {
               </div>
             </div>
             <div className="flex gap-sm">
+              <button onClick={toggleTheme} className="w-10 h-10 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/10 transition-colors border border-white/10 shadow-[0_0_15px_rgba(255,255,255,0.1)]">
+                <span className="material-symbols-outlined text-white">{theme === 'dark' ? 'light_mode' : 'dark_mode'}</span>
+              </button>
               <Link href="/dashboard" className="w-10 h-10 rounded-full overflow-hidden object-cover bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold cursor-pointer hover:scale-105 transition-all shadow-[0_0_15px_rgba(59,130,246,0.5)] border-2 border-white/20">
                 {userEmail?.[0]?.toUpperCase() || "U"}
               </Link>
@@ -509,21 +579,61 @@ export default function WorkspacePage() {
           </div>
         </main>
 
-        {/* Mobile overlay for right settings panel */}
-        {isSettingsOpen && (
-          <div 
-            className="xl:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-40" 
-            onClick={() => setIsSettingsOpen(false)}
-          />
-        )}
-
-        <aside className={`${isSettingsOpen ? 'flex fixed inset-y-2 right-2 rounded-3xl z-50 w-[calc(100%-16px)] sm:w-[320px] shadow-2xl' : 'hidden'} xl:flex w-[320px] bg-surface-container-low border border-outline-variant/20 flex-col py-lg px-md overflow-y-auto transform transition-transform duration-300`}>
+        <AnimatePresence>
           {isSettingsOpen && (
-            <button onClick={() => setIsSettingsOpen(false)} className="xl:hidden absolute top-4 right-4 text-outline hover:text-on-surface">
-              <span className="material-symbols-outlined">close</span>
-            </button>
+            <>
+              <motion.div 
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                className="xl:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-40" 
+                onClick={() => setIsSettingsOpen(false)}
+              />
+              <motion.aside 
+                initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                className="flex fixed inset-x-0 bottom-0 top-16 rounded-t-3xl z-50 w-full shadow-2xl xl:hidden bg-surface-container-low border-t border-outline-variant/20 flex-col py-lg px-md overflow-y-auto"
+              >
+                <button onClick={() => setIsSettingsOpen(false)} className="absolute top-4 right-4 text-outline hover:text-on-surface min-h-[44px] min-w-[44px] flex items-center justify-center bg-white/10 rounded-full">
+                  <span className="material-symbols-outlined">close</span>
+                </button>
+                
+                {/* Mobile settings content duplicated or use same component */}
+                <div className="mt-8 mb-lg flex justify-center">
+                   <Link href="/upload-pro" className="inline-block px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-400 hover:from-amber-400 hover:to-orange-300 rounded-2xl text-sm font-bold shadow-[0_0_15px_rgba(245,158,11,0.4)] transition-all text-black">
+                     Upgrade to Pro
+                   </Link>
+                </div>
+                
+                <div className="mt-auto pt-8">
+                  <p className="text-[11px] font-bold text-outline uppercase tracking-widest mb-md">Data Ingestion</p>
+                  
+                  <div 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="border-2 border-dashed border-outline-variant/30 rounded-2xl p-lg flex flex-col items-center justify-center text-center hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer group"
+                  >
+                    <span className="material-symbols-outlined text-outline text-3xl mb-sm group-hover:text-primary transition-colors group-hover:scale-110 duration-200">cloud_upload</span>
+                    <p className="font-label-md text-label-md text-on-surface">Click to ingest files</p>
+                  </div>
+      
+                  <div className="mt-8 space-y-2 max-h-48 overflow-y-auto">
+                    <p className="text-[11px] font-bold text-outline uppercase tracking-widest mb-sm">Active Documents</p>
+                    {documents.map(doc => (
+                      <div key={doc.id} className="flex items-center justify-between bg-surface-container p-2 rounded border border-outline-variant/20">
+                        <span className="text-xs truncate max-w-[180px]" title={doc.file_name}>{doc.file_name}</span>
+                        <button 
+                          onClick={() => executeDocumentDeletion(doc.id, doc.storage_path)}
+                          className="text-error hover:text-error-container p-1 rounded hover:bg-error/10 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                        >
+                          <span className="material-symbols-outlined text-sm">delete</span>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </motion.aside>
+            </>
           )}
+        </AnimatePresence>
 
+        <aside className="hidden xl:flex w-[320px] bg-surface-container-low border border-outline-variant/20 flex-col py-lg px-md overflow-y-auto">
           <div className="mt-8 xl:mt-0 mb-lg flex justify-center">
              <Link href="/upload-pro" className="inline-block px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-400 hover:from-amber-400 hover:to-orange-300 rounded-2xl text-sm font-bold shadow-[0_0_15px_rgba(245,158,11,0.4)] transition-all text-black">
                Upgrade to Pro
@@ -569,7 +679,7 @@ export default function WorkspacePage() {
                   <span className="text-xs truncate max-w-[180px]" title={doc.file_name}>{doc.file_name}</span>
                   <button 
                     onClick={() => executeDocumentDeletion(doc.id, doc.storage_path)}
-                    className="text-error hover:text-error-container p-1 rounded hover:bg-error/10"
+                    className="text-error hover:text-error-container p-1 rounded hover:bg-error/10 min-h-[44px] min-w-[44px] flex items-center justify-center"
                   >
                     <span className="material-symbols-outlined text-sm">delete</span>
                   </button>

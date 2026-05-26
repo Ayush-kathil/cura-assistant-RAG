@@ -306,7 +306,7 @@ export const ChatInterface = ({
                         </>
                       )}
                       {msg.role === "user" && isEditingId !== msg.id && generationState === "idle" && (
-                         <button onClick={() => { setIsEditingId(msg.id); setEditValue(msg.content); }} className="absolute -left-12 top-2 p-1.5 min-h-[44px] min-w-[44px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-lg hover:bg-white/10 text-gray-400 hover:text-white">
+                         <button onClick={() => { setIsEditingId(msg.id); setEditValue(msg.content); }} className="absolute -left-12 top-2 p-1.5 min-h-[44px] min-w-[44px] flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity rounded-lg hover:bg-white/10 text-gray-400 hover:text-white">
                             <Settings className="w-4 h-4" />
                          </button>
                       )}
@@ -357,7 +357,7 @@ export const ChatInterface = ({
         </div>
       </div>
 
-      <div className="flex-none p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sticky bottom-0 bg-black/40 backdrop-blur-xl border-t border-[var(--color-border)] z-20 shrink-0">
+      <div className="flex-none p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] fixed md:sticky bottom-0 w-full md:w-auto bg-black/40 backdrop-blur-xl border-t border-[var(--color-border)] z-20 shrink-0">
         <SmartCommandPalette 
            input={input}
            setInput={setInput}
