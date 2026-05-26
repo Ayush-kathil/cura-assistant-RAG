@@ -19,7 +19,7 @@ export default function MobileKnowledgeBase() {
           <h1 className="font-bold text-[17px] text-[#dee2f2] tracking-tight" style={{ fontFamily: 'Geist, sans-serif' }}>Nexus RAG</h1>
         </div>
         <div className="flex items-center gap-3">
-          <button onClick={() => setIsDark(!isDark)} className="text-[#c7c4d7] hover:text-[#4cd7f6] transition-colors">
+          <button onClick={() => setIsDark(!isDark)} className="text-[#c7c4d7] active:text-[#4cd7f6] transition-colors">
             <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: ms }}>{isDark ? 'light_mode' : 'dark_mode'}</span>
           </button>
           <button className="bg-[#c0c1ff] text-[#1000a9] text-[12px] font-semibold px-3 py-1.5 rounded-xl active:scale-95 transition-transform" style={{ fontFamily: 'Geist, sans-serif' }}>
@@ -29,7 +29,7 @@ export default function MobileKnowledgeBase() {
       </header>
 
       {/* Scrollable Content */}
-      <main className="flex-1 overflow-y-auto px-4 py-4 space-y-5">
+      <main className="flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-5">
         {/* Bento Grid */}
         <div className="grid grid-cols-2 gap-3">
           {/* Token Usage */}

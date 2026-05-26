@@ -19,7 +19,7 @@ export default function MobileHome() {
           <span className="font-bold text-[17px] text-[#dee2f2] tracking-tight" style={{ fontFamily: 'Geist, sans-serif' }}>Nexus RAG</span>
         </div>
         <div className="flex items-center gap-3">
-          <button onClick={() => setIsDark(!isDark)} className="text-[#c7c4d7] hover:text-[#4cd7f6] transition-colors">
+          <button onClick={() => setIsDark(!isDark)} className="text-[#c7c4d7] active:text-[#4cd7f6] transition-colors">
             <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: ms }}>{isDark ? 'light_mode' : 'dark_mode'}</span>
           </button>
           <button className="bg-[#c0c1ff] text-[#1000a9] text-[12px] font-semibold px-3 py-1.5 rounded-xl active:scale-95 transition-transform" style={{ fontFamily: 'Geist, sans-serif' }}>
@@ -29,7 +29,7 @@ export default function MobileHome() {
       </header>
 
       {/* Scrollable content */}
-      <main className="flex-1 overflow-y-auto px-4 py-4 space-y-5 pb-2">
+      <main className="flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-5 pb-2">
 
         {/* Hero Section */}
         <section className="relative rounded-2xl overflow-hidden min-h-[200px] flex flex-col justify-center items-center text-center p-5">
@@ -112,7 +112,7 @@ export default function MobileHome() {
               <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: ms }}>history</span>
               Recent Activity
             </h2>
-            <button className="text-[12px] text-[#4cd7f6] hover:underline" style={{ fontFamily: 'Geist, sans-serif' }}>View All</button>
+            <button className="text-[12px] text-[#4cd7f6] active:underline" style={{ fontFamily: 'Geist, sans-serif' }}>View All</button>
           </div>
 
           <div className="space-y-3">

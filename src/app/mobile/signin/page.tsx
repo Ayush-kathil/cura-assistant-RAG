@@ -31,7 +31,7 @@ export default function MobileSignIn() {
       </header>
 
       {/* Main content — flex-1, centered */}
-      <main className="flex-1 overflow-y-auto flex items-center justify-center px-4 py-6 z-10">
+      <main className="flex-1 min-h-0 overflow-y-auto flex items-center justify-center px-4 py-6 z-10">
         {/* Auth Card */}
         <div className="w-full max-w-sm bg-[rgba(14,19,30,0.9)] border border-[#464554]/20 rounded-2xl shadow-2xl p-6 flex flex-col gap-5">
 
@@ -52,7 +52,7 @@ export default function MobileSignIn() {
               <div className="relative flex items-center">
                 <span className="material-symbols-outlined absolute left-3 text-[#908fa0] text-[18px]" style={{ fontVariationSettings: ms }}>mail</span>
                 <input
-                  className="w-full bg-[#171c27] border border-[#464554]/30 rounded-xl py-3 pl-10 pr-4 text-[14px] text-[#dee2f2] focus:outline-none focus:border-[#c0c1ff] transition-all placeholder:text-[#908fa0]/50"
+                  className="w-full bg-[#171c27] border border-[#464554]/30 rounded-xl py-3 pl-10 pr-4 text-base text-[#dee2f2] focus:outline-none focus:border-[#c0c1ff] transition-all placeholder:text-[#908fa0]/50"
                   placeholder="name@company.com"
                   type="email"
                   style={{ fontFamily: 'Inter, sans-serif' }}
@@ -64,12 +64,12 @@ export default function MobileSignIn() {
             <div className="flex flex-col gap-1.5">
               <div className="flex justify-between items-center px-1">
                 <label className="text-[12px] text-[#c7c4d7]" style={{ fontFamily: 'Geist, sans-serif' }}>Password</label>
-                <a className="text-[12px] text-[#c0c1ff] hover:text-[#4cd7f6] transition-colors" href="#" style={{ fontFamily: 'Geist, sans-serif' }}>Forgot Password?</a>
+                <a className="text-[12px] text-[#c0c1ff] active:text-[#4cd7f6] transition-colors" href="#" style={{ fontFamily: 'Geist, sans-serif' }}>Forgot Password?</a>
               </div>
               <div className="relative flex items-center">
                 <span className="material-symbols-outlined absolute left-3 text-[#908fa0] text-[18px]" style={{ fontVariationSettings: ms }}>lock</span>
                 <input
-                  className="w-full bg-[#171c27] border border-[#464554]/30 rounded-xl py-3 pl-10 pr-4 text-[14px] text-[#dee2f2] focus:outline-none focus:border-[#c0c1ff] transition-all placeholder:text-[#908fa0]/50"
+                  className="w-full bg-[#171c27] border border-[#464554]/30 rounded-xl py-3 pl-10 pr-4 text-base text-[#dee2f2] focus:outline-none focus:border-[#c0c1ff] transition-all placeholder:text-[#908fa0]/50"
                   placeholder="••••••••"
                   type="password"
                   style={{ fontFamily: 'Inter, sans-serif' }}
@@ -93,11 +93,11 @@ export default function MobileSignIn() {
 
           {/* Social */}
           <div className="grid grid-cols-2 gap-3">
-            <button className="flex items-center justify-center gap-2 border border-[#464554]/30 rounded-xl py-3 hover:bg-[#252a35] active:scale-95 transition-all text-[#dee2f2] text-[13px]" style={{ fontFamily: 'Geist, sans-serif' }}>
+            <button className="flex items-center justify-center gap-2 border border-[#464554]/30 rounded-xl py-3 active:bg-[#252a35] active:scale-95 transition-all text-[#dee2f2] text-[13px]" style={{ fontFamily: 'Geist, sans-serif' }}>
               <img alt="Google" className="w-4 h-4" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAqr7kdHQJwTdHSOuVtd1jCevCWjkR_aI2FVMjDkTxGrrSbEfcgfy7BSPj6zAXOtWc2wvYqyHnojwD3pDRMl7Muo2e9yMtq2JLXxUhvex3196M8NCo7ay4gsBbgyBzMb_GcKYxLAZjy3HYUvpch0oMXA50ptV5MbITz74ohxIGmyKrVt0fAG9q-GrxSqLjnGqnvqhmGpNuFJnev7tTTcglcjhQiqiiD8Pn6YO4MzoeAH45VxoECUqiFJDMAiOwYpIXXkTxZQ4euiiw" />
               Google
             </button>
-            <button className="flex items-center justify-center gap-2 border border-[#464554]/30 rounded-xl py-3 hover:bg-[#252a35] active:scale-95 transition-all text-[#dee2f2] text-[13px]" style={{ fontFamily: 'Geist, sans-serif' }}>
+            <button className="flex items-center justify-center gap-2 border border-[#464554]/30 rounded-xl py-3 active:bg-[#252a35] active:scale-95 transition-all text-[#dee2f2] text-[13px]" style={{ fontFamily: 'Geist, sans-serif' }}>
               <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
               GitHub
             </button>
@@ -106,7 +106,7 @@ export default function MobileSignIn() {
           {/* Footer */}
           <p className="text-center text-[12px] text-[#c7c4d7]" style={{ fontFamily: 'Inter, sans-serif' }}>
             Don't have an account?{' '}
-            <a className="text-[#c0c1ff] font-bold hover:underline" href="#">Request Access</a>
+            <a className="text-[#c0c1ff] font-bold active:underline" href="#">Request Access</a>
           </p>
         </div>
       </main>
