@@ -31,7 +31,7 @@ export default function Home() {
       <main className="relative pt-32 pb-20 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 relative z-10 flex flex-col md:flex-row items-center gap-12">
           
-          <div className="flex-1 min-w-0 w-full text-center md:text-left flex flex-col items-center md:items-start">
+          <div className="flex-1 min-w-0 w-full text-center md:text-left">
             <motion.div 
               initial={{ opacity: 0, y: 20 }} 
               animate={{ opacity: 1, y: 0 }} 
@@ -59,7 +59,7 @@ export default function Home() {
               initial={{ opacity: 0, y: 20 }} 
               animate={{ opacity: 1, y: 0 }} 
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="text-lg text-slate-600 mb-10 max-w-xl mx-auto md:mx-0 leading-relaxed font-medium"
+              className="text-lg text-slate-600 w-full mb-10 max-w-xl mx-auto md:mx-0 leading-relaxed font-medium break-words"
             >
               Curio is a friendly, intelligent assistant designed to help you organize your life, study smarter, and generate creative ideas in an instant.
             </motion.p>
