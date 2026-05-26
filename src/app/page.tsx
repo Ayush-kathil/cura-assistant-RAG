@@ -59,7 +59,7 @@ export default function Home() {
               initial={{ opacity: 0, y: 20 }} 
               animate={{ opacity: 1, y: 0 }} 
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="text-lg text-slate-600 w-full mb-10 max-w-xl mx-auto md:mx-0 leading-relaxed font-medium break-words"
+              className="text-lg text-slate-600 mb-10 max-w-xl mx-auto md:mx-0 leading-relaxed font-medium"
             >
               Curio is a friendly, intelligent assistant designed to help you organize your life, study smarter, and generate creative ideas in an instant.
             </motion.p>
@@ -80,10 +80,10 @@ export default function Home() {
             initial={{ opacity: 0, scale: 0.9 }} 
             animate={{ opacity: 1, scale: 1 }} 
             transition={{ duration: 1, delay: 0.2 }}
-            className="flex-1 relative flex justify-center items-center"
+            className="flex-1 w-full relative flex justify-center items-center"
           >
-             <div className="absolute w-[300px] h-[300px] bg-blue-400/20 blur-[100px] rounded-full"></div>
-             <img src="/mobile-assets/curio.png" alt="Curio Robot 3D" className="w-[400px] h-[400px] object-contain animate-bounce drop-shadow-2xl relative z-10" style={{ animationDuration: '4s' }} />
+             <div className="absolute w-[80%] max-w-[300px] aspect-square bg-blue-400/20 blur-[100px] rounded-full"></div>
+             <img src="/mobile-assets/curio.png" alt="Curio Robot 3D" className="w-full max-w-[400px] h-auto object-contain animate-bounce drop-shadow-2xl relative z-10" style={{ animationDuration: '4s' }} />
           </motion.div>
 
         </div>
