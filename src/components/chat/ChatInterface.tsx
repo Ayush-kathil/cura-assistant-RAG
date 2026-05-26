@@ -213,7 +213,7 @@ export const ChatInterface = ({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="text-slate-500 max-w-md text-sm mb-10 relative z-10"
+              className="text-slate-500 w-full max-w-md mx-auto text-sm mb-10 relative z-10"
             >
               I can analyze your PDFs, help you brainstorm ideas, write code, or just have a friendly conversation!
             </motion.p>

@@ -96,6 +96,22 @@ export default function WorkspacePage() {
     }
   };
 
+  const handleDeleteDocument = async (docId: string, storagePath: string) => {
+    try {
+      const { error: storageError } = await supabase.storage.from('nexus_docs').remove([storagePath]);
+      if (storageError) console.error("Storage deletion error:", storageError);
+      
+      const { error: dbError } = await supabase.from('documents').delete().eq('id', docId);
+      if (dbError) throw dbError;
+      
+      setDocuments(prev => prev.filter(d => d.id !== docId));
+      setActiveDocumentIds(prev => prev.filter(id => id !== docId));
+    } catch (e) {
+      console.error(e);
+      alert("Failed to delete document");
+    }
+  };
+
   return (
     <div className="bg-slate-50 text-slate-900 font-sans overflow-hidden min-h-[100dvh]">
       
@@ -197,9 +213,12 @@ export default function WorkspacePage() {
 
               <div className="space-y-1">
                 {documents.slice(0, 3).map(doc => (
-                  <div key={doc.id} className="text-slate-600 bg-white border border-slate-100 rounded-xl p-2.5 flex items-center gap-2 text-xs hover:border-slate-200 transition-all shadow-sm">
+                  <div key={doc.id} className="group text-slate-600 bg-white border border-slate-100 rounded-xl p-2.5 flex items-center gap-2 text-xs hover:border-slate-200 transition-all shadow-sm">
                     <span className="material-symbols-outlined text-[16px] text-blue-500">description</span>
                     <span className="truncate flex-1 font-medium">{doc.file_name}</span>
+                    <button onClick={() => handleDeleteDocument(doc.id, doc.storage_path)} className="opacity-0 group-hover:opacity-100 p-1 hover:text-red-500 hover:bg-red-50 rounded transition-all">
+                      <span className="material-symbols-outlined text-[14px]">delete</span>
+                    </button>
                   </div>
                 ))}
                 {documents.length > 3 && (
