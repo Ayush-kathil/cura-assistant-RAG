@@ -188,7 +188,7 @@ export const ChatInterface = ({
          </div>
       )}
 
-      <div ref={parentRef} className="flex-1 overflow-y-auto px-4 md:px-6 pt-20 pb-6 space-y-6 scroll-smooth">
+      <div ref={parentRef} className="flex-1 min-h-0 overflow-y-auto px-4 md:px-6 pt-20 pb-6 max-md:pb-36 space-y-6 scroll-smooth">
         <div style={{ height: `${virtualizer.getTotalSize()}px`, width: '100%', position: 'relative' }}>
           {virtualizer.getVirtualItems().map((virtualItem) => {
             const msg = threadMessages[virtualItem.index];
@@ -305,11 +305,11 @@ export const ChatInterface = ({
                           </div>
                         </>
                       )}
-                      {msg.role === "user" && isEditingId !== msg.id && generationState === "idle" && (
-                         <button onClick={() => { setIsEditingId(msg.id); setEditValue(msg.content); }} className="absolute -left-12 top-2 p-1.5 min-h-[44px] min-w-[44px] flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity rounded-lg hover:bg-white/10 text-gray-400 hover:text-white">
-                            <Settings className="w-4 h-4" />
-                         </button>
-                      )}
+                       {msg.role === "user" && isEditingId !== msg.id && generationState === "idle" && (
+                          <button onClick={() => { setIsEditingId(msg.id); setEditValue(msg.content); }} className="absolute -left-12 top-2 p-1.5 min-h-[44px] min-w-[44px] flex items-center justify-center opacity-100 transition-opacity rounded-lg hover:bg-white/10 text-gray-400 hover:text-white">
+                             <Settings className="w-4 h-4" />
+                          </button>
+                       )}
                      </>
                    );
                  })()}
@@ -357,7 +357,7 @@ export const ChatInterface = ({
         </div>
       </div>
 
-      <div className="flex-none p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] fixed md:sticky bottom-0 w-full md:w-auto bg-black/40 backdrop-blur-xl border-t border-[var(--color-border)] z-20 shrink-0">
+      <div className="flex-none p-4 max-md:fixed max-md:bottom-0 max-md:left-0 max-md:w-full max-md:z-[100] max-md:pb-[max(env(safe-area-inset-bottom),16px)] max-md:bg-surface-container/90 max-md:backdrop-blur-xl md:sticky md:bottom-0 bg-black/40 backdrop-blur-xl border-t border-[var(--color-border)] shrink-0">
         <SmartCommandPalette 
            input={input}
            setInput={setInput}

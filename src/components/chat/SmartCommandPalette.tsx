@@ -160,7 +160,7 @@ export const SmartCommandPalette = ({
               onKeyDown={handleKeyDown}
               placeholder="Ask a question... (Type '/' for personas, '@' for docs)" 
               disabled={generationState !== "idle"} 
-              className="w-full bg-transparent py-4 pl-6 pr-16 text-white placeholder:text-gray-500 focus:outline-none focus:ring-0 focus:border-transparent border-transparent transition-all disabled:opacity-50 relative z-10 font-medium" 
+              className="w-full bg-transparent py-4 pl-6 pr-16 text-base text-white placeholder:text-gray-500 focus:outline-none focus:ring-0 focus:border-transparent border-transparent transition-all disabled:opacity-50 relative z-10 font-medium" 
             />
             <button type="submit" disabled={!input.trim() || generationState !== "idle"} className="absolute right-2 p-3 min-h-[44px] min-w-[44px] flex items-center justify-center bg-[var(--color-accent)] hover:bg-blue-400 disabled:bg-white/10 disabled:text-gray-500 text-white rounded-xl transition-all z-20 shadow-lg cursor-pointer">
               <Send className="w-5 h-5 ml-0.5" />
