@@ -28,8 +28,8 @@ export default function Home() {
       </nav>
 
       {/* Hero Section */}
-      <main className="relative pt-32 pb-20 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 relative z-10 flex flex-col md:flex-row items-center gap-12">
+      <main className="relative pt-24 pb-12 md:pt-32 md:pb-20 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 flex flex-col md:flex-row items-center gap-8 md:gap-12">
           
           <div className="flex-1 min-w-0 w-full text-center md:text-left">
             <motion.div 
@@ -49,7 +49,7 @@ export default function Home() {
               initial={{ opacity: 0, y: 20 }} 
               animate={{ opacity: 1, y: 0 }} 
               transition={{ duration: 0.8, delay: 0.1 }}
-              className="text-5xl md:text-7xl font-bold tracking-tight mb-6 text-slate-900"
+              className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight mb-4 md:mb-6 text-slate-900"
               style={{ fontFamily: 'Geist, sans-serif' }}
             >
               Say hello to <span className="text-blue-500">Curio.</span>
@@ -75,8 +75,8 @@ export default function Home() {
             transition={{ duration: 1, delay: 0.2 }}
             className="flex-1 w-full relative flex justify-center items-center"
           >
-             <div className="absolute w-[80%] max-w-[300px] aspect-square bg-blue-400/20 blur-[100px] rounded-full"></div>
-             <img src="/mobile-assets/curio.png" alt="Curio Robot 3D" className="w-full max-w-[400px] aspect-square object-cover rounded-full bg-slate-100 border-4 border-white shadow-2xl animate-bounce relative z-10" style={{ animationDuration: '4s' }} />
+             <div className="absolute w-[80%] max-w-[250px] md:max-w-[300px] aspect-square bg-blue-400/20 blur-[100px] rounded-full"></div>
+             <img src="/mobile-assets/curio.png" alt="Curio Robot 3D" className="w-full max-w-[280px] md:max-w-[400px] aspect-square object-cover rounded-full bg-slate-100 border-4 border-white shadow-2xl animate-bounce relative z-10" style={{ animationDuration: '4s' }} />
           </motion.div>
 
         </div>
@@ -84,10 +84,10 @@ export default function Home() {
 
       {/* Features Section */}
       <section id="features" className="py-24 bg-white relative">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-12 md:mb-16">
             <h2 className="text-3xl md:text-5xl font-bold mb-4 text-slate-900 tracking-tight">Everything you need.</h2>
-            <p className="text-slate-500 max-w-2xl mx-auto font-medium">Curio combines powerful AI with a beautiful, friendly interface that works perfectly across all your devices.</p>
+            <p className="text-slate-500 max-w-2xl mx-auto font-medium px-4">Curio combines powerful AI with a beautiful, friendly interface that works perfectly across all your devices.</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">

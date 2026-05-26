@@ -110,11 +110,11 @@ export default function LoginPage() {
           <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-50 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '1s' }}></div>
         </div>
 
-        <div className="w-full max-w-[440px] relative z-10 px-4 sm:px-0">
-          <div className="bg-white rounded-3xl p-8 sm:p-10 shadow-[0_10px_40px_rgba(0,0,0,0.05)] border border-slate-100 flex flex-col gap-6">
+        <div className="w-full max-w-[440px] relative z-10 px-4 sm:px-0 mx-4 sm:mx-0">
+          <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-[0_10px_40px_rgba(0,0,0,0.05)] border border-slate-100 flex flex-col gap-6">
             
             <div className="flex flex-col gap-2 text-center mb-4">
-              <h2 className="text-3xl font-bold text-slate-900 tracking-tight">
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
                 Welcome back
               </h2>
               <p className="text-sm text-slate-500 font-medium">
