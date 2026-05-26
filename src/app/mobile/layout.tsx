@@ -23,7 +23,7 @@ export default function MobileLayout({ children }: { children: React.ReactNode }
         href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Inter:wght@100..900&family=JetBrains+Mono:wght@100..800&display=swap"
         rel="stylesheet"
       />
-      <div className="w-full h-[100dvh] sm:max-w-sm sm:h-[844px] sm:rounded-[40px] sm:shadow-2xl sm:shadow-black/60 overflow-hidden bg-[#0e131e] relative flex flex-col">
+      <div className="w-full h-full sm:max-w-sm sm:h-[844px] sm:rounded-[40px] sm:shadow-2xl sm:shadow-black/60 overflow-hidden bg-[#0e131e] relative flex flex-col">
         {children}
       </div>
     </div>

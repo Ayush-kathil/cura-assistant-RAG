@@ -147,7 +147,7 @@ export default function MobileKnowledgeBase() {
       </div>
 
       {/* Bottom Nav */}
-      <nav className="shrink-0 bg-[#303541] border-t border-[#464554]/30 flex justify-around items-center h-14 px-4">
+      <nav className="shrink-0 bg-[#303541] border-t border-[#464554]/30 flex justify-around items-center min-h-[56px] pb-[env(safe-area-inset-bottom)] px-4">
         <Link href="/mobile/chatbot" className="flex flex-col items-center justify-center text-[#c7c4d7]">
           <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: ms }}>chat</span>
           <span className="text-[11px]" style={{ fontFamily: 'Geist, sans-serif' }}>Chat</span>

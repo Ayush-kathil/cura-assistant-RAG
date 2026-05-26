@@ -249,7 +249,7 @@ export default function MobileChatbot() {
         {isStreaming && <LiveStreamBubble streamBuffer={streamBuffer} />}
       </div>
 
-      <div className="shrink-0 flex flex-col bg-[rgba(14,19,30,0.97)] border-t border-[#464554]/20 pb-[max(env(safe-area-inset-bottom),12px)]">
+      <div className="shrink-0 flex flex-col bg-[rgba(14,19,30,0.97)] border-t border-[#464554]/20 pb-3">
         <div className="flex items-center gap-2 overflow-x-auto px-3 pt-2 pb-1" style={{ scrollbarWidth: 'none' }}>
           <button className="flex items-center gap-1 bg-[#252a35] border border-[#464554]/30 px-2.5 py-1 rounded-full whitespace-nowrap text-[#c7c4d7] active:scale-95 transition-transform text-[12px]" style={{ fontFamily: 'Geist, sans-serif' }}>
             <span className="material-symbols-outlined text-[14px]" style={{ fontVariationSettings: ICON_BASE }}>psychology</span>
@@ -291,7 +291,7 @@ export default function MobileChatbot() {
         </div>
       </div>
 
-      <nav className="shrink-0 bg-[#303541] border-t border-[#464554]/30 flex justify-around items-center h-14 px-4">
+      <nav className="shrink-0 bg-[#303541] border-t border-[#464554]/30 flex justify-around items-center min-h-[56px] pb-[env(safe-area-inset-bottom)] px-4">
         <div className="flex flex-col items-center justify-center text-[#4cd7f6] bg-[rgba(76,215,246,0.1)] rounded-xl px-4 py-1">
           <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: ICON_FILLED }}>chat</span>
           <span className="text-[11px]" style={{ fontFamily: 'Geist, sans-serif' }}>Chat</span>
