@@ -16,6 +16,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Curio | AI Assistant",
   description: "Premium RAG Chatbot Application",
+  manifest: "/manifest.json"
 };
 
 export default function RootLayout({

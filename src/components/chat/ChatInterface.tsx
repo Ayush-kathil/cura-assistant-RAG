@@ -353,10 +353,17 @@ export const ChatInterface = ({
                           {/* Premium Action Footer */}
                           <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
                             <div className="flex items-center gap-4">
-                              <button className="flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-blue-500 transition-colors uppercase tracking-wider">
+                              <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); navigator.clipboard.writeText(typeof displayContent === 'string' ? displayContent : ''); }} className="flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-blue-500 transition-colors uppercase tracking-wider z-10 relative">
                                 <Copy className="w-4 h-4" /> Copy
                               </button>
-                              <button className="flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-blue-500 transition-colors uppercase tracking-wider">
+                              <button onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                const parentMsg = threadMessages.find(m => m.id === msg.parentId);
+                                if (parentMsg && typeof parentMsg.content === 'string') {
+                                  onSendMessage(parentMsg.content, parentMsg.parentId, true);
+                                }
+                              }} className="flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-blue-500 transition-colors uppercase tracking-wider z-10 relative">
                                 <RefreshCw className="w-4 h-4" /> Regenerate
                               </button>
                             </div>

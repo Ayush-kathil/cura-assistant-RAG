@@ -113,11 +113,9 @@ export const generateStreamingResponse = async (
     done = doneReading;
     if (value) {
       const chunkText = decoder.decode(value, { stream: true });
-      const words = chunkText.split(/(\s+)/); // keep spaces
-      for (const word of words) {
-        if (word) {
-          onChunk(word);
-        }
+      for (const char of chunkText) {
+        onChunk(char);
+        await new Promise(r => setTimeout(r, 2));
       }
     }
   }

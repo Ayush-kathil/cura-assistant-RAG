@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Send, Loader2, User, FileText } from "lucide-react";
 import clsx from "clsx";
 import { ChatDocument, Message } from "@/lib/storage";
-import { DinoGame } from "./DinoGame";
 
 interface SmartCommandPaletteProps {
   input: string;
@@ -38,7 +37,6 @@ export const SmartCommandPalette = ({
   const [filterText, setFilterText] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [modelMenuOpen, setModelMenuOpen] = useState(false);
-  const [showGame, setShowGame] = useState(true);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const estimatedTokens = input.length / 4;
@@ -87,15 +85,6 @@ export const SmartCommandPalette = ({
 
   return (
     <div className="relative w-full flex flex-col items-center">
-      {/* Dino Game overlay */}
-      {showGame && generationState !== "idle" && (
-        <div className="absolute -top-[160px] left-1/2 -translate-x-1/2 z-50">
-          <div className="relative">
-            <button onClick={() => setShowGame(false)} className="absolute -top-4 -right-4 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-[10px] font-bold z-50 transition-colors shadow-lg">X</button>
-            <DinoGame isActive={true} />
-          </div>
-        </div>
-      )}
 
       <AnimatePresence>
         {showMenu && (
