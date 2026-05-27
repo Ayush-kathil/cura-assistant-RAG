@@ -36,7 +36,7 @@ export default function ProfilePage() {
       // Calculate total storage by fetching documents
       const { data: docs } = await supabase.from('documents').select('file_size_bytes').eq('user_id', user.id);
       if (docs) {
-        const total = docs.reduce((acc, doc) => acc + (doc.file_size_bytes || 0), 0);
+        const total = docs.reduce((acc: number, doc: any) => acc + (doc.file_size_bytes || 0), 0);
         setTotalStorageBytes(total);
       }
       setLoading(false);
