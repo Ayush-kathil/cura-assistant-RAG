@@ -178,7 +178,7 @@ export default function WorkspacePage() {
                   <div key={doc.id} className="group text-slate-600 bg-white border border-slate-100 rounded-xl p-2.5 flex items-center gap-2 text-xs hover:border-slate-200 transition-all shadow-sm">
                     <span className="material-symbols-outlined text-[16px] text-blue-500">description</span>
                     <span className="truncate flex-1 font-medium">{doc.file_name}</span>
-                    <button onClick={() => handleDeleteDocument(doc.id, doc.storage_path)} className="opacity-0 group-hover:opacity-100 p-1 hover:text-red-500 hover:bg-red-50 rounded transition-all">
+                    <button onClick={() => handleDeleteDocument(doc.id, doc.storage_path)} className="opacity-100 md:opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-all">
                       <span className="material-symbols-outlined text-[14px]">delete</span>
                     </button>
                   </div>
@@ -208,7 +208,7 @@ export default function WorkspacePage() {
                         <span className="material-symbols-outlined text-[16px]">chat</span>
                         <span className="text-xs truncate font-medium">{session.title}</span>
                       </div>
-                      <button onClick={(e) => { e.stopPropagation(); deleteChatSession(session.id); }} className="opacity-0 group-hover:opacity-100 p-1 hover:text-red-500 hover:bg-red-50 rounded transition-all">
+                      <button onClick={(e) => { e.stopPropagation(); deleteChatSession(session.id); }} className="opacity-100 md:opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-all">
                         <span className="material-symbols-outlined text-[14px]">delete</span>
                       </button>
                     </div>

@@ -214,7 +214,7 @@ export const ChatInterface = ({
               transition={{ duration: 0.6, type: "spring" }}
               src="/mobile-assets/curio.png" 
               alt="Curio AI" 
-              className="w-24 h-24 object-cover rounded-full bg-slate-100 border border-slate-200 shadow-md p-2 mb-6 relative z-10"
+              className="w-24 h-24 object-cover mt-12 mb-6 relative z-10"
               style={{ animation: 'bounce 3s infinite' }}
             />
             <motion.h2 
