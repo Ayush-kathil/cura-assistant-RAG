@@ -5,17 +5,15 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { ChatInterface } from "@/components/chat/ChatInterface";
 import { useChatSession } from "@/hooks/useChatSession";
-import { MobileCurioHome } from "@/components/chat/MobileCurioHome";
-import { MobileCurioChat } from "@/components/chat/MobileCurioChat";
 import { UserDashboard } from "@/components/dashboard/UserDashboard";
+import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function WorkspacePage() {
   const router = useRouter();
   const supabase = createClient();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [mobileView, setMobileView] = useState<'home' | 'chat' | 'kb'>('home');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isDashboardOpen, setIsDashboardOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -47,12 +45,7 @@ export default function WorkspacePage() {
     router.push('/login');
   };
 
-  const handleStartMobileChat = (initialMessage?: string) => {
-    setMobileView('chat');
-    if (initialMessage) {
-      sendMessage(initialMessage);
-    }
-  };
+
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -116,51 +109,18 @@ export default function WorkspacePage() {
 
   return (
     <div className="bg-slate-50 text-slate-900 font-sans overflow-hidden min-h-[100dvh]">
-      
-      {/* --- MOBILE VIEW --- */}
-      <div className="md:hidden h-full flex flex-col">
-        {mobileView === 'home' && (
-          <MobileCurioHome 
-            userEmail={userEmail} 
-            onNavigate={setMobileView} 
-            onStartChat={handleStartMobileChat} 
-          />
-        )}
-        {mobileView === 'chat' && (
-          <MobileCurioChat 
-            messages={messages} 
-            userEmail={userEmail} 
-            generationState={generationState}
-            onNavigate={setMobileView} 
-            onSendMessage={(msg) => sendMessage(msg, currentLeafId)} 
-          />
-        )}
-        {mobileView === 'kb' && (
-          <div className="flex flex-col h-full bg-white p-6">
-            <header className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold">Knowledge Base</h2>
-              <button onClick={() => setMobileView('home')} className="p-2">
-                <span className="material-symbols-outlined">close</span>
-              </button>
-            </header>
-            <div className="flex-1 overflow-y-auto">
-              <p className="text-slate-500 mb-4 text-sm">Upload documents to allow Curio to answer questions based on your data.</p>
-              {documents.map(doc => (
-                <div key={doc.id} className="flex justify-between items-center p-3 border border-slate-100 rounded-xl mb-2 shadow-sm">
-                  <span className="text-sm font-medium truncate">{doc.file_name}</span>
-                </div>
-              ))}
-              {documents.length === 0 && <p className="text-sm text-slate-400 italic">No documents uploaded yet.</p>}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* --- DESKTOP VIEW --- */}
-      <div className="hidden md:flex h-[100dvh] overflow-hidden p-2 gap-2 relative bg-slate-100">
+      <div className="flex h-[100dvh] overflow-hidden md:p-2 md:gap-2 relative bg-slate-100">
         
+        {/* Overlay for mobile sidebar */}
+        {isSidebarOpen && (
+          <div 
+            className="md:hidden absolute inset-0 bg-slate-900/20 z-30 backdrop-blur-sm transition-opacity"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
+
         {/* Left Sidebar */}
-        <aside className="bg-white border border-slate-200 relative h-full w-[280px] z-40 flex flex-col py-6 overflow-hidden rounded-3xl shadow-sm">
+        <aside className={`bg-white border-r md:border border-slate-200 absolute md:relative h-full w-[280px] z-40 flex flex-col py-6 overflow-hidden md:rounded-3xl shadow-sm transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
           <div className="px-6 mb-6">
             <div className="flex items-center gap-3 bg-blue-50 p-3 rounded-xl border border-blue-100">
               <div className="w-8 h-8 rounded bg-blue-500 flex items-center justify-center text-white font-bold">C</div>
@@ -172,7 +132,7 @@ export default function WorkspacePage() {
           </div>
 
           <div className="px-6 mb-4">
-            <button onClick={clearChat} className="w-full flex items-center justify-center gap-2 bg-blue-500 text-white font-bold text-sm py-3 rounded-2xl active:scale-95 transition-all hover:bg-blue-600 shadow-md">
+            <button onClick={() => { clearChat(); setIsSidebarOpen(false); }} className="w-full flex items-center justify-center gap-2 bg-blue-500 text-white font-bold text-sm py-3 rounded-2xl active:scale-95 transition-all hover:bg-blue-600 shadow-md">
               <span className="material-symbols-outlined text-[18px]">add_comment</span>
               New Chat
             </button>
@@ -243,7 +203,7 @@ export default function WorkspacePage() {
                   </div>
                 ) : (
                   chatSessions.map(session => (
-                    <div key={session.id} onClick={() => loadChatSession(session.id)} className={`text-slate-600 hover:bg-slate-50 rounded-2xl p-2.5 flex items-center justify-between cursor-pointer transition-all group ${currentSessionId === session.id ? 'bg-blue-50 text-blue-700 font-medium' : ''}`}>
+                    <div key={session.id} onClick={() => { loadChatSession(session.id); setIsSidebarOpen(false); }} className={`text-slate-600 hover:bg-slate-50 rounded-2xl p-2.5 flex items-center justify-between cursor-pointer transition-all group ${currentSessionId === session.id ? 'bg-blue-50 text-blue-700 font-medium' : ''}`}>
                       <div className="flex items-center gap-2 overflow-hidden">
                         <span className="material-symbols-outlined text-[16px]">chat</span>
                         <span className="text-xs truncate font-medium">{session.title}</span>
@@ -266,11 +226,18 @@ export default function WorkspacePage() {
         </aside>
 
         {/* Main Chat Area */}
-        <main className="flex-1 flex flex-col relative bg-[#FAFCFF] min-w-0 rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-          <header className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-white/80 backdrop-blur-md sticky top-0 z-30">
-            <div className="flex items-center gap-4">
+        <main className="flex-1 flex flex-col relative bg-[#FAFCFF] min-w-0 md:rounded-3xl md:border border-slate-200 shadow-sm overflow-hidden">
+          <header className="flex items-center justify-between px-4 md:px-6 py-3 md:py-4 border-b border-slate-200 bg-white/80 backdrop-blur-md sticky top-0 z-20">
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={() => setIsSidebarOpen(true)}
+                className="md:hidden p-2 -ml-2 rounded-lg hover:bg-slate-100 text-slate-600"
+              >
+                <Menu className="w-5 h-5" />
+              </button>
               <h2 className="text-lg font-bold tracking-tight text-slate-900 flex items-center gap-2">
-                <img src="/mobile-assets/curio.png" className="w-8 h-8 object-cover rounded-full bg-slate-100 border border-slate-200 shadow-sm p-0.5" /> Curio AI
+                <img src="/mobile-assets/curio.png" className="w-8 h-8 object-cover rounded-full bg-slate-100 border border-slate-200 shadow-sm p-0.5" /> 
+                <span className="hidden sm:inline">Curio AI</span>
               </h2>
             </div>
             <div className="flex items-center gap-4">
