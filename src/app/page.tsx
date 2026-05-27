@@ -76,7 +76,7 @@ export default function Home() {
             className="flex-1 w-full relative flex justify-center items-center"
           >
              <div className="absolute w-[80%] max-w-[250px] md:max-w-[300px] aspect-square bg-blue-400/20 blur-[100px] rounded-full"></div>
-             <img src="/mobile-assets/curio.png" alt="Curio Robot 3D" className="w-full max-w-[280px] md:max-w-[400px] aspect-square object-cover rounded-full bg-slate-100 border-4 border-white shadow-2xl animate-bounce relative z-10" style={{ animationDuration: '4s' }} />
+             <img src="/mobile-assets/curio.png" alt="Curio Robot 3D" className="w-full max-w-[280px] md:max-w-[400px] aspect-square object-cover mt-8 md:mt-0 animate-bounce relative z-10" style={{ animationDuration: '4s' }} />
           </motion.div>
 
         </div>
