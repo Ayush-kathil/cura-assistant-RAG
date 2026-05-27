@@ -119,7 +119,7 @@ export const SmartCommandPalette = ({
               <div className="space-y-1 max-h-48 overflow-y-auto">
                 <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider px-2 py-1">Scope Document</p>
                 {filteredDocs.map(d => (
-                  <button key={d.id} onClick={() => { onSetScopedDocument(d.id); handleSelect("doc", d.id, d.filename); }} className="w-full text-left px-3 py-2 text-sm text-gray-200 hover:bg-white/10 rounded-lg flex items-center gap-2">
+                  <button key={d.id} onClick={() => { onSetScopedDocument(d.id); handleSelect("doc", d.id, d.filename); }} className="w-full text-left px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 rounded-lg flex items-center gap-2">
                     <span className="text-blue-400">@</span>{d.filename}
                   </button>
                 ))}

@@ -192,7 +192,7 @@ export const ChatInterface = ({
   };
 
   return (
-    <motion.div layout className="flex flex-col w-full h-[100dvh] lg:h-full lg:rounded-3xl lg:border border-slate-200 bg-[#FAFCFF] shadow-2xl relative overflow-hidden">
+    <motion.div layout className="flex flex-col w-full h-full rounded-3xl border border-slate-200 bg-[#FAFCFF] shadow-2xl relative overflow-hidden">
       {threadMessages.length > 2 && (
          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 bg-white/80 backdrop-blur-md border border-slate-200 shadow-sm px-4 py-1.5 rounded-full flex gap-2 overflow-x-auto max-w-sm hide-scrollbar items-center">
             {threadMessages.filter(m => m.role === 'user').map((m, i) => (
@@ -204,7 +204,7 @@ export const ChatInterface = ({
          </div>
       )}
 
-      <div ref={parentRef} className="flex-1 min-h-0 overflow-y-auto px-4 md:px-6 pt-20 pb-6 max-md:pb-36 space-y-6 scroll-smooth custom-scrollbar">
+      <div ref={parentRef} className="flex-1 min-h-0 overflow-y-auto px-4 md:px-6 pt-20 pb-6 space-y-6 scroll-smooth custom-scrollbar">
         {threadMessages.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center px-4 relative">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-blue-100 rounded-full blur-[100px] pointer-events-none opacity-50"></div>
@@ -420,7 +420,7 @@ export const ChatInterface = ({
         )}
       </div>
 
-      <div className="flex-none p-4 max-md:fixed max-md:bottom-0 max-md:left-0 max-md:w-full max-md:z-[100] max-md:pb-[max(env(safe-area-inset-bottom),16px)] max-md:bg-white/90 max-md:backdrop-blur-xl md:sticky md:bottom-0 md:z-50 bg-white/80 backdrop-blur-xl border-t border-slate-200 shrink-0">
+      <div className="flex-none p-4 sticky bottom-0 z-50 bg-white/80 backdrop-blur-xl border-t border-slate-200 shrink-0">
         <SmartCommandPalette 
            input={input}
            setInput={setInput}
