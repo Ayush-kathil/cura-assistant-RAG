@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { ChatInterface } from "@/components/chat/ChatInterface";
 import { useChatSession } from "@/hooks/useChatSession";
-import { UserDashboard } from "@/components/dashboard/UserDashboard";
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -14,7 +13,6 @@ export default function WorkspacePage() {
   const router = useRouter();
   const supabase = createClient();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isDashboardOpen, setIsDashboardOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -245,7 +243,7 @@ export default function WorkspacePage() {
                 <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
                 <span className="font-bold text-[11px] uppercase tracking-wider">{documents.length} Docs Indexed</span>
               </div>
-              <div onClick={() => setIsDashboardOpen(true)} className="w-9 h-9 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold shadow-sm cursor-pointer hover:bg-blue-600 transition-colors">
+              <div onClick={() => router.push('/workspace/profile')} className="w-9 h-9 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold shadow-sm cursor-pointer hover:bg-blue-600 transition-colors">
                 {userEmail?.[0]?.toUpperCase() || "U"}
               </div>
             </div>
@@ -275,14 +273,6 @@ export default function WorkspacePage() {
           </div>
         </main>
       </div>
-
-      <UserDashboard 
-        isOpen={isDashboardOpen} 
-        onClose={() => setIsDashboardOpen(false)} 
-        userEmail={userEmail}
-        totalStorageBytes={documents.reduce((acc, doc) => acc + (doc.file_size_bytes || 0), 0)}
-        onLogout={handleLogout}
-      />
 
     </div>
   );
