@@ -1,4 +1,4 @@
-// vectorStore and ScoredChunk removed
+import { VectorStoreData, ScoredChunk } from "./vectorStore";
 
 export interface Message {
   id: string;
@@ -6,7 +6,7 @@ export interface Message {
   childrenIds: string[];
   role: "user" | "assistant";
   content: string;
-  sources?: any[];
+  sources?: ScoredChunk[];
   isWelcome?: boolean;
   orchestrationPath?: string[];
   telemetry?: { vectorSearchMs?: number; rerankerMs?: number; ttftMs?: number; };
@@ -26,7 +26,7 @@ export interface ChatSession {
   createdAt: number;
   documents: ChatDocument[];
   activeDocumentIds: string[];
-  vectorStore?: any;
+  vectorStore: VectorStoreData;
   messages: Message[];
   currentLeafId: string | null;
   devModeEnabled?: boolean;
@@ -44,7 +44,7 @@ export const saveSessions = (sessions: ChatSession[], isTracePrivacyEnabled: boo
   if (typeof window === "undefined" || isTracePrivacyEnabled) return;
   const strippedSessions = sessions.map(session => ({
     ...session,
-    vectorStore: undefined
+    vectorStore: { parents: [], children: [] }
   }));
   localStorage.setItem(STORAGE_KEY, JSON.stringify(strippedSessions));
 };
@@ -56,7 +56,7 @@ export const createSession = (name: string = "New Chat"): ChatSession => {
     createdAt: Date.now(),
     documents: [],
     activeDocumentIds: [],
-    vectorStore: undefined,
+    vectorStore: { parents: [], children: [] },
     messages: [],
     currentLeafId: null,
     devModeEnabled: false

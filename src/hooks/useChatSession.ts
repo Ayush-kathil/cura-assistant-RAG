@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { Message } from "@/lib/storage";
 import { GenerationState } from "@/components/chat/ChatInterface";
+import { generateStreamingResponse, generateEmbedding, generateEmbeddingsBatch } from "@/lib/gemini";
+import { VectorStoreData, chunkText, hybridSearchVectorStore } from "@/lib/vectorStore";
 
 export interface DocumentItem {
   id: string;
@@ -20,7 +22,7 @@ export function useChatSession() {
   const [currentLeafId, setCurrentLeafId] = useState<string | null>(null);
   const [activeDocumentIds, setActiveDocumentIds] = useState<string[]>([]);
   const [personaInstruction, setPersonaInstruction] = useState<string>("");
-
+  const [vectorStore, setVectorStore] = useState<VectorStoreData>({ parents: [], children: [] });
   const [chatSessions, setChatSessions] = useState<any[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string>("");
@@ -125,37 +127,72 @@ export function useChatSession() {
     }
 
     setGenerationState("synthesizing");
+    let contextChunks: any[] = [];
+    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || "";
+
+    if (activeDocumentIds.length > 0) {
+      const docsToIndex = documents.filter(d => activeDocumentIds.includes(d.id) && !vectorStore.parents.some(p => p.documentId === d.id));
+      if (docsToIndex.length > 0) {
+        let newParents = [...vectorStore.parents];
+        let newChildren = [...vectorStore.children];
+        for (const doc of docsToIndex) {
+          try {
+            let extractedChunks = doc.chunks && doc.chunks.length > 0 ? doc.chunks : null;
+            if (!extractedChunks) {
+              const { data, error } = await supabase.storage.from('nexus_docs').download(doc.storage_path);
+              if (!error && data) {
+                let fullText = "";
+                if (doc.file_name.toLowerCase().endsWith('.pdf')) {
+                  const arrayBuffer = await data.arrayBuffer();
+                  const pdfjsLib = await import("pdfjs-dist");
+                  pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
+                  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                  for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const textContent = await page.getTextContent();
+                    fullText += textContent.items.map((item: any) => item.str + (item.hasEOL ? '\n' : '')).join("") + "\n";
+                  }
+                } else {
+                  fullText = await data.text();
+                }
+                if (fullText.trim()) extractedChunks = chunkText(fullText);
+              }
+            }
+            if (extractedChunks) {
+              const parentChunks = extractedChunks.map((text: string, i: number) => ({ id: crypto.randomUUID(), documentId: doc.id, filename: doc.file_name, text, chunkIndex: i }));
+              const embeddings = await generateEmbeddingsBatch(extractedChunks, apiKey);
+              const childChunks = extractedChunks.map((text: string, i: number) => ({ id: crypto.randomUUID(), parentId: parentChunks[i].id, documentId: doc.id, filename: doc.file_name, text, embedding: embeddings[i], chunkIndex: i }));
+              newParents = [...newParents, ...parentChunks];
+              newChildren = [...newChildren, ...childChunks];
+            }
+          } catch (e) {
+             console.error(e);
+          }
+        }
+        const newStore = { parents: newParents, children: newChildren };
+        setVectorStore(newStore);
+        try {
+          const queryEmbedding = await generateEmbedding(msg, apiKey);
+          contextChunks = hybridSearchVectorStore(msg, queryEmbedding, newStore, activeDocumentIds, 3);
+        } catch (e) {}
+      } else {
+        try {
+          const queryEmbedding = await generateEmbedding(msg, apiKey);
+          contextChunks = hybridSearchVectorStore(msg, queryEmbedding, vectorStore, activeDocumentIds, 3);
+        } catch (e) {}
+      }
+    }
+
     let finalAssistantText = "";
-
     try {
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
-      const response = await fetch(`${backendUrl}/query`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          query: msg,
-          top_k: 5,
-          active_document_ids: activeDocumentIds,
-          model: selectedModel
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to query documents");
-      }
-
-      const data = await response.json();
-      finalAssistantText = data.answer;
-
-      // Format citations if any
-      if (data.citations && data.citations.length > 0) {
-         finalAssistantText += "\n\n**Sources:**\n";
-         data.citations.forEach((cit: any, idx: number) => {
-            finalAssistantText += `[${idx + 1}] ${cit.document_name} - Page ${cit.page_number} (${cit.section})\n`;
-         });
-      }
-
-      setMessages(prev => prev.map(m => m.id === botMsgId ? { ...m, content: finalAssistantText } : m));
+      await generateStreamingResponse(
+        msg, contextChunks, "no-doc", apiKey, 
+        (text) => {
+          finalAssistantText += text;
+          setMessages(prev => prev.map(m => m.id === botMsgId ? { ...m, content: m.content + text } : m));
+        },
+        personaInstruction, selectedModel
+      );
     } catch (err: any) {
       finalAssistantText += `\n\n**Error:** ${err.message}`;
       setMessages(prev => prev.map(m => m.id === botMsgId ? { ...m, content: m.content + `\n\n**Error:** ${err.message}` } : m));

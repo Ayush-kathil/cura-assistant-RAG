@@ -7,7 +7,7 @@ import clsx from "clsx";
 import ReactMarkdown from "react-markdown";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import * as Popover from "@radix-ui/react-popover";
-// ScoredChunk removed
+import { ScoredChunk } from "@/lib/vectorStore";
 import { ChatDocument, Message } from "@/lib/storage";
 import { SmartCommandPalette } from "./SmartCommandPalette";
 
