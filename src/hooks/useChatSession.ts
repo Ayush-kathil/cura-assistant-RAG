@@ -150,7 +150,7 @@ export function useChatSession() {
                   for (let i = 1; i <= pdf.numPages; i++) {
                     const page = await pdf.getPage(i);
                     const textContent = await page.getTextContent();
-                    fullText += textContent.items.map((item: any) => item.str).join(" ") + "\n";
+                    fullText += textContent.items.map((item: any) => item.str + (item.hasEOL ? '\n' : '')).join("") + "\n";
                   }
                 } else {
                   fullText = await data.text();

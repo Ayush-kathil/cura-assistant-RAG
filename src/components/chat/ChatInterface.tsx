@@ -274,13 +274,15 @@ export const ChatInterface = ({
                        </details>
                     )}
 
-                    <div className={clsx("group relative p-3 sm:p-4 rounded-2xl text-[14px] leading-relaxed font-medium transition-all duration-500", msg.role === "user" ? "bg-[#EBF3FF] text-slate-800 rounded-br-none" : "text-slate-800 shadow-sm flex flex-col rounded-bl-none")}>
-                      {msg.role === "assistant" && (
+                    <div className={clsx("group relative p-3 sm:p-4 rounded-2xl text-[14px] leading-relaxed font-medium transition-all duration-500", msg.role === "user" ? "bg-[#EBF3FF] text-slate-800 rounded-br-none" : "bg-white text-slate-800 shadow-sm flex flex-col rounded-bl-none")}>
+                      {msg.role === "assistant" && generationState !== "idle" && virtualItem.index === threadMessages.length - 1 ? (
                         <div className="absolute inset-0 z-0 rounded-2xl rounded-bl-none overflow-hidden" style={{ padding: '1.5px' }}>
                            <div className="absolute inset-[-150%] animate-[spin_4s_linear_infinite] bg-[conic-gradient(from_0deg,transparent_0_280deg,rgba(59,130,246,0.6)_360deg)]" />
                            <div className="absolute inset-[1.5px] bg-white rounded-2xl rounded-bl-none" />
                         </div>
-                      )}
+                      ) : msg.role === "assistant" ? (
+                        <div className="absolute inset-0 z-0 rounded-2xl rounded-bl-none border border-slate-200 pointer-events-none" />
+                      ) : null}
                       <div className="relative z-10 flex flex-col w-full h-full">
                       {(() => {
                         let displayContent = msg.content;

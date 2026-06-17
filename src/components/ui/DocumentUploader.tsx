@@ -42,7 +42,7 @@ export const DocumentUploader = ({ onDocumentsProcessed, isProcessing }: Documen
           for (let i = 1; i <= pdf.numPages; i++) {
             const page = await pdf.getPage(i);
             const textContent = await page.getTextContent();
-            const pageText = textContent.items.map((item: any) => item.str).join(" ");
+            const pageText = textContent.items.map((item: any) => item.str + (item.hasEOL ? '\n' : '')).join("");
             fullText += pageText + "\n";
           }
           extractedText = fullText;
