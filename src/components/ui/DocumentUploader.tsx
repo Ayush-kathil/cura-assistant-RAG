@@ -34,7 +34,8 @@ export const DocumentUploader = ({ onDocumentsProcessed, isProcessing }: Documen
         const formData = new FormData();
         formData.append("file", file);
 
-        const response = await fetch("http://localhost:8000/upload", {
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+        const response = await fetch(`${backendUrl}/upload`, {
           method: "POST",
           body: formData,
         });
