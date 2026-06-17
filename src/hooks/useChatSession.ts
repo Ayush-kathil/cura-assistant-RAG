@@ -20,9 +20,7 @@ export function useChatSession() {
   const [currentLeafId, setCurrentLeafId] = useState<string | null>(null);
   const [activeDocumentIds, setActiveDocumentIds] = useState<string[]>([]);
   const [personaInstruction, setPersonaInstruction] = useState<string>("");
-  const [vectorStore, setVectorStore] = useState<any>(null);
-  const memoryStoreRef = useRef<any>(null);
-  const indexedDocIdsRef = useRef<Set<string>>(new Set());
+
   const [chatSessions, setChatSessions] = useState<any[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string>("");
@@ -91,11 +89,13 @@ export function useChatSession() {
     const userMsgId = `msg-${Date.now()}`;
     const userMsg: Message = { id: userMsgId, parentId: actualParentId, childrenIds: [], role: "user", content: msg };
 
+    let newMsgsWithUser: Message[] = [];
     setMessages(prev => {
       const newMsgs = [...prev];
       const parent = newMsgs.find(p => p.id === actualParentId);
       if (parent) parent.childrenIds.push(userMsgId);
-      return [...newMsgs, userMsg];
+      newMsgsWithUser = [...newMsgs, userMsg];
+      return newMsgsWithUser;
     });
     setCurrentLeafId(userMsgId);
 
@@ -127,71 +127,19 @@ export function useChatSession() {
     }
 
     setGenerationState("synthesizing");
-    let contextStr = "";
-    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || "";
-
-    if (activeDocumentIds.length > 0) {
-      if (!memoryStoreRef.current) {
-         const { MemoryVectorStore, CustomGeminiEmbeddings } = await import("@/lib/memoryVectorStore");
-         const embeddings = new CustomGeminiEmbeddings(apiKey);
-         memoryStoreRef.current = new MemoryVectorStore(embeddings);
-      }
-
-      const docsToIndex = documents.filter(d => activeDocumentIds.includes(d.id) && !indexedDocIdsRef.current.has(d.id));
-      if (docsToIndex.length > 0) {
-        const { RecursiveCharacterTextSplitter } = await import("@langchain/textsplitters");
-        const splitter = new RecursiveCharacterTextSplitter({ chunkSize: 1000, chunkOverlap: 200 });
-
-        for (const doc of docsToIndex) {
-          try {
-            const { data, error } = await supabase.storage.from('nexus_docs').download(doc.storage_path);
-            if (!error && data) {
-              let fullText = "";
-              if (doc.file_name.toLowerCase().endsWith('.pdf')) {
-                const arrayBuffer = await data.arrayBuffer();
-                const pdfjsLib = await import("pdfjs-dist");
-                pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
-                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-                for (let i = 1; i <= pdf.numPages; i++) {
-                  const page = await pdf.getPage(i);
-                  const textContent = await page.getTextContent();
-                  fullText += textContent.items.map((item: any) => item.str + (item.hasEOL ? '\n' : '')).join("") + "\n";
-                }
-              } else {
-                fullText = await data.text();
-              }
-              if (fullText.trim()) {
-                const chunks = await splitter.createDocuments([fullText], [{ source: doc.file_name, documentId: doc.id }]);
-                await memoryStoreRef.current.addDocuments(chunks);
-                indexedDocIdsRef.current.add(doc.id);
-              }
-            }
-          } catch (e: any) {
-             console.error("Extraction error:", e);
-             contextStr += `\n[System Error Extracting Document: ${e.message}]\n`;
-          }
-        }
-      }
-      
-      try {
-        const results = await memoryStoreRef.current.similaritySearch(msg, 15, (doc: any) => activeDocumentIds.includes(doc.metadata.documentId));
-        if (results.length === 0) {
-           contextStr += `\n[System Info: Similarity search returned 0 chunks]\n`;
-        } else {
-           contextStr += results.map((r: any, i: number) => `--- Chunk ${i+1} (Source: ${r.metadata.source}) ---\n${r.pageContent}`).join("\n\n");
-        }
-      } catch (e: any) {
-        console.error("Search error", e);
-        contextStr += `\n[System Error Searching: ${e.message}]\n`;
-      }
-    }
 
     let finalAssistantText = "";
     try {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: msg, contextStr, apiKey, personaInstruction, selectedModel }),
+        body: JSON.stringify({ 
+          prompt: msg, 
+          messages: newMsgsWithUser, // Need to pass the actual message array for history
+          activeDocumentIds, 
+          personaInstruction, 
+          selectedModel 
+        }),
       });
 
       if (!response.ok || !response.body) {
@@ -202,16 +150,34 @@ export function useChatSession() {
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let done = false;
+      let isFirstMetadataPacket = true;
 
       while (!done) {
         const { value, done: doneReading } = await reader.read();
         done = doneReading;
         if (value) {
-          const chunkText = decoder.decode(value, { stream: true });
+          let chunkText = decoder.decode(value, { stream: true });
+          
+          if (isFirstMetadataPacket && chunkText.includes('---METADATA-END---')) {
+             isFirstMetadataPacket = false;
+             const split = chunkText.split('---METADATA-END---\\n\\n');
+             try {
+                const meta = JSON.parse(split[0]);
+                if (meta.type === 'citations') {
+                   setMessages(prev => prev.map(m => m.id === botMsgId ? { ...m, sources: meta.chunks } : m));
+                }
+             } catch (e) {
+                console.error("Failed to parse citations metadata", e);
+             }
+             chunkText = split[1] || "";
+          }
+          
           finalAssistantText += chunkText;
           setMessages(prev => prev.map(m => m.id === botMsgId ? { ...m, content: finalAssistantText } : m));
         }
       }
+
+
     } catch (err: any) {
       finalAssistantText += `\n\n**Error:** ${err.message}`;
       setMessages(prev => prev.map(m => m.id === botMsgId ? { ...m, content: m.content + `\n\n**Error:** ${err.message}` } : m));

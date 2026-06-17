@@ -108,11 +108,11 @@ const CitationNode = ({ node, children, sources }: any) => {
       <Popover.Portal>
         <Popover.Content sideOffset={5} className="z-50 w-64 p-3 bg-white/95 backdrop-blur-xl border border-slate-200 rounded-3xl shadow-xl animate-in fade-in zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=closed]:zoom-out-95">
           <div className="flex items-center justify-between mb-2 pb-2 border-b border-slate-100">
-            <span className="text-xs font-bold text-slate-800 truncate max-w-[150px]"><FileText className="w-3 h-3 inline mr-1 text-blue-500"/>{source.chunk.filename}</span>
-            <span className="text-[10px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded-full font-mono font-bold">Score: {source.score.toFixed(2)}</span>
+            <span className="text-xs font-bold text-slate-800 truncate max-w-[150px]"><FileText className="w-3 h-3 inline mr-1 text-blue-500"/>{source.metadata?.source || source.chunk?.filename || "Document"}</span>
+            <span className="text-[10px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded-full font-mono font-bold">Score: {source.similarity !== undefined ? source.similarity.toFixed(2) : source.score?.toFixed(2) || "N/A"}</span>
           </div>
           <div className="text-[10px] text-slate-600 line-clamp-4 leading-relaxed bg-slate-50 p-2 rounded-xl border border-slate-100 font-mono">
-            {source.childMatchText}
+            {source.content || source.childMatchText}
           </div>
           <Popover.Arrow className="fill-slate-200" />
         </Popover.Content>
@@ -349,8 +349,8 @@ export const ChatInterface = ({
                                 {msg.sources.map((source, idx) => (
                                   <div key={idx} className="flex gap-2 text-xs text-slate-600">
                                     <span className="font-bold text-blue-500">[{idx + 1}]</span>
-                                    <span className="italic">{source.chunk.filename}</span>
-                                    <span className="text-slate-400">- Score: {source.score.toFixed(2)}</span>
+                                    <span className="italic">{source.metadata?.source || source.chunk?.filename || "Document"}</span>
+                                    <span className="text-slate-400">- Score: {source.similarity !== undefined ? source.similarity.toFixed(2) : source.score?.toFixed(2) || "N/A"}</span>
                                   </div>
                                 ))}
                               </div>

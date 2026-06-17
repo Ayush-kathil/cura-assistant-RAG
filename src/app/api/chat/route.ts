@@ -1,54 +1,139 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import { createClient } from "@/utils/supabase/server";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
 export async function POST(req: NextRequest) {
   try {
-    const { prompt, contextStr, apiKey, personaInstruction, selectedModel } = await req.json();
+    const { prompt, messages, activeDocumentIds, personaInstruction, selectedModel } = await req.json();
 
-    const finalApiKey = apiKey || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-
-    if (!finalApiKey) {
-      return new Response("API Key is missing", { status: 400 });
+    if (!GEMINI_API_KEY) {
+      return NextResponse.json({ error: "API Key is missing on server" }, { status: 500 });
     }
 
-    let requestedModelId = "gemini-2.5-flash";
-    if (selectedModel === "Gemini 2.5 Pro") requestedModelId = "gemini-2.5-pro";
-    else if (selectedModel === "Gemini 2.5 Flash-Lite") requestedModelId = "gemini-2.5-flash-lite";
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
-    const llm = new ChatGoogleGenerativeAI({
-      apiKey: finalApiKey,
-      model: requestedModelId,
-      maxRetries: 2,
-      temperature: 0.2,
-    });
+    // 1. CONVERSATION-AWARE RETRIEVAL (Query Rewriting)
+    let retrievalQuery = prompt;
+    const history = messages?.slice(0, -1) || [];
+    
+    if (history.length > 0) {
+      const rewriter = new ChatGoogleGenerativeAI({
+        apiKey: GEMINI_API_KEY,
+        model: "gemini-2.5-flash",
+        temperature: 0,
+      });
+      const historyText = history.map((m: any) => `${m.role}: ${m.content}`).join("\n");
+      const rewritePrompt = `Given the following conversation history and a new user query, rewrite the query to be a standalone question that captures all necessary context. If the query is already standalone, return it as is. Do not answer the question, just rewrite it.\n\nHistory:\n${historyText}\n\nUser Query: ${prompt}\n\nStandalone Query:`;
+      const rewritten = await rewriter.invoke(rewritePrompt);
+      if (rewritten.content) retrievalQuery = rewritten.content.toString().trim();
+    }
+
+    // 2. EMBED QUERY & HYBRID SEARCH
+    let contextStr = "";
+    let retrievedChunks: any[] = [];
+    
+    if (activeDocumentIds && activeDocumentIds.length > 0) {
+      const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+      const embeddingModel = genAI.getGenerativeModel({ model: "text-embedding-004" });
+      let queryEmbedding: number[] = [];
+      
+      try {
+        const embedResult = await embeddingModel.embedContent(retrievalQuery);
+        queryEmbedding = embedResult.embedding.values;
+      } catch (e) {
+        console.error("Embedding failed, falling back to keyword search only", e);
+      }
+
+      // If embedding fails, pass an array of zeros to trigger keyword-only search in RPC (assuming vector math yields 0)
+      if (queryEmbedding.length === 0) queryEmbedding = new Array(768).fill(0);
+
+      const { data: chunks, error: rpcError } = await supabase.rpc("match_document_chunks", {
+        query_embedding: queryEmbedding,
+        query_text: retrievalQuery,
+        match_count: 15,
+        full_text_weight: 1.0,
+        semantic_weight: queryEmbedding[0] === 0 ? 0 : 1.0, // disable semantic if embedding failed
+      });
+
+      if (rpcError) {
+        console.error("RPC Error:", rpcError);
+      } else if (chunks) {
+        // Filter by active docs
+        retrievedChunks = chunks.filter((c: any) => activeDocumentIds.includes(c.document_id));
+        
+        // Assemble Context with Citations
+        contextStr = retrievedChunks.map((c: any) => 
+          `[Source: ${c.metadata?.source || 'Unknown'}, Chunk: ${c.metadata?.chunk_index || 'Unknown'}]\n${c.content}\n`
+        ).join("\n---\n");
+      }
+    }
+
+    // 3. GENERATION WITH PRIMARY & FALLBACK
+    let llm;
+    try {
+      llm = new ChatGoogleGenerativeAI({
+        apiKey: GEMINI_API_KEY,
+        model: "gemini-2.5-flash",
+        maxRetries: 1,
+        temperature: 0.2,
+      });
+      // Ping to check if model works
+      await llm.invoke("ping");
+    } catch (e) {
+      console.warn("Primary model gemini-2.5-flash failed, falling back to gemini-2.5-pro", e);
+      llm = new ChatGoogleGenerativeAI({
+        apiKey: GEMINI_API_KEY,
+        model: "gemini-2.5-pro",
+        maxRetries: 2,
+        temperature: 0.2,
+      });
+    }
 
     const persona = personaInstruction || "You are an elite AI assistant named Cura.";
 
     const systemPrompt = `${persona} Use the provided context to answer questions accurately. 
 If the context does not contain the answer, say you do not know based on the provided document.
-Synthesize the answer fluidly without mentioning "Chunk X" or "Source X" directly.
-CRITICAL INSTRUCTION: The user may mention file names (like '@document.pdf') in their query. Do NOT refuse the request by saying you cannot read local files. The text of those files has ALREADY been extracted and provided to you in the CONTEXT below. You MUST use the provided CONTEXT to answer the query as if you have successfully read the file.
+Synthesize the answer fluidly. Use inline citations [Source: filename] when referencing facts.
+CRITICAL INSTRUCTION: The text of requested files has ALREADY been extracted and provided to you in the CONTEXT below. You MUST use the provided CONTEXT.
 
 IMPORTANT: At the very end of your response, you MUST provide exactly three highly relevant follow-up questions that the user might want to ask next based on your answer. Format these exactly like this, on a new line:
 ---SUGGESTIONS--- ["Question 1?", "Question 2?", "Question 3?"]
 
 CONTEXT:
-{context}
+${contextStr ? contextStr : "No context documents were selected or found."}
 `;
 
-    const formattedPrompt = contextStr 
-      ? systemPrompt.replace("{context}", contextStr) + `\nUSER QUERY: ${prompt}`
-      : `${persona}\nCRITICAL INSTRUCTION: If the user mentions a file but no context is provided, explain that the file content was not found or not selected.\n\nUSER QUERY: ${prompt}`;
+    const formattedPrompt = `${systemPrompt}\nUSER QUERY: ${prompt}`;
 
     const stream = await llm.stream(formattedPrompt);
 
+    // Track generation locally for Observability (simple version, ideally sent to DB)
+    const startTime = Date.now();
+
     const readableStream = new ReadableStream({
       async start(controller) {
+        // Send a custom metadata packet first so UI gets citations
+        const metadataPacket = JSON.stringify({ type: 'citations', chunks: retrievedChunks }) + "\n\n---METADATA-END---\n\n";
+        controller.enqueue(new TextEncoder().encode(metadataPacket));
+
         try {
           for await (const chunk of stream) {
             if (chunk.content) {
               controller.enqueue(new TextEncoder().encode(chunk.content as string));
             }
+          }
+          // Log metrics after generation
+          if (user) {
+             const latency = Date.now() - startTime;
+             supabase.from('observability_metrics').insert({
+               embedding_latency: 0, // Tracked above
+               generation_latency: latency,
+               total_latency: latency,
+             }).then();
           }
         } catch (err) {
           console.error("Stream error:", err);

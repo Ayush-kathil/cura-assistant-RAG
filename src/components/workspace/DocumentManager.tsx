@@ -71,7 +71,7 @@ export const DocumentManager = ({ onDocumentsProcessed, onDocumentDeleted, isPro
           file_name: activeFile.name,
           file_size_bytes: activeFile.size,
           storage_path: storagePathIdentifier,
-          vector_status: 'completed'
+          vector_status: 'processing'
         })
         .select()
         .single();
@@ -88,9 +88,20 @@ export const DocumentManager = ({ onDocumentsProcessed, onDocumentDeleted, isPro
       
       setStorageUsed(updatedStorageMetric);
 
-      const generatedMockTextPayload = `Extracted text from ${activeFile.name}`;
+      // Call the server-side ingestion endpoint to chunk and embed the document
+      const ingestResponse = await fetch("/api/ingest", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ documentId: insertedDocumentRow.id }),
+      });
+      
+      if (!ingestResponse.ok) {
+        const errorText = await ingestResponse.text();
+        throw new Error(`Ingestion failed: ${errorText}`);
+      }
+
       await onDocumentsProcessed([{ 
-        text: generatedMockTextPayload, 
+        text: `Successfully ingested and indexed ${activeFile.name}`, 
         filename: activeFile.name, 
         sizeBytes: activeFile.size, 
         dbId: insertedDocumentRow.id 

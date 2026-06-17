@@ -1,11 +1,11 @@
-
 export interface Message {
   id: string;
   parentId: string | null;
   childrenIds: string[];
-  role: "user" | "assistant";
+  role: "system" | "user" | "assistant";
   content: string;
   sources?: any[];
+  citations?: any[];
   isWelcome?: boolean;
   orchestrationPath?: string[];
   telemetry?: { vectorSearchMs?: number; rerankerMs?: number; ttftMs?: number; };
