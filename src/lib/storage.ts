@@ -1,4 +1,3 @@
-import { VectorStoreData, ScoredChunk } from "./vectorStore";
 
 export interface Message {
   id: string;
@@ -6,7 +5,7 @@ export interface Message {
   childrenIds: string[];
   role: "user" | "assistant";
   content: string;
-  sources?: ScoredChunk[];
+  sources?: any[];
   isWelcome?: boolean;
   orchestrationPath?: string[];
   telemetry?: { vectorSearchMs?: number; rerankerMs?: number; ttftMs?: number; };
@@ -26,7 +25,7 @@ export interface ChatSession {
   createdAt: number;
   documents: ChatDocument[];
   activeDocumentIds: string[];
-  vectorStore: VectorStoreData;
+  vectorStore: any;
   messages: Message[];
   currentLeafId: string | null;
   devModeEnabled?: boolean;

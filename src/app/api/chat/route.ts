@@ -1,9 +1,9 @@
 import { NextRequest } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 
 export async function POST(req: NextRequest) {
   try {
-    const { prompt, contextChunks, apiKey, personaInstruction, selectedModel } = await req.json();
+    const { prompt, contextStr, apiKey, personaInstruction, selectedModel } = await req.json();
 
     const finalApiKey = apiKey || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
@@ -11,71 +11,42 @@ export async function POST(req: NextRequest) {
       return new Response("API Key is missing", { status: 400 });
     }
 
-    const genAI = new GoogleGenerativeAI(finalApiKey);
-    let defaultFallbackModels = ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.5-flash-lite"];
-
-    // Map UI friendly names to actual Google model names
     let requestedModelId = "gemini-2.5-flash";
     if (selectedModel === "Gemini 2.5 Pro") requestedModelId = "gemini-2.5-pro";
     else if (selectedModel === "Gemini 2.5 Flash-Lite") requestedModelId = "gemini-2.5-flash-lite";
-    
-    // Put the user's selected model at the top of the fallback queue
-    const fallbackModels = [requestedModelId, ...defaultFallbackModels.filter(m => m !== requestedModelId)];
 
-    const contextStr = contextChunks && contextChunks.length > 0 
-      ? `\n\nCONTEXT INFORMATION:\n${contextChunks.map((c: any) => `--- Chunk ${c.chunk.chunkIndex} ---\n${c.chunk.text}`).join("\n\n")}\n\nBased ONLY on the above context information, answer the user query: ${prompt}`
-      : prompt;
+    const llm = new ChatGoogleGenerativeAI({
+      apiKey: finalApiKey,
+      model: requestedModelId,
+      maxRetries: 2,
+      temperature: 0.2,
+    });
 
     const persona = personaInstruction || "You are an elite AI assistant named Cura.";
 
-    let result;
-    let lastError = null;
-
-    for (const modelName of fallbackModels) {
-      try {
-        const model = genAI.getGenerativeModel({ model: modelName });
-        result = await model.generateContentStream({
-          contents: [{ role: "user", parts: [{ text: contextStr }] }],
-          systemInstruction: `${persona} Use the provided context to answer questions accurately. 
+    const systemPrompt = `${persona} Use the provided context to answer questions accurately. 
 If the context does not contain the answer, say you do not know based on the provided document.
-Do not use raw chunk text citations in your response text. Synthesize the answer fluidly without mentioning "Chunk X" or "Source X".
+Synthesize the answer fluidly without mentioning "Chunk X" or "Source X" directly.
 IMPORTANT: At the very end of your response, you MUST provide exactly three highly relevant follow-up questions that the user might want to ask next based on your answer. Format these exactly like this, on a new line:
----SUGGESTIONS--- ["Question 1?", "Question 2?", "Question 3?"]`,
-        });
-        
-        // If successful, break out of the loop
-        break;
-      } catch (apiError: any) {
-        lastError = apiError;
-        const isFallbackError = apiError?.status === 429 || apiError?.status >= 500 || apiError?.message?.includes("429") || apiError?.message?.includes("503") || apiError?.message?.includes("Quota exceeded") || apiError?.message?.includes("Service Unavailable") || apiError?.message?.includes("high demand") || apiError?.message?.includes("overloaded");
-        
-        // If it's a quota or high demand error, continue to the next model
-        if (isFallbackError) {
-          console.warn(`[Model Fallback] Model ${modelName} hit limit or high demand. Falling back to next model...`);
-          continue;
-        } else {
-          // If it's a different error, break and throw it immediately
-          break;
-        }
-      }
-    }
+---SUGGESTIONS--- ["Question 1?", "Question 2?", "Question 3?"]
 
-    if (!result) {
-      console.error("Gemini API Error (All models exhausted):", lastError);
-      const isFallbackError = lastError?.status === 429 || lastError?.status >= 500 || lastError?.message?.includes("429") || lastError?.message?.includes("503") || lastError?.message?.includes("Quota exceeded") || lastError?.message?.includes("Service Unavailable") || lastError?.message?.includes("high demand") || lastError?.message?.includes("overloaded");
-      return new Response(
-        isFallbackError 
-          ? "API Quota Exceeded or High Demand across all fallback models. Please wait and try again later."
-          : `AI Generation Error: ${lastError?.message || 'Unknown error'}`, 
-        { status: isFallbackError ? 503 : 500 }
-      );
-    }
+CONTEXT:
+{context}
+`;
 
-    const stream = new ReadableStream({
+    const formattedPrompt = contextStr 
+      ? systemPrompt.replace("{context}", contextStr) + `\nUSER QUERY: ${prompt}`
+      : `${persona}\n\nUSER QUERY: ${prompt}`;
+
+    const stream = await llm.stream(formattedPrompt);
+
+    const readableStream = new ReadableStream({
       async start(controller) {
         try {
-          for await (const chunk of result.stream) {
-            controller.enqueue(new TextEncoder().encode(chunk.text()));
+          for await (const chunk of stream) {
+            if (chunk.content) {
+              controller.enqueue(new TextEncoder().encode(chunk.content as string));
+            }
           }
         } catch (err) {
           console.error("Stream error:", err);
@@ -85,7 +56,7 @@ IMPORTANT: At the very end of your response, you MUST provide exactly three high
       }
     });
 
-    return new Response(stream, {
+    return new Response(readableStream, {
       headers: {
         "Content-Type": "text/event-stream",
         "Cache-Control": "no-cache",

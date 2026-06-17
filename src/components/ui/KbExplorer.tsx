@@ -1,17 +1,17 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { ScoredChunk } from "@/lib/vectorStore";
+
 import { X, Network, FileText, FilterX, PlusCircle } from "lucide-react";
 import clsx from "clsx";
 
 interface KbExplorerProps {
   isOpen: boolean;
   onClose: () => void;
-  lastSources: ScoredChunk[];
+  currentSources: any[];
   excludedChunkIds: string[];
   onToggleExclude: (chunkId: string) => void;
 }
 
-export const KbExplorer = ({ isOpen, onClose, lastSources, excludedChunkIds, onToggleExclude }: KbExplorerProps) => {
+export const KbExplorer = ({ isOpen, onClose, currentSources, excludedChunkIds, onToggleExclude }: KbExplorerProps) => {
   return (
     <AnimatePresence>
       {isOpen && (
@@ -45,7 +45,7 @@ export const KbExplorer = ({ isOpen, onClose, lastSources, excludedChunkIds, onT
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               <p className="text-xs text-gray-400 font-medium tracking-wide uppercase">Context Mapping</p>
               
-              {lastSources.length === 0 ? (
+              {currentSources.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 text-center space-y-3">
                   <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center">
                     <FileText className="w-5 h-5 text-gray-500" />
@@ -54,7 +54,7 @@ export const KbExplorer = ({ isOpen, onClose, lastSources, excludedChunkIds, onT
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {lastSources.map((source) => {
+                  {currentSources.map((source) => {
                     const isExcluded = excludedChunkIds.includes(source.chunk.id);
                     
                     return (

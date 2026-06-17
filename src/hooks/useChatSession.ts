@@ -1,9 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { Message } from "@/lib/storage";
 import { GenerationState } from "@/components/chat/ChatInterface";
-import { generateStreamingResponse, generateEmbedding, generateEmbeddingsBatch } from "@/lib/gemini";
-import { VectorStoreData, chunkText, hybridSearchVectorStore } from "@/lib/vectorStore";
 
 export interface DocumentItem {
   id: string;
@@ -22,7 +20,9 @@ export function useChatSession() {
   const [currentLeafId, setCurrentLeafId] = useState<string | null>(null);
   const [activeDocumentIds, setActiveDocumentIds] = useState<string[]>([]);
   const [personaInstruction, setPersonaInstruction] = useState<string>("");
-  const [vectorStore, setVectorStore] = useState<VectorStoreData>({ parents: [], children: [] });
+  const [vectorStore, setVectorStore] = useState<any>(null);
+  const memoryStoreRef = useRef<any>(null);
+  const indexedDocIdsRef = useRef<Set<string>>(new Set());
   const [chatSessions, setChatSessions] = useState<any[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string>("");
@@ -127,72 +127,86 @@ export function useChatSession() {
     }
 
     setGenerationState("synthesizing");
-    let contextChunks: any[] = [];
+    let contextStr = "";
     const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || "";
 
     if (activeDocumentIds.length > 0) {
-      const docsToIndex = documents.filter(d => activeDocumentIds.includes(d.id) && !vectorStore.parents.some(p => p.documentId === d.id));
+      if (!memoryStoreRef.current) {
+         const { MemoryVectorStore } = await import("@/lib/memoryVectorStore");
+         const { GoogleGenerativeAIEmbeddings } = await import("@langchain/google-genai");
+         const embeddings = new GoogleGenerativeAIEmbeddings({ apiKey, modelName: "text-embedding-004", taskType: "RETRIEVAL_QUERY" as any });
+         memoryStoreRef.current = new MemoryVectorStore(embeddings);
+      }
+
+      const docsToIndex = documents.filter(d => activeDocumentIds.includes(d.id) && !indexedDocIdsRef.current.has(d.id));
       if (docsToIndex.length > 0) {
-        let newParents = [...vectorStore.parents];
-        let newChildren = [...vectorStore.children];
+        const { RecursiveCharacterTextSplitter } = await import("@langchain/textsplitters");
+        const splitter = new RecursiveCharacterTextSplitter({ chunkSize: 1000, chunkOverlap: 200 });
+
         for (const doc of docsToIndex) {
           try {
-            let extractedChunks = doc.chunks && doc.chunks.length > 0 ? doc.chunks : null;
-            if (!extractedChunks) {
-              const { data, error } = await supabase.storage.from('nexus_docs').download(doc.storage_path);
-              if (!error && data) {
-                let fullText = "";
-                if (doc.file_name.toLowerCase().endsWith('.pdf')) {
-                  const arrayBuffer = await data.arrayBuffer();
-                  const pdfjsLib = await import("pdfjs-dist");
-                  pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
-                  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-                  for (let i = 1; i <= pdf.numPages; i++) {
-                    const page = await pdf.getPage(i);
-                    const textContent = await page.getTextContent();
-                    fullText += textContent.items.map((item: any) => item.str + (item.hasEOL ? '\n' : '')).join("") + "\n";
-                  }
-                } else {
-                  fullText = await data.text();
+            const { data, error } = await supabase.storage.from('nexus_docs').download(doc.storage_path);
+            if (!error && data) {
+              let fullText = "";
+              if (doc.file_name.toLowerCase().endsWith('.pdf')) {
+                const arrayBuffer = await data.arrayBuffer();
+                const pdfjsLib = await import("pdfjs-dist");
+                pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
+                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                for (let i = 1; i <= pdf.numPages; i++) {
+                  const page = await pdf.getPage(i);
+                  const textContent = await page.getTextContent();
+                  fullText += textContent.items.map((item: any) => item.str + (item.hasEOL ? '\n' : '')).join("") + "\n";
                 }
-                if (fullText.trim()) extractedChunks = chunkText(fullText);
+              } else {
+                fullText = await data.text();
               }
-            }
-            if (extractedChunks) {
-              const parentChunks = extractedChunks.map((text: string, i: number) => ({ id: crypto.randomUUID(), documentId: doc.id, filename: doc.file_name, text, chunkIndex: i }));
-              const embeddings = await generateEmbeddingsBatch(extractedChunks, apiKey);
-              const childChunks = extractedChunks.map((text: string, i: number) => ({ id: crypto.randomUUID(), parentId: parentChunks[i].id, documentId: doc.id, filename: doc.file_name, text, embedding: embeddings[i], chunkIndex: i }));
-              newParents = [...newParents, ...parentChunks];
-              newChildren = [...newChildren, ...childChunks];
+              if (fullText.trim()) {
+                const chunks = await splitter.createDocuments([fullText], [{ source: doc.file_name, documentId: doc.id }]);
+                await memoryStoreRef.current.addDocuments(chunks);
+                indexedDocIdsRef.current.add(doc.id);
+              }
             }
           } catch (e) {
              console.error(e);
           }
         }
-        const newStore = { parents: newParents, children: newChildren };
-        setVectorStore(newStore);
-        try {
-          const queryEmbedding = await generateEmbedding(msg, apiKey);
-          contextChunks = hybridSearchVectorStore(msg, queryEmbedding, newStore, activeDocumentIds, 3);
-        } catch (e) {}
-      } else {
-        try {
-          const queryEmbedding = await generateEmbedding(msg, apiKey);
-          contextChunks = hybridSearchVectorStore(msg, queryEmbedding, vectorStore, activeDocumentIds, 3);
-        } catch (e) {}
+      }
+      
+      try {
+        const results = await memoryStoreRef.current.similaritySearch(msg, 15, (doc: any) => activeDocumentIds.includes(doc.metadata.documentId));
+        contextStr = results.map((r: any, i: number) => `--- Chunk ${i+1} (Source: ${r.metadata.source}) ---\n${r.pageContent}`).join("\n\n");
+      } catch (e) {
+        console.error("Search error", e);
       }
     }
 
     let finalAssistantText = "";
     try {
-      await generateStreamingResponse(
-        msg, contextChunks, "no-doc", apiKey, 
-        (text) => {
-          finalAssistantText += text;
-          setMessages(prev => prev.map(m => m.id === botMsgId ? { ...m, content: m.content + text } : m));
-        },
-        personaInstruction, selectedModel
-      );
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: msg, contextStr, apiKey, personaInstruction, selectedModel }),
+      });
+
+      if (!response.ok || !response.body) {
+        const errText = await response.text();
+        throw new Error(errText || "Failed to fetch response");
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let done = false;
+
+      while (!done) {
+        const { value, done: doneReading } = await reader.read();
+        done = doneReading;
+        if (value) {
+          const chunkText = decoder.decode(value, { stream: true });
+          finalAssistantText += chunkText;
+          setMessages(prev => prev.map(m => m.id === botMsgId ? { ...m, content: finalAssistantText } : m));
+        }
+      }
     } catch (err: any) {
       finalAssistantText += `\n\n**Error:** ${err.message}`;
       setMessages(prev => prev.map(m => m.id === botMsgId ? { ...m, content: m.content + `\n\n**Error:** ${err.message}` } : m));
