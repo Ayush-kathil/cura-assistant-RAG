@@ -2,11 +2,34 @@ import { VectorStore } from "@langchain/core/vectorstores";
 import { Document } from "@langchain/core/documents";
 import { Embeddings } from "@langchain/core/embeddings";
 
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
+export class CustomGeminiEmbeddings {
+  private genAI: GoogleGenerativeAI;
+  constructor(apiKey: string) {
+    this.genAI = new GoogleGenerativeAI(apiKey);
+  }
+  async embedQuery(text: string): Promise<number[]> {
+    const model = this.genAI.getGenerativeModel({ model: "text-embedding-004" });
+    const result = await model.embedContent(text);
+    return result.embedding.values;
+  }
+  async embedDocuments(texts: string[]): Promise<number[][]> {
+    const model = this.genAI.getGenerativeModel({ model: "text-embedding-004" });
+    const result = await model.batchEmbedContents({
+        requests: texts.map(text => ({ content: { role: 'user', parts: [{ text }] } }))
+    });
+    return result.embeddings.map((e: any) => e.values);
+  }
+}
+
 export class MemoryVectorStore extends VectorStore {
   memoryVectors: { content: string; embedding: number[]; metadata: any }[] = [];
+  embeddings: Embeddings | CustomGeminiEmbeddings;
 
-  constructor(embeddings: Embeddings) {
+  constructor(embeddings: Embeddings | CustomGeminiEmbeddings) {
     super(embeddings, {});
+    this.embeddings = embeddings;
   }
 
   _vectorstoreType(): string {
