@@ -118,7 +118,7 @@ export const SmartCommandPalette = ({
         )}
       </AnimatePresence>
 
-      <div className="w-full max-w-4xl mx-auto bg-white border border-slate-200 rounded-2xl shadow-xl transition-all duration-300 focus-within:border-blue-400 focus-within:shadow-[0_0_20px_rgba(59,130,246,0.1)] flex flex-col">
+      <div className="w-full max-w-4xl mx-auto bg-white border border-slate-200 rounded-3xl shadow-xl transition-all duration-300 focus-within:border-blue-400 focus-within:shadow-[0_0_20px_rgba(59,130,246,0.1)] flex flex-col">
         <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-slate-100">
           <div className="flex items-center gap-md relative">
             <button type="button" onClick={() => setModelMenuOpen(!modelMenuOpen)} className="flex items-center gap-1 bg-blue-50 hover:bg-blue-100 text-[11px] font-bold text-blue-600 uppercase tracking-wider px-4 py-1.5 rounded-full cursor-pointer transition-all outline-none">
@@ -127,7 +127,7 @@ export const SmartCommandPalette = ({
             </button>
             <AnimatePresence>
               {modelMenuOpen && (
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="absolute bottom-full mb-2 left-0 w-48 bg-white border border-slate-200 rounded-2xl shadow-2xl overflow-hidden z-50">
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="absolute bottom-full mb-2 left-0 w-48 bg-white border border-slate-200 rounded-3xl shadow-2xl overflow-hidden z-50">
                   {["Gemini 3.5 Flash", "Gemini 3.1 Pro", "Gemini 2.5 Flash-Lite"].map(m => (
                     <button key={m} type="button" onClick={() => { onModelChange(m); setModelMenuOpen(false); }} className="w-full text-left px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-slate-700 hover:text-blue-700 hover:bg-blue-50 transition-colors border-b border-slate-100 last:border-0 flex items-center justify-between">
                       {m}
@@ -151,7 +151,7 @@ export const SmartCommandPalette = ({
               disabled={generationState !== "idle"} 
               className="w-full bg-transparent py-4 pl-6 pr-16 text-base text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-0 focus:border-transparent border-transparent transition-all disabled:opacity-50 relative z-10 font-medium" 
             />
-            <button type="submit" disabled={!input.trim() || generationState !== "idle"} className="absolute right-2 p-3 min-h-[44px] min-w-[44px] flex items-center justify-center bg-blue-500 hover:bg-blue-600 disabled:bg-slate-100 disabled:text-slate-400 text-white rounded-xl transition-all z-20 shadow-lg cursor-pointer">
+            <button type="submit" disabled={!input.trim() || generationState !== "idle"} className="absolute right-2 p-3 min-h-[44px] min-w-[44px] flex items-center justify-center bg-blue-500 hover:bg-blue-600 disabled:bg-slate-100 disabled:text-slate-400 text-white rounded-full transition-all z-20 shadow-lg cursor-pointer">
               <Send className="w-5 h-5 ml-0.5" />
             </button>
           </div>

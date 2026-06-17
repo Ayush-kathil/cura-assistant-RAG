@@ -47,11 +47,11 @@ IMPORTANT: At the very end of your response, you MUST provide exactly three high
         break;
       } catch (apiError: any) {
         lastError = apiError;
-        const isQuota = apiError?.status === 429 || apiError?.message?.includes("429") || apiError?.message?.includes("Quota exceeded");
+        const isFallbackError = apiError?.status === 429 || apiError?.status >= 500 || apiError?.message?.includes("429") || apiError?.message?.includes("503") || apiError?.message?.includes("Quota exceeded") || apiError?.message?.includes("Service Unavailable") || apiError?.message?.includes("high demand") || apiError?.message?.includes("overloaded");
         
-        // If it's a quota error, continue to the next model
-        if (isQuota) {
-          console.warn(`[Quota Exceeded] Model ${modelName} hit limit. Falling back to next model...`);
+        // If it's a quota or high demand error, continue to the next model
+        if (isFallbackError) {
+          console.warn(`[Model Fallback] Model ${modelName} hit limit or high demand. Falling back to next model...`);
           continue;
         } else {
           // If it's a different error, break and throw it immediately
@@ -62,12 +62,12 @@ IMPORTANT: At the very end of your response, you MUST provide exactly three high
 
     if (!result) {
       console.error("Gemini API Error (All models exhausted):", lastError);
-      const isQuota = lastError?.status === 429 || lastError?.message?.includes("429") || lastError?.message?.includes("Quota exceeded");
+      const isFallbackError = lastError?.status === 429 || lastError?.status >= 500 || lastError?.message?.includes("429") || lastError?.message?.includes("503") || lastError?.message?.includes("Quota exceeded") || lastError?.message?.includes("Service Unavailable") || lastError?.message?.includes("high demand") || lastError?.message?.includes("overloaded");
       return new Response(
-        isQuota 
-          ? "API Quota Exceeded across all fallback models. Please wait or update your billing details."
+        isFallbackError 
+          ? "API Quota Exceeded or High Demand across all fallback models. Please wait and try again later."
           : `AI Generation Error: ${lastError?.message || 'Unknown error'}`, 
-        { status: isQuota ? 429 : 500 }
+        { status: isFallbackError ? 503 : 500 }
       );
     }
 

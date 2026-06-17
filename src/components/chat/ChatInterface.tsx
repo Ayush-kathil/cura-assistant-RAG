@@ -68,14 +68,14 @@ const CodeBlock = ({ node, inline, className, children, onViewArtifact, ...props
   }
 
   return (
-    <div className="relative my-4 rounded-xl overflow-hidden bg-slate-50 border border-slate-200 shadow-sm group">
+    <div className="relative my-4 rounded-3xl overflow-hidden bg-slate-50 border border-slate-200 shadow-sm group">
       <div className="flex items-center justify-between px-4 py-2 bg-slate-100 border-b border-slate-200">
         <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">{language || "text"}</span>
         <div className="flex gap-1">
-          <button onClick={() => onViewArtifact(codeContent)} className="p-1.5 rounded-md hover:bg-blue-50 text-blue-600 flex items-center gap-1 min-h-[36px] text-xs font-bold tracking-wide transition-colors">
+          <button onClick={() => onViewArtifact(codeContent)} className="p-1.5 rounded-full hover:bg-blue-50 text-blue-600 flex items-center gap-1 min-h-[36px] text-xs font-bold tracking-wide transition-colors">
             <Code2 className="w-3.5 h-3.5" /> View Artifact
           </button>
-          <button onClick={handleCopy} className="p-1.5 min-h-[36px] min-w-[36px] flex items-center justify-center rounded-md hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition-colors">
+          <button onClick={handleCopy} className="p-1.5 min-h-[36px] min-w-[36px] flex items-center justify-center rounded-full hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition-colors">
             {copied ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
           </button>
         </div>
@@ -107,12 +107,12 @@ const CitationNode = ({ node, children, sources }: any) => {
         </span>
       </Popover.Trigger>
       <Popover.Portal>
-        <Popover.Content sideOffset={5} className="z-50 w-64 p-3 bg-white/95 backdrop-blur-xl border border-slate-200 rounded-xl shadow-xl animate-in fade-in zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=closed]:zoom-out-95">
+        <Popover.Content sideOffset={5} className="z-50 w-64 p-3 bg-white/95 backdrop-blur-xl border border-slate-200 rounded-3xl shadow-xl animate-in fade-in zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=closed]:zoom-out-95">
           <div className="flex items-center justify-between mb-2 pb-2 border-b border-slate-100">
             <span className="text-xs font-bold text-slate-800 truncate max-w-[150px]"><FileText className="w-3 h-3 inline mr-1 text-blue-500"/>{source.chunk.filename}</span>
-            <span className="text-[10px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded font-mono font-bold">Score: {source.score.toFixed(2)}</span>
+            <span className="text-[10px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded-full font-mono font-bold">Score: {source.score.toFixed(2)}</span>
           </div>
-          <div className="text-[10px] text-slate-600 line-clamp-4 leading-relaxed bg-slate-50 p-2 rounded border border-slate-100 font-mono">
+          <div className="text-[10px] text-slate-600 line-clamp-4 leading-relaxed bg-slate-50 p-2 rounded-xl border border-slate-100 font-mono">
             {source.childMatchText}
           </div>
           <Popover.Arrow className="fill-slate-200" />
@@ -241,7 +241,7 @@ export const ChatInterface = ({
                 <button 
                   key={i}
                   onClick={() => { setInput(card.prompt); document.querySelector('form')?.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true })); }}
-                  className="bg-white border border-slate-100 p-4 rounded-2xl text-left hover:border-blue-200 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300 group flex flex-col gap-2 hover:-translate-y-1"
+                  className="bg-white border border-slate-100 p-4 rounded-3xl text-left hover:border-blue-200 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300 group flex flex-col gap-2 hover:-translate-y-1"
                 >
                   <span className="material-symbols-outlined text-blue-500 opacity-80 group-hover:opacity-100 transition-opacity">{card.icon}</span>
                   <span className="font-bold text-slate-700 group-hover:text-blue-600 text-sm transition-colors">{card.title}</span>
@@ -274,8 +274,14 @@ export const ChatInterface = ({
                        </details>
                     )}
 
-                    <div className={clsx("group relative p-3 sm:p-4 rounded-xl text-[14px] leading-relaxed font-medium", msg.role === "user" ? "bg-[#EBF3FF] text-slate-800 rounded-br-none" : "bg-white border border-slate-100 text-slate-800 shadow-sm flex flex-col rounded-bl-none")}>
-                      
+                    <div className={clsx("group relative p-3 sm:p-4 rounded-2xl text-[14px] leading-relaxed font-medium transition-all duration-500", msg.role === "user" ? "bg-[#EBF3FF] text-slate-800 rounded-br-none" : "text-slate-800 shadow-sm flex flex-col rounded-bl-none")}>
+                      {msg.role === "assistant" && (
+                        <div className="absolute inset-0 z-0 rounded-2xl rounded-bl-none overflow-hidden" style={{ padding: '1.5px' }}>
+                           <div className="absolute inset-[-150%] animate-[spin_4s_linear_infinite] bg-[conic-gradient(from_0deg,transparent_0_280deg,rgba(59,130,246,0.6)_360deg)]" />
+                           <div className="absolute inset-[1.5px] bg-white rounded-2xl rounded-bl-none" />
+                        </div>
+                      )}
+                      <div className="relative z-10 flex flex-col w-full h-full">
                       {(() => {
                         let displayContent = msg.content;
                         let dynamicSuggestions = ["Summarize the key points", "Explain the data processing requirements", "What are the specific Top-K parameters?"];
@@ -301,21 +307,21 @@ export const ChatInterface = ({
                             )}
                       
                       {msg.requiresApproval && !msg.isApproved ? (
-                        <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 flex flex-col gap-3">
+                        <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 flex flex-col gap-3">
                            <div className="flex items-center gap-2 text-amber-400 font-bold tracking-wide">
                              <AlertTriangle className="w-5 h-5" /> HITL Approval Required
                            </div>
                            <p className="text-sm text-amber-200/70">The agent has requested permission to execute a complex sequence. Please confirm to proceed.</p>
-                           <button onClick={() => onApproveAction(msg.id)} className="mt-2 w-full flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 text-amber-950 font-bold py-2 rounded-lg transition-colors min-h-[44px]">
+                           <button onClick={() => onApproveAction(msg.id)} className="mt-2 w-full flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 text-amber-950 font-bold py-2 rounded-full transition-colors min-h-[44px]">
                              <Play className="w-4 h-4 fill-amber-950" /> Approve & Execute
                            </button>
                         </div>
                       ) : isEditingId === msg.id && msg.role === "user" ? (
                          <form onSubmit={(e) => handleEditSubmit(e, msg.parentId)} className="flex flex-col gap-2">
-                           <textarea value={editValue} onChange={e => setEditValue(e.target.value)} className="w-full bg-white border border-slate-200 rounded-xl p-3 text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none min-h-[100px]" autoFocus />
+                           <textarea value={editValue} onChange={e => setEditValue(e.target.value)} className="w-full bg-white border border-slate-200 rounded-2xl p-3 text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none min-h-[100px]" autoFocus />
                            <div className="flex justify-end gap-2">
-                             <button type="button" onClick={() => setIsEditingId(null)} className="px-3 py-1.5 rounded-lg bg-slate-100 text-xs text-slate-700 font-bold">Cancel</button>
-                             <button type="submit" className="px-3 py-1.5 rounded-lg bg-blue-500 text-xs text-white font-bold">Save & Branch</button>
+                             <button type="button" onClick={() => setIsEditingId(null)} className="px-4 py-1.5 rounded-full bg-slate-100 text-xs text-slate-700 font-bold">Cancel</button>
+                             <button type="submit" className="px-4 py-1.5 rounded-full bg-blue-500 text-xs text-white font-bold">Save & Branch</button>
                            </div>
                          </form>
                       ) : msg.role === "assistant" && !msg.content && generationState !== "idle" ? (
@@ -375,13 +381,14 @@ export const ChatInterface = ({
                         </>
                       )}
                        {msg.role === "user" && isEditingId !== msg.id && generationState === "idle" && (
-                          <button onClick={() => { setIsEditingId(msg.id); setEditValue(msg.content); }} className="absolute -left-12 top-2 p-1.5 min-h-[44px] min-w-[44px] flex items-center justify-center opacity-100 transition-opacity rounded-lg hover:bg-slate-200 text-slate-400 hover:text-slate-600">
+                          <button onClick={() => { setIsEditingId(msg.id); setEditValue(msg.content); }} className="absolute -left-12 top-2 p-1.5 min-h-[44px] min-w-[44px] flex items-center justify-center opacity-100 transition-opacity rounded-full hover:bg-slate-200 text-slate-400 hover:text-slate-600">
                              <Settings className="w-4 h-4" />
                           </button>
                        )}
                      </>
                    );
                  })()}
+                 </div>
                </div>
                     
                     {isDevMode && msg.telemetry && msg.role === "assistant" && (
