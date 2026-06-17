@@ -134,7 +134,7 @@ export function useChatSession() {
       if (!memoryStoreRef.current) {
          const { MemoryVectorStore } = await import("@/lib/memoryVectorStore");
          const { GoogleGenerativeAIEmbeddings } = await import("@langchain/google-genai");
-         const embeddings = new GoogleGenerativeAIEmbeddings({ apiKey, modelName: "text-embedding-004", taskType: "RETRIEVAL_QUERY" as any });
+         const embeddings = new GoogleGenerativeAIEmbeddings({ apiKey, modelName: "embedding-001", taskType: "RETRIEVAL_QUERY" as any });
          memoryStoreRef.current = new MemoryVectorStore(embeddings);
       }
 
