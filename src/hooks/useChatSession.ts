@@ -151,7 +151,7 @@ export function useChatSession() {
               if (doc.file_name.toLowerCase().endsWith('.pdf')) {
                 const arrayBuffer = await data.arrayBuffer();
                 const pdfjsLib = await import("pdfjs-dist");
-                pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
+                pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
                 const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
                 for (let i = 1; i <= pdf.numPages; i++) {
                   const page = await pdf.getPage(i);

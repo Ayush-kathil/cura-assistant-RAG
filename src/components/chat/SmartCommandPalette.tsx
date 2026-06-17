@@ -43,8 +43,8 @@ export const SmartCommandPalette = ({
   const maxTokens = 8000;
 
   useEffect(() => {
-    const docMatch = input.match(/@([^ ]*)$/);
-    const personaMatch = input.match(/\/([^ ]*)$/);
+    const docMatch = input.match(/@(.*)$/);
+    const personaMatch = input.match(/\/(.*)$/);
 
     if (docMatch) {
       setShowMenu("doc");
