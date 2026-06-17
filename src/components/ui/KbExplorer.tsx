@@ -1,12 +1,12 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { ScoredChunk } from "@/lib/vectorStore";
+// ScoredChunk removed
 import { X, Network, FileText, FilterX, PlusCircle } from "lucide-react";
 import clsx from "clsx";
 
 interface KbExplorerProps {
   isOpen: boolean;
   onClose: () => void;
-  lastSources: ScoredChunk[];
+  lastSources: any[];
   excludedChunkIds: string[];
   onToggleExclude: (chunkId: string) => void;
 }

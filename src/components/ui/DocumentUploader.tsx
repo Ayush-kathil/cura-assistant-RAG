@@ -30,35 +30,22 @@ export const DocumentUploader = ({ onDocumentsProcessed, isProcessing }: Documen
     try {
       for (let fileIndex = 0; fileIndex < validFiles.length; fileIndex++) {
         const file = validFiles[fileIndex];
-        let extractedText = "";
 
-        if (file.type === "application/pdf") {
-          const pdfjsLib = await import("pdfjs-dist");
-          pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
-          
-          const arrayBuffer = await file.arrayBuffer();
-          const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-          let fullText = "";
-          for (let i = 1; i <= pdf.numPages; i++) {
-            const page = await pdf.getPage(i);
-            const textContent = await page.getTextContent();
-            const pageText = textContent.items.map((item: any) => item.str + (item.hasEOL ? '\n' : '')).join("");
-            fullText += pageText + "\n";
-          }
-          extractedText = fullText;
-        } else {
-          extractedText = await file.text();
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const response = await fetch("http://localhost:8000/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.detail || "Upload failed");
         }
 
-        if (extractedText.trim()) {
-          processedDocs.push({ text: extractedText, filename: file.name });
-        }
-
+        processedDocs.push({ text: "Processed by FastAPI", filename: file.name });
         setProcessingFiles(prev => prev.map((pf, i) => i === fileIndex ? { ...pf, status: "done" } : pf));
-      }
-
-      if (processedDocs.length === 0) {
-        throw new Error("No readable text found in the documents.");
       }
 
       onDocumentsProcessed(processedDocs);
