@@ -35,8 +35,12 @@ export class MemoryVectorStore extends VectorStore {
     }
   }
 
-  async similaritySearchVectorWithScore(query: number[], k: number): Promise<[Document, number][]> {
-    const results = this.memoryVectors.map((v) => {
+  async similaritySearchVectorWithScore(query: number[], k: number, filter?: any): Promise<[Document, number][]> {
+    let targetVectors = this.memoryVectors;
+    if (filter && typeof filter === 'function') {
+      targetVectors = this.memoryVectors.filter((v) => filter(new Document({ pageContent: v.content, metadata: v.metadata })));
+    }
+    const results = targetVectors.map((v) => {
       let dotProduct = 0;
       let normA = 0;
       let normB = 0;

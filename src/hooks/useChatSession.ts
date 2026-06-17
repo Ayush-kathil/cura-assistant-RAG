@@ -167,17 +167,23 @@ export function useChatSession() {
                 indexedDocIdsRef.current.add(doc.id);
               }
             }
-          } catch (e) {
-             console.error(e);
+          } catch (e: any) {
+             console.error("Extraction error:", e);
+             contextStr += `\n[System Error Extracting Document: ${e.message}]\n`;
           }
         }
       }
       
       try {
         const results = await memoryStoreRef.current.similaritySearch(msg, 15, (doc: any) => activeDocumentIds.includes(doc.metadata.documentId));
-        contextStr = results.map((r: any, i: number) => `--- Chunk ${i+1} (Source: ${r.metadata.source}) ---\n${r.pageContent}`).join("\n\n");
-      } catch (e) {
+        if (results.length === 0) {
+           contextStr += `\n[System Info: Similarity search returned 0 chunks]\n`;
+        } else {
+           contextStr += results.map((r: any, i: number) => `--- Chunk ${i+1} (Source: ${r.metadata.source}) ---\n${r.pageContent}`).join("\n\n");
+        }
+      } catch (e: any) {
         console.error("Search error", e);
+        contextStr += `\n[System Error Searching: ${e.message}]\n`;
       }
     }
 
