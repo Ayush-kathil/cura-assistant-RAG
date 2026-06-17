@@ -26,7 +26,7 @@ export function useChatSession() {
   const [chatSessions, setChatSessions] = useState<any[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string>("");
-  const [selectedModel, setSelectedModel] = useState("Gemini 1.5 Flash");
+  const [selectedModel, setSelectedModel] = useState("Gemini 2.5 Flash");
 
   useEffect(() => {
     fetchDocuments();

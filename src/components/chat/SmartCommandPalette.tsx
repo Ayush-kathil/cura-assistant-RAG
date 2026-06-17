@@ -128,7 +128,7 @@ export const SmartCommandPalette = ({
             <AnimatePresence>
               {modelMenuOpen && (
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="absolute bottom-full mb-2 left-0 w-48 bg-white border border-slate-200 rounded-3xl shadow-2xl overflow-hidden z-50">
-                  {["Gemini 1.5 Flash", "Gemini 1.5 Pro", "Gemini 2.0 Flash-Lite"].map(m => (
+                  {["Gemini 2.5 Flash", "Gemini 2.5 Pro", "Gemini 2.5 Flash-Lite"].map(m => (
                     <button key={m} type="button" onClick={() => { onModelChange(m); setModelMenuOpen(false); }} className="w-full text-left px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-slate-700 hover:text-blue-700 hover:bg-blue-50 transition-colors border-b border-slate-100 last:border-0 flex items-center justify-between">
                       {m}
                       {selectedModel === m && <span className="material-symbols-outlined text-[14px] text-blue-600">check</span>}

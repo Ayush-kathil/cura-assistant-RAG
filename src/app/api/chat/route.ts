@@ -12,12 +12,12 @@ export async function POST(req: NextRequest) {
     }
 
     const genAI = new GoogleGenerativeAI(finalApiKey);
-    let defaultFallbackModels = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.0-flash-lite-preview-02-05"];
+    let defaultFallbackModels = ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.5-flash-lite"];
 
     // Map UI friendly names to actual Google model names
-    let requestedModelId = "gemini-1.5-flash";
-    if (selectedModel === "Gemini 1.5 Pro") requestedModelId = "gemini-1.5-pro";
-    else if (selectedModel === "Gemini 2.0 Flash-Lite") requestedModelId = "gemini-2.0-flash-lite-preview-02-05";
+    let requestedModelId = "gemini-2.5-flash";
+    if (selectedModel === "Gemini 2.5 Pro") requestedModelId = "gemini-2.5-pro";
+    else if (selectedModel === "Gemini 2.5 Flash-Lite") requestedModelId = "gemini-2.5-flash-lite";
     
     // Put the user's selected model at the top of the fallback queue
     const fallbackModels = [requestedModelId, ...defaultFallbackModels.filter(m => m !== requestedModelId)];

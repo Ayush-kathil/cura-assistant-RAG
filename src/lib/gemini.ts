@@ -42,7 +42,7 @@ export const reformulateQuery = async (
   if (history.length === 0) return currentQuery;
 
   const genAI = getGeminiClient(apiKey);
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
   const historyText = history
     .slice(-4)
@@ -67,7 +67,7 @@ export const compressContextSnapshot = async (
   apiKey: string
 ): Promise<string> => {
   const genAI = getGeminiClient(apiKey);
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
   const historyText = messagesToCompress
     .map(m => `${m.role.toUpperCase()}: ${m.content}`)
