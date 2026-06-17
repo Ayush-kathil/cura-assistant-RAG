@@ -9,7 +9,7 @@ export const getGeminiClient = (apiKey: string) => {
 
 export const generateEmbedding = async (text: string, apiKey: string): Promise<number[]> => {
   const genAI = getGeminiClient(apiKey);
-  const model = genAI.getGenerativeModel({ model: "gemini-embedding-2" });
+  const model = genAI.getGenerativeModel({ model: "text-embedding-004" });
   
   const result = await model.embedContent(text);
   return result.embedding.values;
@@ -42,7 +42,7 @@ export const reformulateQuery = async (
   if (history.length === 0) return currentQuery;
 
   const genAI = getGeminiClient(apiKey);
-  const model = genAI.getGenerativeModel({ model: "gemini-3.5-flash" });
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
   const historyText = history
     .slice(-4)
@@ -67,7 +67,7 @@ export const compressContextSnapshot = async (
   apiKey: string
 ): Promise<string> => {
   const genAI = getGeminiClient(apiKey);
-  const model = genAI.getGenerativeModel({ model: "gemini-3.5-flash" });
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
   const historyText = messagesToCompress
     .map(m => `${m.role.toUpperCase()}: ${m.content}`)
