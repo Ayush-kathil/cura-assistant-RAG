@@ -27,6 +27,8 @@ export async function POST(req: NextRequest) {
     const systemPrompt = `${persona} Use the provided context to answer questions accurately. 
 If the context does not contain the answer, say you do not know based on the provided document.
 Synthesize the answer fluidly without mentioning "Chunk X" or "Source X" directly.
+CRITICAL INSTRUCTION: The user may mention file names (like '@document.pdf') in their query. Do NOT refuse the request by saying you cannot read local files. The text of those files has ALREADY been extracted and provided to you in the CONTEXT below. You MUST use the provided CONTEXT to answer the query as if you have successfully read the file.
+
 IMPORTANT: At the very end of your response, you MUST provide exactly three highly relevant follow-up questions that the user might want to ask next based on your answer. Format these exactly like this, on a new line:
 ---SUGGESTIONS--- ["Question 1?", "Question 2?", "Question 3?"]
 
@@ -36,7 +38,7 @@ CONTEXT:
 
     const formattedPrompt = contextStr 
       ? systemPrompt.replace("{context}", contextStr) + `\nUSER QUERY: ${prompt}`
-      : `${persona}\n\nUSER QUERY: ${prompt}`;
+      : `${persona}\nCRITICAL INSTRUCTION: If the user mentions a file but no context is provided, explain that the file content was not found or not selected.\n\nUSER QUERY: ${prompt}`;
 
     const stream = await llm.stream(formattedPrompt);
 
