@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&amp;family=Nunito+Sans:wght@200..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-tertiary": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "error": "#ba1a1a",
+                    "primary-fixed-dim": "#89d0ed",
+                    "surface-container-high": "#dee8ff",
+                    "outline": "#6f787d",
+                    "on-secondary-fixed-variant": "#1d4d53",
+                    "on-secondary-container": "#3b6a6f",
+                    "primary": "#0c6780",
+                    "on-error-container": "#93000a",
+                    "on-primary-fixed": "#001f29",
+                    "background": "#f9f9ff",
+                    "secondary-fixed": "#bbebf1",
+                    "tertiary-fixed": "#dbe4ea",
+                    "inverse-on-surface": "#ebf1ff",
+                    "on-tertiary-fixed-variant": "#40484d",
+                    "surface": "#f9f9ff",
+                    "tertiary-container": "#bdc5cc",
+                    "on-secondary": "#ffffff",
+                    "on-primary": "#ffffff",
+                    "on-tertiary-fixed": "#151d22",
+                    "surface-bright": "#f9f9ff",
+                    "outline-variant": "#bfc8cd",
+                    "surface-container-highest": "#d8e3fa",
+                    "surface-tint": "#0c6780",
+                    "surface-dim": "#cfdaf1",
+                    "on-tertiary-container": "#4a5258",
+                    "on-background": "#111c2c",
+                    "secondary-fixed-dim": "#9fcfd5",
+                    "surface-container-lowest": "#ffffff",
+                    "secondary-container": "#b8e8ee",
+                    "secondary": "#37656b",
+                    "surface-container": "#e7eeff",
+                    "tertiary": "#575f65",
+                    "tertiary-fixed-dim": "#bfc8ce",
+                    "on-surface-variant": "#3f484c",
+                    "on-error": "#ffffff",
+                    "surface-variant": "#d8e3fa",
+                    "on-primary-container": "#005870",
+                    "inverse-primary": "#89d0ed",
+                    "surface-container-low": "#f0f3ff",
+                    "inverse-surface": "#263142",
+                    "on-secondary-fixed": "#001f23",
+                    "primary-container": "#87ceeb",
+                    "on-primary-fixed-variant": "#004d62",
+                    "on-surface": "#111c2c",
+                    "primary-fixed": "#baeaff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "margin-mobile": "20px",
+                    "margin-desktop": "40px",
+                    "gutter": "24px",
+                    "container-max": "1200px",
+                    "unit": "8px"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Quicksand"],
+                    "body-md": ["Nunito Sans"],
+                    "label-md": ["Nunito Sans"],
+                    "label-sm": ["Nunito Sans"],
+                    "headline-md": ["Quicksand"],
+                    "body-lg": ["Nunito Sans"],
+                    "headline-lg-mobile": ["Quicksand"]
+            },
+            "fontSize": {
+                    "headline-lg": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "700"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "34px", "letterSpacing": "-0.01em", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #f9f9ff;
+            font-family: 'Nunito Sans', sans-serif;
+            overflow-x: hidden;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .pro-glow {
+            box-shadow: 0 0 40px rgba(135, 206, 235, 0.3);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .active-pill {
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .active-pill:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopNavBar -->
+<nav class="sticky top-4 z-50 flex justify-between items-center px-8 py-3 rounded-full mt-4 mx-auto w-[90%] max-w-container-max bg-white/70 dark:bg-surface-container/70 backdrop-blur-xl border border-white/10 dark:border-outline-variant/10 shadow-[0_20px_20px_rgba(12,103,128,0.05)] transition-transform">
+<div class="flex items-center gap-2">
+<span class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim">Cura</span>
+</div>
+<div class="hidden md:flex gap-8">
+<a class="font-label-md text-label-md text-on-surface-variant dark:text-on-surface-variant hover:text-primary-container dark:hover:text-primary-fixed transition-colors" href="#">Features</a>
+<a class="font-label-md text-label-md text-on-surface-variant dark:text-on-surface-variant hover:text-primary-container dark:hover:text-primary-fixed transition-colors" href="#">Science</a>
+<a class="font-label-md text-label-md text-primary dark:text-primary-fixed-dim font-bold border-b-2 border-primary" href="#">Pricing</a>
+<a class="font-label-md text-label-md text-on-surface-variant dark:text-on-surface-variant hover:text-primary-container dark:hover:text-primary-fixed transition-colors" href="#">Support</a>
+</div>
+<button class="bg-primary text-on-primary px-6 py-2 rounded-full font-label-md text-label-md hover:bg-primary/90 active:scale-95 transition-all shadow-md">
+            Get Started
+        </button>
+</nav>
+<main class="relative pt-16 pb-24 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto overflow-visible">
+<!-- Background Decoration -->
+<div class="absolute -top-24 -left-24 w-96 h-96 bg-primary-container/20 rounded-full blur-[100px] -z-10"></div>
+<div class="absolute top-1/2 -right-24 w-80 h-80 bg-secondary-container/30 rounded-full blur-[100px] -z-10"></div>
+<!-- Header Section -->
+<header class="text-center mb-16">
+<h1 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface mb-4">Choose your journey to calm</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mx-auto">Flexible plans designed to support your mental well-being, whether you're just starting out or seeking a lifetime companion.</p>
+<!-- Toggle -->
+<div class="mt-10 flex items-center justify-center gap-4">
+<span class="font-label-md text-label-md text-on-surface-variant">Monthly</span>
+<button class="relative w-14 h-8 bg-surface-container-high rounded-full p-1 transition-colors" id="billing-toggle">
+<div class="w-6 h-6 bg-primary rounded-full transition-transform" id="toggle-circle"></div>
+</button>
+<span class="font-label-md text-label-md text-on-surface flex items-center gap-1">
+                    Yearly <span class="bg-secondary-container text-on-secondary-container text-[10px] px-2 py-0.5 rounded-full">Save 20%</span>
+</span>
+</div>
+</header>
+<!-- Pricing Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter items-stretch">
+<!-- Free Plan -->
+<section class="glass-card p-10 rounded-xl flex flex-col items-center text-center transition-all hover:-translate-y-2">
+<div class="mb-6">
+<span class="material-symbols-outlined text-secondary text-5xl" style="font-variation-settings: 'FILL' 0;">spa</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2">Free</h3>
+<div class="mb-6">
+<span class="font-headline-lg text-headline-lg">$0</span>
+<span class="font-body-md text-body-md text-on-surface-variant">/forever</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mb-8 h-12">Essential tools for mindful reflection and basic support.</p>
+<ul class="w-full space-y-4 mb-10 flex-grow text-left">
+<li class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+<span class="font-label-md text-label-md">Daily Mood Check-ins</span>
+</li>
+<li class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+<span class="font-label-md text-label-md">3 Guided Sessions / Week</span>
+</li>
+<li class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+<span class="font-label-md text-label-md">Community Access</span>
+</li>
+</ul>
+<button class="w-full py-4 border-2 border-outline-variant text-on-surface-variant rounded-full font-label-md text-label-md hover:bg-surface-container transition-all active-pill">
+                    Start for Free
+                </button>
+</section>
+<!-- Pro Plan (Recommended) -->
+<section class="relative bg-white pro-glow p-10 rounded-xl flex flex-col items-center text-center border-2 border-primary-container z-10 scale-105 transition-all hover:scale-[1.07]">
+<!-- Recommended Badge -->
+<div class="absolute -top-4 bg-primary text-on-primary px-4 py-1 rounded-full text-[12px] font-bold tracking-wide shadow-lg">
+                    RECOMMENDED
+                </div>
+<div class="mb-6">
+<span class="material-symbols-outlined text-primary text-5xl" style="font-variation-settings: 'FILL' 1;">stars</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2">Pro</h3>
+<div class="mb-6">
+<span class="font-headline-lg text-headline-lg" id="pro-price">$12</span>
+<span class="font-body-md text-body-md text-on-surface-variant">/month</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mb-8 h-12">Advanced AI features and personalized therapeutic paths.</p>
+<ul class="w-full space-y-4 mb-10 flex-grow text-left">
+<li class="flex items-center gap-3 text-on-surface">
+<span class="material-symbols-outlined text-primary text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-label-md text-label-md">Everything in Free</span>
+</li>
+<li class="flex items-center gap-3 text-on-surface">
+<span class="material-symbols-outlined text-primary text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-label-md text-label-md">Unlimited AI Chat Support</span>
+</li>
+<li class="flex items-center gap-3 text-on-surface">
+<span class="material-symbols-outlined text-primary text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-label-md text-label-md">Personalized Wellness Data</span>
+</li>
+<li class="flex items-center gap-3 text-on-surface">
+<span class="material-symbols-outlined text-primary text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-label-md text-label-md">Sleep &amp; Focus Audio Library</span>
+</li>
+</ul>
+<button class="w-full py-4 bg-primary text-on-primary rounded-full font-label-md text-label-md hover:shadow-xl active-pill transition-all transform-gpu">
+                    Get Pro Access
+                </button>
+</section>
+<!-- Enterprise Plan -->
+<section class="glass-card p-10 rounded-xl flex flex-col items-center text-center transition-all hover:-translate-y-2">
+<div class="mb-6">
+<span class="material-symbols-outlined text-secondary text-5xl" style="font-variation-settings: 'FILL' 0;">corporate_fare</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2">Enterprise</h3>
+<div class="mb-6">
+<span class="font-headline-lg text-headline-lg">$49</span>
+<span class="font-body-md text-body-md text-on-surface-variant">/month</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mb-8 h-12">Scalable wellness solutions for teams and organizations.</p>
+<ul class="w-full space-y-4 mb-10 flex-grow text-left">
+<li class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+<span class="font-label-md text-label-md">Everything in Pro</span>
+</li>
+<li class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+<span class="font-label-md text-label-md">Admin Dashboard &amp; Reports</span>
+</li>
+<li class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+<span class="font-label-md text-label-md">HIPAA &amp; GDPR Compliance</span>
+</li>
+<li class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+<span class="font-label-md text-label-md">Dedicated Success Manager</span>
+</li>
+</ul>
+<button class="w-full py-4 border-2 border-outline-variant text-on-surface-variant rounded-full font-label-md text-label-md hover:bg-surface-container transition-all active-pill">
+                    Contact Sales
+                </button>
+</section>
+</div>
+<!-- Detailed Comparison -->
+<div class="mt-32 max-w-4xl mx-auto overflow-hidden">
+<h2 class="font-headline-md text-headline-md text-center mb-12">Compare every feature</h2>
+<div class="glass-card rounded-xl overflow-hidden p-2">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low">
+<th class="p-6 font-label-md text-on-surface-variant">Features</th>
+<th class="p-6 font-label-md text-on-surface text-center">Free</th>
+<th class="p-6 font-label-md text-primary text-center">Pro</th>
+<th class="p-6 font-label-md text-on-surface text-center">Enterprise</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/10">
+<tr>
+<td class="p-6 font-body-md">Daily Check-ins</td>
+<td class="p-6 text-center"><span class="material-symbols-outlined text-primary">done</span></td>
+<td class="p-6 text-center"><span class="material-symbols-outlined text-primary">done</span></td>
+<td class="p-6 text-center"><span class="material-symbols-outlined text-primary">done</span></td>
+</tr>
+<tr>
+<td class="p-6 font-body-md">AI Mood Analysis</td>
+<td class="p-6 text-center text-on-surface-variant">—</td>
+<td class="p-6 text-center"><span class="material-symbols-outlined text-primary">done</span></td>
+<td class="p-6 text-center"><span class="material-symbols-outlined text-primary">done</span></td>
+</tr>
+<tr>
+<td class="p-6 font-body-md">Offline Access</td>
+<td class="p-6 text-center text-on-surface-variant">—</td>
+<td class="p-6 text-center"><span class="material-symbols-outlined text-primary">done</span></td>
+<td class="p-6 text-center"><span class="material-symbols-outlined text-primary">done</span></td>
+</tr>
+<tr>
+<td class="p-6 font-body-md">Team Collaboration</td>
+<td class="p-6 text-center text-on-surface-variant">—</td>
+<td class="p-6 text-center text-on-surface-variant">—</td>
+<td class="p-6 text-center"><span class="material-symbols-outlined text-primary">done</span></td>
+</tr>
+<tr>
+<td class="p-6 font-body-md">Custom Branding</td>
+<td class="p-6 text-center text-on-surface-variant">—</td>
+<td class="p-6 text-center text-on-surface-variant">—</td>
+<td class="p-6 text-center"><span class="material-symbols-outlined text-primary">done</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Trust Section -->
+<section class="mt-32 text-center">
+<h2 class="font-headline-md text-headline-md mb-12">Trusted by clinicians and seekers</h2>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-8 opacity-60 grayscale hover:grayscale-0 transition-all">
+<div class="flex items-center justify-center p-4">
+<span class="font-headline-md text-on-surface-variant/50">WellnessCo</span>
+</div>
+<div class="flex items-center justify-center p-4">
+<span class="font-headline-md text-on-surface-variant/50">MindPath</span>
+</div>
+<div class="flex items-center justify-center p-4">
+<span class="font-headline-md text-on-surface-variant/50">HealthGrid</span>
+</div>
+<div class="flex items-center justify-center p-4">
+<span class="font-headline-md text-on-surface-variant/50">UnityCare</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full py-12 px-margin-desktop mt-auto flex flex-col items-center gap-4 bg-surface-container-highest dark:bg-inverse-surface rounded-t-xl">
+<div class="flex items-center gap-2 mb-4">
+<span class="font-headline-md text-headline-md text-primary">Cura</span>
+</div>
+<div class="flex flex-wrap justify-center gap-8 mb-6">
+<a class="font-label-sm text-label-sm text-on-tertiary-fixed-variant hover:text-primary dark:hover:text-primary-fixed transition-colors" href="#">Privacy Policy</a>
+<a class="font-label-sm text-label-sm text-on-tertiary-fixed-variant hover:text-primary dark:hover:text-primary-fixed transition-colors" href="#">Terms of Service</a>
+<a class="font-label-sm text-label-sm text-on-tertiary-fixed-variant hover:text-primary dark:hover:text-primary-fixed transition-colors" href="#">Contact Us</a>
+</div>
+<p class="font-label-sm text-label-sm text-on-tertiary-fixed-variant">© 2024 Cura AI. Made with empathy.</p>
+</footer>
+<script>
+        const toggle = document.getElementById('billing-toggle');
+        const circle = document.getElementById('toggle-circle');
+        const proPrice = document.getElementById('pro-price');
+        let isYearly = false;
+
+        toggle.addEventListener('click', () => {
+            isYearly = !isYearly;
+            if (isYearly) {
+                circle.style.transform = 'translateX(24px)';
+                toggle.classList.remove('bg-surface-container-high');
+                toggle.classList.add('bg-primary/20');
+                proPrice.innerText = '$9.60'; // 20% discount
+            } else {
+                circle.style.transform = 'translateX(0px)';
+                toggle.classList.remove('bg-primary/20');
+                toggle.classList.add('bg-surface-container-high');
+                proPrice.innerText = '$12';
+            }
+        });
+
+        // Hover effect for cards
+        document.querySelectorAll('.glass-card, section.pro-glow').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-8px)';
+            });
+            card.addEventListener('mouseleave', () => {
+                if(!card.classList.contains('scale-105')) {
+                    card.style.transform = 'translateY(0px)';
+                } else {
+                    card.style.transform = 'scale(1.05)';
+                }
+            });
+        });
+    </script>
+</body></html>

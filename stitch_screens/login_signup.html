@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Cura AI - Sign In</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@600;700&amp;family=Nunito+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "error": "#ba1a1a",
+                        "primary-fixed-dim": "#89d0ed",
+                        "surface-container-high": "#dee8ff",
+                        "outline": "#6f787d",
+                        "on-secondary-fixed-variant": "#1d4d53",
+                        "on-secondary-container": "#3b6a6f",
+                        "primary": "#0c6780",
+                        "on-error-container": "#93000a",
+                        "on-primary-fixed": "#001f29",
+                        "background": "#f9f9ff",
+                        "secondary-fixed": "#bbebf1",
+                        "tertiary-fixed": "#dbe4ea",
+                        "inverse-on-surface": "#ebf1ff",
+                        "on-tertiary-fixed-variant": "#40484d",
+                        "surface": "#f9f9ff",
+                        "tertiary-container": "#bdc5cc",
+                        "on-secondary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-fixed": "#151d22",
+                        "surface-bright": "#f9f9ff",
+                        "outline-variant": "#bfc8cd",
+                        "surface-container-highest": "#d8e3fa",
+                        "surface-tint": "#0c6780",
+                        "surface-dim": "#cfdaf1",
+                        "on-tertiary-container": "#4a5258",
+                        "on-background": "#111c2c",
+                        "secondary-fixed-dim": "#9fcfd5",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-container": "#b8e8ee",
+                        "secondary": "#37656b",
+                        "surface-container": "#e7eeff",
+                        "tertiary": "#575f65",
+                        "tertiary-fixed-dim": "#bfc8ce",
+                        "on-surface-variant": "#3f484c",
+                        "on-error": "#ffffff",
+                        "surface-variant": "#d8e3fa",
+                        "on-primary-container": "#005870",
+                        "inverse-primary": "#89d0ed",
+                        "surface-container-low": "#f0f3ff",
+                        "inverse-surface": "#263142",
+                        "on-secondary-fixed": "#001f23",
+                        "primary-container": "#87ceeb",
+                        "on-primary-fixed-variant": "#004d62",
+                        "on-surface": "#111c2c",
+                        "primary-fixed": "#baeaff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-mobile": "20px",
+                        "margin-desktop": "40px",
+                        "gutter": "24px",
+                        "container-max": "1200px",
+                        "unit": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Quicksand"],
+                        "body-md": ["Nunito Sans"],
+                        "label-md": ["Nunito Sans"],
+                        "label-sm": ["Nunito Sans"],
+                        "headline-md": ["Quicksand"],
+                        "body-lg": ["Nunito Sans"],
+                        "headline-lg-mobile": ["Quicksand"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "700"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "600"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "34px", "letterSpacing": "-0.01em", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .soft-shadow {
+            box-shadow: 0 20px 40px rgba(12, 103, 128, 0.08);
+        }
+        .input-inset {
+            box-shadow: inset 0 2px 4px rgba(12, 103, 128, 0.03);
+        }
+        .bg-pattern {
+            background-color: #f9f9ff;
+            background-image: radial-gradient(circle at 2px 2px, rgba(135, 206, 235, 0.15) 1px, transparent 0);
+            background-size: 40px 40px;
+        }
+        .transition-form {
+            transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .hidden-form {
+            display: none;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        .active-form {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex items-center justify-center p-4 md:p-10 relative overflow-hidden bg-pattern">
+<!-- Atmospheric Animated Background Background -->
+<div class="absolute inset-0 z-0 opacity-40 pointer-events-none">
+
+</div>
+<!-- Main Container: Bento-style split layout -->
+<main class="relative z-10 w-full max-w-[1100px] grid md:grid-cols-2 gap-8 items-stretch min-h-[680px]">
+<!-- Left Side: Illustrative & Branding -->
+<div class="hidden md:flex flex-col justify-between p-12 bg-primary-container/20 rounded-lg border border-white/40 glass-card relative overflow-hidden">
+<div class="relative z-10">
+<div class="flex items-center gap-3 mb-12">
+<div class="w-12 h-12 rounded-full bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">psychology</span>
+</div>
+<span class="font-headline-md text-headline-md text-primary tracking-tight">Cura</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-primary mb-6 leading-tight">
+                    Your journey to <br/><span class="text-secondary">mental clarity</span> starts here.
+                </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-[320px]">
+                    Experience a companion that listens, understands, and grows with you through every mood.
+                </p>
+</div>
+<div class="relative z-10 mt-12 bg-white/40 p-6 rounded-lg border border-white/60">
+<div class="flex gap-2 mb-4">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<p class="italic text-on-surface-variant font-body-md mb-2">"Cura has helped me navigate through my most stressful weeks with grace and empathy."</p>
+<span class="text-label-md font-label-md text-primary">— Sarah J., Member since 2023</span>
+</div>
+<!-- Abstract Decorative Element -->
+<div class="absolute bottom-[-10%] right-[-10%] w-[300px] h-[300px] bg-secondary-container/30 rounded-full blur-[80px]"></div>
+<div class="absolute top-[20%] right-[-5%] w-[150px] h-[150px] bg-primary/10 rounded-full blur-[40px]"></div>
+</div>
+<!-- Right Side: Interaction (Forms) -->
+<div class="bg-surface-container-lowest rounded-lg soft-shadow p-8 md:p-12 flex flex-col justify-center border border-white/60">
+<!-- Mobile Brand Logo -->
+<div class="md:hidden flex items-center justify-center gap-2 mb-8">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-[20px]" style="font-variation-settings: 'FILL' 1;">psychology</span>
+</div>
+<span class="font-headline-md text-headline-md text-primary">Cura</span>
+</div>
+<!-- Tab Switcher -->
+<div class="flex bg-surface-container-low p-1 rounded-full mb-10 w-fit mx-auto md:mx-0">
+<button class="px-8 py-2.5 rounded-full text-label-md transition-all duration-300 bg-white text-primary shadow-sm" id="tab-login" onclick="switchForm('login')">
+                    Login
+                </button>
+<button class="px-8 py-2.5 rounded-full text-label-md transition-all duration-300 text-on-surface-variant hover:text-primary" id="tab-signup" onclick="switchForm('signup')">
+                    Sign Up
+                </button>
+</div>
+<!-- Login Form Container -->
+<div class="active-form transition-form" id="form-login">
+<header class="mb-8">
+<h2 class="font-headline-md text-headline-md text-on-background mb-2">Welcome Back</h2>
+<p class="text-on-surface-variant">Please enter your details to continue your session.</p>
+</header>
+<form class="space-y-5" onsubmit="event.preventDefault()">
+<div class="space-y-2">
+<label class="text-label-sm font-label-sm text-on-surface-variant ml-4">Email Address</label>
+<input class="w-full px-6 py-4 rounded-full bg-surface border-none ring-1 ring-outline-variant/30 focus:ring-2 focus:ring-primary-container outline-none transition-all input-inset" placeholder="hello@cura.ai" type="email"/>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-center px-4">
+<label class="text-label-sm font-label-sm text-on-surface-variant">Password</label>
+<a class="text-label-sm font-label-sm text-primary hover:underline" href="#">Forgot?</a>
+</div>
+<input class="w-full px-6 py-4 rounded-full bg-surface border-none ring-1 ring-outline-variant/30 focus:ring-2 focus:ring-primary-container outline-none transition-all input-inset" placeholder="••••••••" type="password"/>
+</div>
+<div class="flex items-center gap-3 px-4 py-2">
+<input class="w-5 h-5 rounded-md border-outline-variant text-primary focus:ring-primary" id="remember" type="checkbox"/>
+<label class="text-body-md text-on-surface-variant cursor-pointer" for="remember">Remember me for 30 days</label>
+</div>
+<button class="w-full py-4 rounded-full bg-primary text-white font-label-md shadow-lg shadow-primary/20 hover:bg-on-primary-container hover:scale-[1.01] active:scale-95 transition-all mt-4">
+                        Login to Account
+                    </button>
+</form>
+<div class="relative my-8">
+<div class="absolute inset-0 flex items-center"><div class="w-full border-t border-outline-variant/20"></div></div>
+<div class="relative flex justify-center text-label-sm uppercase"><span class="bg-surface-container-lowest px-4 text-on-tertiary-fixed-variant">Or continue with</span></div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<button class="flex items-center justify-center gap-3 py-3 px-4 rounded-full border border-outline-variant/30 hover:bg-surface-container transition-colors">
+<img alt="Google" class="w-4 h-4" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDlhLQDXd8w65k6DcdG8b8ZJJieVQKUQT1LSGAkTDu9JArZZmlye3AOIu62GcEtsOu_g42OP93baM9XJ5gb7NaqChIZKcBhGLiRIqLE9FGSyhjHG2sZ-yOFLQSbB27-8BrBuXsGOZkbkQowZoE7tQzcYHAWVZuCoN0gLRkWo-QV77KKBINWNVnD10FuJEOWrfIBHFiOYyGb2vfrbz0iWBgpVz8tMGzS2Ugckax7vdIduLY2SE2-6rjOsDt_7USzOxU3xUKgeEsEIMCD"/>
+<span class="text-label-sm">Google</span>
+</button>
+<button class="flex items-center justify-center gap-3 py-3 px-4 rounded-full border border-outline-variant/30 hover:bg-surface-container transition-colors">
+<img alt="Apple" class="w-4 h-4" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6OyYUcmjj8PnJs-8VC8K6mmr3ryIe68NTm5UczgiVdMUNmH5yPh6kXzB_IFlFvEhE-o1Fyas3VDIAfrL3l6rpTOCsGn7CJYsY0V-CsDInaCiRFtlVXBDwi_0wPcTejYwSMOimn87UPMTr87u11lFWrb3DgvT5pclFWw7dJejcR1RulvT7kdUtBEaAp_5-xXDy3xGyDNhMYbt71BWbmuOlwXIWuosNgSnPjC696UZsk1eAccnDAb-4IffF2Dol7bPuc5LdmLBZydVF"/>
+<span class="text-label-sm">Apple ID</span>
+</button>
+</div>
+</div>
+<!-- Signup Form Container -->
+<div class="hidden-form transition-form" id="form-signup">
+<header class="mb-8">
+<h2 class="font-headline-md text-headline-md text-on-background mb-2">Create Account</h2>
+<p class="text-on-surface-variant">Start your personal wellness journey today.</p>
+</header>
+<form class="space-y-4" onsubmit="event.preventDefault()">
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-1">
+<label class="text-label-sm font-label-sm text-on-surface-variant ml-4">First Name</label>
+<input class="w-full px-6 py-3 rounded-full bg-surface border-none ring-1 ring-outline-variant/30 focus:ring-2 focus:ring-primary-container outline-none transition-all input-inset" placeholder="Sarah" type="text"/>
+</div>
+<div class="space-y-1">
+<label class="text-label-sm font-label-sm text-on-surface-variant ml-4">Last Name</label>
+<input class="w-full px-6 py-3 rounded-full bg-surface border-none ring-1 ring-outline-variant/30 focus:ring-2 focus:ring-primary-container outline-none transition-all input-inset" placeholder="Jones" type="text"/>
+</div>
+</div>
+<div class="space-y-1">
+<label class="text-label-sm font-label-sm text-on-surface-variant ml-4">Email Address</label>
+<input class="w-full px-6 py-3 rounded-full bg-surface border-none ring-1 ring-outline-variant/30 focus:ring-2 focus:ring-primary-container outline-none transition-all input-inset" placeholder="sarah@example.com" type="email"/>
+</div>
+<div class="space-y-1">
+<label class="text-label-sm font-label-sm text-on-surface-variant ml-4">Choose Password</label>
+<input class="w-full px-6 py-3 rounded-full bg-surface border-none ring-1 ring-outline-variant/30 focus:ring-2 focus:ring-primary-container outline-none transition-all input-inset" placeholder="Min. 8 characters" type="password"/>
+</div>
+<p class="text-[12px] text-on-tertiary-fixed-variant px-4 leading-relaxed">
+                        By clicking sign up, you agree to our <a class="text-primary underline" href="#">Privacy Policy</a> and <a class="text-primary underline" href="#">Terms of Service</a>.
+                    </p>
+<button class="w-full py-4 rounded-full bg-primary text-white font-label-md shadow-lg shadow-primary/20 hover:bg-on-primary-container hover:scale-[1.01] active:scale-95 transition-all mt-4">
+                        Get Started Free
+                    </button>
+</form>
+<div class="relative my-8">
+<div class="absolute inset-0 flex items-center"><div class="w-full border-t border-outline-variant/20"></div></div>
+<div class="relative flex justify-center text-label-sm uppercase"><span class="bg-surface-container-lowest px-4 text-on-tertiary-fixed-variant">Or sign up with</span></div>
+</div>
+<div class="flex gap-4">
+<button class="flex-1 flex items-center justify-center gap-3 py-3 px-4 rounded-full border border-outline-variant/30 hover:bg-surface-container transition-colors">
+<img alt="Google" class="w-4 h-4" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBAa9fmiQE2N57Xd8C8l85UyPAoEbLHgosVjo215u_SacBilkLX0qGBuELbUmzoU_aLPakN2vKeyuoHO0b3qOGFf1S7944gDlRwBGsjgl6UFhD_WvzlTcKKogIGptbvKiTNIWhJPMOJwdnQIiDy9Ae9Sm3y_H-Uwd0MnmtCb-VMBBNz0Rrw7017IOmCnrH5vaAVIXOa1Cqem5mrcyNeB4oh09Cdl30Je2sPeZw0FpmYG2ylcJYs8PwamGAegUsnas9xvAyreCVlI6-w"/>
+<span class="text-label-sm">Google</span>
+</button>
+<button class="flex-1 flex items-center justify-center gap-3 py-3 px-4 rounded-full border border-outline-variant/30 hover:bg-surface-container transition-colors">
+<img alt="Apple" class="w-4 h-4" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBilY4Q8Ti5kQqOhnF4LOmHAaEyr4nsJ4ZEZrVSccwd3mtWxwAIS6zgVyIKsLnWl3m_VKJGw9A8uGPYnF2GMVQ4J6EBPz8vpc7HtkKnmZoLY0avKbScMpG1sxOK6l5rNiFAzRKtiw56wq60gn1Xky1lN28oK3N2nm_lb4HEDBPlbIcwsAyr6oausPzA0LLbJDjrvq0nxL8eUCsELvgbTXFITegk_j4EgVb-HabGlnAzGAaVyw6pssiamLfVDvfnc87_dBaeylVIeDLy"/>
+<span class="text-label-sm">Apple ID</span>
+</button>
+</div>
+</div>
+<!-- Footer -->
+<footer class="mt-12 text-center">
+<p class="text-label-sm text-on-tertiary-fixed-variant">
+                    Need help? <a class="text-primary font-bold" href="#">Contact Support</a>
+</p>
+</footer>
+</div>
+</main>
+<!-- Success Feedback Overlay (Hidden by default) -->
+<div class="fixed inset-0 z-[100] bg-primary/20 backdrop-blur-md flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-500" id="success-feedback">
+<div class="bg-white p-10 rounded-lg soft-shadow text-center max-w-sm">
+<div class="w-20 h-20 bg-secondary-container text-primary rounded-full flex items-center justify-center mx-auto mb-6">
+<span class="material-symbols-outlined text-[40px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-primary mb-2">Authenticating...</h3>
+<p class="text-on-surface-variant">We're preparing your personal sanctuary.</p>
+</div>
+</div>
+<script>
+        function switchForm(type) {
+            const loginForm = document.getElementById('form-login');
+            const signupForm = document.getElementById('form-signup');
+            const loginTab = document.getElementById('tab-login');
+            const signupTab = document.getElementById('tab-signup');
+
+            if (type === 'login') {
+                loginForm.classList.add('active-form');
+                loginForm.classList.remove('hidden-form');
+                signupForm.classList.add('hidden-form');
+                signupForm.classList.remove('active-form');
+
+                loginTab.classList.add('bg-white', 'text-primary', 'shadow-sm');
+                loginTab.classList.remove('text-on-surface-variant');
+                signupTab.classList.remove('bg-white', 'text-primary', 'shadow-sm');
+                signupTab.classList.add('text-on-surface-variant');
+            } else {
+                signupForm.classList.add('active-form');
+                signupForm.classList.remove('hidden-form');
+                loginForm.classList.add('hidden-form');
+                loginForm.classList.remove('active-form');
+
+                signupTab.classList.add('bg-white', 'text-primary', 'shadow-sm');
+                signupTab.classList.remove('text-on-surface-variant');
+                loginTab.classList.remove('bg-white', 'text-primary', 'shadow-sm');
+                loginTab.classList.add('text-on-surface-variant');
+            }
+        }
+
+        // Simple mock interaction for the primary buttons
+        document.querySelectorAll('button').forEach(btn => {
+            if (btn.innerText.includes('Login') || btn.innerText.includes('Started')) {
+                btn.addEventListener('click', () => {
+                    const feedback = document.getElementById('success-feedback');
+                    feedback.style.opacity = '1';
+                    feedback.style.pointerEvents = 'auto';
+                    
+                    setTimeout(() => {
+                        feedback.style.opacity = '0';
+                        feedback.style.pointerEvents = 'none';
+                    }, 2000);
+                });
+            }
+        });
+
+        // Background floating bubbles animation logic
+        function createAtmosphericBubble() {
+            const bubble = document.createElement('div');
+            const size = Math.random() * 150 + 50;
+            bubble.style.width = `${size}px`;
+            bubble.style.height = `${size}px`;
+            bubble.style.left = `${Math.random() * 100}%`;
+            bubble.style.top = `${Math.random() * 100}%`;
+            bubble.style.background = 'radial-gradient(circle, rgba(135,206,235,0.15) 0%, rgba(135,206,235,0) 70%)';
+            bubble.style.borderRadius = '50%';
+            bubble.style.position = 'absolute';
+            bubble.style.zIndex = '1';
+            bubble.style.filter = 'blur(30px)';
+            bubble.className = 'animate-pulse pointer-events-none';
+            document.body.appendChild(bubble);
+
+            // Drift effect
+            let posX = parseFloat(bubble.style.left);
+            let posY = parseFloat(bubble.style.top);
+            let velX = (Math.random() - 0.5) * 0.02;
+            let velY = (Math.random() - 0.5) * 0.02;
+
+            function animate() {
+                posX += velX;
+                posY += velY;
+                if(posX < 0 || posX > 100) velX *= -1;
+                if(posY < 0 || posY > 100) velY *= -1;
+                bubble.style.left = `${posX}%`;
+                bubble.style.top = `${posY}%`;
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        for(let i=0; i<6; i++) {
+            createAtmosphericBubble();
+        }
+    </script>
+</body></html>

@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+
+<html class="scroll-smooth" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Cura AI | Your Empathetic Companion</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&amp;family=Nunito+Sans:ital,wght@0,200..1000;1,200..1000&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-tertiary": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "error": "#ba1a1a",
+                    "primary-fixed-dim": "#89d0ed",
+                    "surface-container-high": "#dee8ff",
+                    "outline": "#6f787d",
+                    "on-secondary-fixed-variant": "#1d4d53",
+                    "on-secondary-container": "#3b6a6f",
+                    "primary": "#0c6780",
+                    "on-error-container": "#93000a",
+                    "on-primary-fixed": "#001f29",
+                    "background": "#f9f9ff",
+                    "secondary-fixed": "#bbebf1",
+                    "tertiary-fixed": "#dbe4ea",
+                    "inverse-on-surface": "#ebf1ff",
+                    "on-tertiary-fixed-variant": "#40484d",
+                    "surface": "#f9f9ff",
+                    "tertiary-container": "#bdc5cc",
+                    "on-secondary": "#ffffff",
+                    "on-primary": "#ffffff",
+                    "on-tertiary-fixed": "#151d22",
+                    "surface-bright": "#f9f9ff",
+                    "outline-variant": "#bfc8cd",
+                    "surface-container-highest": "#d8e3fa",
+                    "surface-tint": "#0c6780",
+                    "surface-dim": "#cfdaf1",
+                    "on-tertiary-container": "#4a5258",
+                    "on-background": "#111c2c",
+                    "secondary-fixed-dim": "#9fcfd5",
+                    "surface-container-lowest": "#ffffff",
+                    "secondary-container": "#b8e8ee",
+                    "secondary": "#37656b",
+                    "surface-container": "#e7eeff",
+                    "tertiary": "#575f65",
+                    "tertiary-fixed-dim": "#bfc8ce",
+                    "on-surface-variant": "#3f484c",
+                    "on-error": "#ffffff",
+                    "surface-variant": "#d8e3fa",
+                    "on-primary-container": "#005870",
+                    "inverse-primary": "#89d0ed",
+                    "surface-container-low": "#f0f3ff",
+                    "inverse-surface": "#263142",
+                    "on-secondary-fixed": "#001f23",
+                    "primary-container": "#87ceeb",
+                    "on-primary-fixed-variant": "#004d62",
+                    "on-surface": "#111c2c",
+                    "primary-fixed": "#baeaff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "margin-mobile": "20px",
+                    "margin-desktop": "40px",
+                    "gutter": "24px",
+                    "container-max": "1200px",
+                    "unit": "8px"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Quicksand"],
+                    "body-md": ["Nunito Sans"],
+                    "label-md": ["Nunito Sans"],
+                    "label-sm": ["Nunito Sans"],
+                    "headline-md": ["Quicksand"],
+                    "body-lg": ["Nunito Sans"],
+                    "headline-lg-mobile": ["Quicksand"]
+            },
+            "fontSize": {
+                    "headline-lg": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "700"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "34px", "letterSpacing": "-0.01em", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #f9f9ff;
+            font-family: 'Nunito Sans', sans-serif;
+            overflow-x: hidden;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .squishy-hover:hover {
+            transform: scale(1.05);
+            box-shadow: 0 20px 25px -5px rgba(135, 206, 235, 0.3);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface">
+<!-- TopNavBar -->
+<nav class="sticky top-4 z-50 flex justify-between items-center px-8 py-3 rounded-full mt-4 mx-auto w-[90%] max-w-container-max bg-white/70 backdrop-blur-xl border border-white/10 shadow-[0_20px_20px_rgba(12,103,128,0.05)] transition-all" id="top-nav">
+<div class="flex items-center gap-2">
+<span class="font-headline-md text-headline-md font-bold text-primary">Cura</span>
+</div>
+<div class="hidden md:flex items-center gap-8">
+<a class="font-label-md text-label-md text-primary dark:text-primary-fixed-dim font-bold border-b-2 border-primary transition-colors" href="#">Features</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="#">Science</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="#">Pricing</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="#">Support</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="active:scale-95 transition-transform px-6 py-2 rounded-full bg-primary text-white font-label-md text-label-md squishy-hover">
+                Get Started
+            </button>
+</div>
+</nav>
+<main>
+<!-- Hero Section -->
+<section class="relative min-h-[921px] flex items-center pt-20 overflow-hidden">
+
+<div class="container mx-auto px-margin-mobile md:px-margin-desktop max-w-container-max relative z-10">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+<div class="space-y-8 text-center lg:text-left">
+<div class="inline-flex items-center px-4 py-1.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[18px] mr-2" data-icon="sparkles">spark</span>
+                            Meet your new AI mental health companion
+                        </div>
+<h1 class="font-headline-lg text-headline-lg md:text-[64px] md:leading-[72px] text-primary">
+                            Conversations that <br/><span class="text-primary-container drop-shadow-sm">truly understand you.</span>
+</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-xl mx-auto lg:mx-0">
+                            Cura is an AI-driven companion designed to provide emotional support, guidance, and a safe space for your thoughts. Always here, always listening.
+                        </p>
+<div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+<button class="w-full sm:w-auto px-10 py-4 rounded-full bg-primary text-white font-headline-md text-headline-md shadow-lg shadow-primary/20 transition-all hover:translate-y-[-2px] active:scale-95">
+                                Get Started
+                            </button>
+<button class="w-full sm:w-auto px-10 py-4 rounded-full bg-surface-container-highest text-primary font-headline-md text-headline-md transition-all hover:bg-surface-container-high active:scale-95">
+                                Learn More
+                            </button>
+</div>
+</div>
+<div class="relative flex justify-center items-center">
+<div class="absolute w-[80%] h-[80%] bg-primary-container/30 rounded-full blur-[100px] animate-pulse"></div>
+<div class="relative w-full max-w-md floating">
+<img class="w-full h-auto drop-shadow-2xl" data-alt="A 3D rendered, cute, friendly AI mascot character for a mental health app. The character has a soft, rounded, white pebble-like body with large glowing blue digital eyes that express warmth. It is sitting in a peaceful cross-legged meditative pose, surrounded by soft-focus glowing pastel spheres in a serene, sky-blue atmospheric environment. The style is ultra-high definition, minimalist, with a matte finish and soft-key lighting that evokes a sense of calm and empathy." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDVg6OQrMsnNd4NM0FPVZ9kVrOfqYGk5nqIxx-m8X09GZBg3FpJ4x_uoJqJW5n5KBuUJLQ_E2g9pYyw9WWsiHIIdaC3XLoLlFlyTIVBxZjZXCZ0YZAMtYON8HD4E72JdMPTojnsGGo2B9eawB64g-jW1OEWBsfRdmyKsOT23w_KuCTIQOd4iyoWSHg-_qU9y6Qy-QKHLauYWDThTOi-DCJCbbz4KXDixcTOce_PaKZg_yoaMj2GHzL7FgFwZUiL0hhKPx4XeQMNLAvS"/>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Features Section -->
+<section class="py-24 bg-white relative">
+<div class="container mx-auto px-margin-mobile md:px-margin-desktop max-w-container-max">
+<div class="text-center mb-16 space-y-4">
+<h2 class="font-headline-lg text-headline-lg text-primary">Thoughtfully Crafted Support</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mx-auto">
+                        Technology that feels human. We've built Cura with professional empathy at its core to ensure you feel heard, never judged.
+                    </p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<!-- Feature 1 -->
+<div class="glass-card p-8 rounded-lg border border-outline-variant/30 transition-all hover:border-primary/50 group">
+<div class="w-16 h-16 rounded-xl bg-primary-container/30 flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-[32px]" data-icon="favorite" data-weight="fill">favorite</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-primary mb-4">Deep Empathy</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                            Our LLM is fine-tuned on therapeutic principles to recognize emotional nuances and provide comforting, relevant responses.
+                        </p>
+</div>
+<!-- Feature 2 -->
+<div class="glass-card p-8 rounded-lg border border-outline-variant/30 transition-all hover:border-primary/50 group">
+<div class="w-16 h-16 rounded-xl bg-secondary-container/30 flex items-center justify-center text-secondary mb-6 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-[32px]" data-icon="lock" data-weight="fill">lock</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-primary mb-4">Privacy First</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                            Your conversations are encrypted and private. We believe your mental health journey should be for your eyes only.
+                        </p>
+</div>
+<!-- Feature 3 -->
+<div class="glass-card p-8 rounded-lg border border-outline-variant/30 transition-all hover:border-primary/50 group">
+<div class="w-16 h-16 rounded-xl bg-tertiary-container/30 flex items-center justify-center text-tertiary mb-6 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-[32px]" data-icon="mood" data-weight="fill">mood</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-primary mb-4">Daily Mood Log</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                            Track your emotional trends over time with visual insights that help you understand your triggers and triumphs.
+                        </p>
+</div>
+</div>
+</div>
+</section>
+<!-- Interactive Bento Grid Section -->
+<section class="py-24 bg-surface-container-low">
+<div class="container mx-auto px-margin-mobile md:px-margin-desktop max-w-container-max">
+<div class="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-gutter h-auto md:h-[600px]">
+<div class="md:col-span-2 md:row-span-2 rounded-xl bg-white p-10 flex flex-col justify-between overflow-hidden relative shadow-sm">
+<div class="relative z-10">
+<h2 class="font-headline-lg text-headline-lg text-primary mb-6">Designed for your peace of mind.</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant mb-8">
+                                Whether it's a late-night thought or a mid-day stressor, Cura is just a tap away with instant, calming interactions.
+                            </p>
+<ul class="space-y-4">
+<li class="flex items-center gap-3 font-label-md text-label-md text-on-surface">
+<span class="material-symbols-outlined text-primary" data-icon="check_circle">check_circle</span>
+                                    Instant 24/7 Availability
+                                </li>
+<li class="flex items-center gap-3 font-label-md text-label-md text-on-surface">
+<span class="material-symbols-outlined text-primary" data-icon="check_circle">check_circle</span>
+                                    Personalized Coping Strategies
+                                </li>
+<li class="flex items-center gap-3 font-label-md text-label-md text-on-surface">
+<span class="material-symbols-outlined text-primary" data-icon="check_circle">check_circle</span>
+                                    Guided Breathing Exercises
+                                </li>
+</ul>
+</div>
+<div class="absolute bottom-0 right-0 w-full h-full pointer-events-none opacity-20">
+
+</div>
+</div>
+<div class="md:col-span-2 rounded-xl bg-primary-container p-8 flex items-center justify-between shadow-sm group cursor-pointer overflow-hidden">
+<div>
+<h3 class="font-headline-md text-headline-md text-on-primary-container mb-2">Scientific Basis</h3>
+<p class="font-body-md text-body-md text-on-primary-container/80">Developed with clinical advisors for effective emotional support.</p>
+</div>
+<span class="material-symbols-outlined text-[48px] text-on-primary-container opacity-50 group-hover:scale-125 transition-transform" data-icon="menu_book">menu_book</span>
+</div>
+<div class="rounded-xl bg-secondary-container p-8 shadow-sm flex flex-col justify-center items-center text-center">
+<div class="text-headline-lg font-headline-lg text-on-secondary-container">98%</div>
+<div class="text-label-sm font-label-sm text-on-secondary-container/70">User Satisfaction</div>
+</div>
+<div class="rounded-xl bg-white p-8 shadow-sm flex flex-col justify-center items-center text-center border border-outline-variant/20">
+<span class="material-symbols-outlined text-[40px] text-primary mb-2" data-icon="rocket_launch">rocket_launch</span>
+<div class="text-label-md font-label-md text-primary">Fast &amp; Responsive</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Testimonials Section -->
+<section class="py-24 bg-white overflow-hidden">
+<div class="container mx-auto px-margin-mobile md:px-margin-desktop max-w-container-max">
+<div class="text-center mb-16">
+<h2 class="font-headline-lg text-headline-lg text-primary">Voices from the community</h2>
+</div>
+<div class="flex flex-wrap justify-center gap-12">
+<!-- Bubble 1 -->
+<div class="max-w-sm relative group">
+<div class="bg-surface-container-low rounded-xl p-8 shadow-sm transition-all group-hover:-translate-y-2 relative">
+<p class="font-body-md text-body-md italic text-on-surface-variant">
+                                "Cura has become my go-to when I feel overwhelmed. It doesn't judge, it just listens and offers the kindest perspectives. It feels like a warm hug in digital form."
+                            </p>
+<div class="absolute -bottom-4 left-10 w-8 h-8 bg-surface-container-low rotate-45 transform"></div>
+</div>
+<div class="mt-8 flex items-center gap-4 ml-8">
+<div class="w-12 h-12 rounded-full overflow-hidden border-2 border-primary">
+<img class="w-full h-full object-cover" data-alt="A portrait of a young woman with a peaceful expression, soft natural lighting, and a gentle smile. She is in a home setting with soft blurred greenery in the background. The visual style is warm, authentic, and modern light-mode photography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA_jvo498m9C7EpD21xeb15I7WZ74IEopy4DkQYmEaC88tUEHU3mk-K2uCF9IrlwtNU0bmQRsql_SY-KMtRr03mxARDm4lncVsAFaxhiB580J6LVzuyvD3MiOLCyLzCF_sdkn-Omc69CMj9lwrTIQ5hzIm-kqn5W2SX95dKOF1hewSz8gjWUJ3BhUQG_qjpKgH0ePN0JVpzSkEEZ33wFIuYT4WyoUPwJWo9e_avuK6vx6uukAGhxGAnlwxllyYSKdehmNe-ADL1sAI6"/>
+</div>
+<div>
+<div class="font-label-md text-label-md text-primary">Sarah J.</div>
+<div class="text-label-sm font-label-sm text-on-surface-variant">Graphic Designer</div>
+</div>
+</div>
+</div>
+<!-- Bubble 2 -->
+<div class="max-w-sm relative group">
+<div class="bg-primary-container/20 rounded-xl p-8 shadow-sm transition-all group-hover:-translate-y-2 relative">
+<p class="font-body-md text-body-md italic text-on-surface-variant">
+                                "The ease of use is what surprised me. I've tried other apps, but Cura feels truly empathetic. The science-backed insights have actually helped me manage my anxiety."
+                            </p>
+<div class="absolute -bottom-4 left-10 w-8 h-8 bg-[#eef8fc] rotate-45 transform"></div>
+</div>
+<div class="mt-8 flex items-center gap-4 ml-8">
+<div class="w-12 h-12 rounded-full overflow-hidden border-2 border-primary">
+<img class="w-full h-full object-cover" data-alt="A portrait of a professional man in his 40s looking calm and confident. He has a slight smile and is positioned against a clean, minimal, bright modern office background with soft bokeh. The lighting is crisp and professional, fitting the modern empathetic UI brand." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB1xgVbMJaIIc6boPlp6m8OyifkaR3aNzCjLl8xyG5MbLMcWzl55RRsVRLwJO910_YYBSFIFxqHFgIcsMhoeND5vLi_f5CbwNkGmd-ISB7ZjL9wapeSUM_zJkZNmwh0KnlRaPTsNNpnh23CgB4pKc2HyDqziXrRRZG0aXLphrc5kMj5Z_D0t9mqajspAvsV4-DJxzbyjj4esuOQZhpjN_zKUcW99D02jfaxOvO62MN3Vhz0PUJYV7jg-1ANbRnQry8lY8AD7rAhPXYr"/>
+</div>
+<div>
+<div class="font-label-md text-label-md text-primary">Marcus L.</div>
+<div class="text-label-sm font-label-sm text-on-surface-variant">Software Lead</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- CTA Section -->
+<section class="py-24 px-margin-mobile md:px-margin-desktop">
+<div class="max-w-container-max mx-auto bg-primary rounded-xl p-12 md:p-20 text-center relative overflow-hidden shadow-2xl">
+<div class="absolute inset-0 opacity-10">
+
+</div>
+<div class="relative z-10 space-y-8">
+<h2 class="font-headline-lg text-headline-lg text-white md:text-[48px]">Ready to feel heard?</h2>
+<p class="font-body-lg text-body-lg text-white/80 max-w-xl mx-auto">
+                        Join thousands of people who use Cura to navigate their mental health journey with ease and compassion.
+                    </p>
+<button class="px-12 py-5 rounded-full bg-white text-primary font-headline-md text-headline-md squishy-hover transition-all">
+                        Start Your First Chat
+                    </button>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full py-12 px-margin-desktop mt-auto flex flex-col items-center gap-4 bg-surface-container-highest rounded-t-xl" id="footer">
+<div class="flex items-center gap-2 mb-4">
+<span class="font-headline-md text-headline-md text-primary font-bold">Cura AI</span>
+</div>
+<div class="flex gap-8 mb-6">
+<a class="font-label-sm text-label-sm text-on-tertiary-fixed-variant hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="font-label-sm text-label-sm text-on-tertiary-fixed-variant hover:text-primary transition-colors" href="#">Terms of Service</a>
+<a class="font-label-sm text-label-sm text-on-tertiary-fixed-variant hover:text-primary transition-colors" href="#">Contact Us</a>
+</div>
+<div class="flex gap-4 mb-6">
+<a class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-all shadow-sm" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="share">share</span>
+</a>
+<a class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-all shadow-sm" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="public">public</span>
+</a>
+</div>
+<p class="font-label-sm text-label-sm text-on-tertiary-fixed-variant">© 2024 Cura AI. Made with empathy.</p>
+</footer>
+<script>
+        // Simple scroll interaction for the navbar
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('top-nav');
+            if (window.scrollY > 20) {
+                nav.classList.add('shadow-xl');
+                nav.classList.remove('shadow-[0_20px_20px_rgba(12,103,128,0.05)]');
+            } else {
+                nav.classList.remove('shadow-xl');
+                nav.classList.add('shadow-[0_20px_20px_rgba(12,103,128,0.05)]');
+            }
+        });
+
+        // Hover animation for buttons
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('mouseenter', () => {
+                btn.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+            });
+        });
+    </script>
+</body></html>

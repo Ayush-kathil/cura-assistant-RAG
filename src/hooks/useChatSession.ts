@@ -77,7 +77,10 @@ export function useChatSession() {
       .select('*')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
-    if (data) setDocuments(data);
+    if (data) {
+      setDocuments(data);
+      setActiveDocumentIds(data.map((d: any) => d.id));
+    }
   };
 
   const sendMessage = async (msg: string, parentId: string | null = null) => {

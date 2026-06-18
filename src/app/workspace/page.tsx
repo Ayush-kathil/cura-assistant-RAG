@@ -190,14 +190,14 @@ export default function WorkspacePage() {
             >
               <Menu className="w-5 h-5" />
             </button>
-            <h2 className="font-headline-md text-headline-md text-primary font-bold">
+            <h2 className="font-headline-md text-headline-md text-[#5ebce3] font-semibold">
               {currentSessionId ? chatSessions.find(s => s.id === currentSessionId)?.title || "Current Session" : "New Session"}
             </h2>
           </div>
           <div className="flex items-center gap-3">
-            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-[#f0f3ff] text-primary rounded-full font-bold">
-              <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-              <span className="text-[11px] uppercase tracking-wider">{documents.length} Docs Indexed</span>
+            <div className="hidden md:flex items-center gap-2 px-4 py-1.5 bg-[#e3f4fb] text-[#2c6e8e] rounded-full font-semibold">
+              <span className="w-2 h-2 rounded-full bg-[#1b4e6b] animate-pulse"></span>
+              <span className="text-[12px] uppercase tracking-wider">{documents.length} Docs Indexed</span>
             </div>
             <button className="w-10 h-10 rounded-full flex items-center justify-center bg-white shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
               <span className="material-symbols-outlined text-primary">more_vert</span>

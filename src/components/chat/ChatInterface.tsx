@@ -205,22 +205,28 @@ export const ChatInterface = ({
 
       <div ref={parentRef} className="flex-1 min-h-0 overflow-y-auto px-4 md:px-6 pt-20 pb-6 space-y-6 scroll-smooth custom-scrollbar">
         {threadMessages.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center text-center px-4 relative">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-blue-100 rounded-full blur-[100px] pointer-events-none opacity-50"></div>
-            <motion.img 
+          <div className="h-full flex flex-col items-center justify-center text-center px-4 relative max-w-4xl mx-auto w-full">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-b from-transparent to-[#f4f7fa] rounded-full blur-[100px] pointer-events-none opacity-50 z-0"></div>
+            
+            <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.6, type: "spring" }}
-              src="/mobile-assets/curio.png" 
-              alt="Curio AI" 
-              className="w-24 h-24 object-cover mt-12 mb-6 relative z-10"
-              style={{ animation: 'bounce 3s infinite' }}
-            />
+              className="relative z-10 w-28 h-28 bg-white rounded-3xl shadow-[0_10px_40px_rgba(0,0,0,0.06)] flex items-center justify-center mb-8 overflow-hidden"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-cyan-50 to-white opacity-50"></div>
+              <img 
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDVg6OQrMsnNd4NM0FPVZ9kVrOfqYGk5nqIxx-m8X09GZBg3FpJ4x_uoJqJW5n5KBuUJLQ_E2g9pYyw9WWsiHIIdaC3XLoLlFlyTIVBxZjZXCZ0YZAMtYON8HD4E72JdMPTojnsGGo2B9eawB64g-jW1OEWBsfRdmyKsOT23w_KuCTIQOd4iyoWSHg-_qU9y6Qy-QKHLauYWDThTOi-DCJCbbz4KXDixcTOce_PaKZg_yoaMj2GHzL7FgFwZUiL0hhKPx4XeQMNLAvS" 
+                alt="Cura AI" 
+                className="w-20 h-20 object-contain relative z-10 scale-[1.2]"
+              />
+            </motion.div>
+
             <motion.h2 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="text-2xl font-bold text-slate-900 mb-8 tracking-tight relative z-10"
+              className="text-3xl md:text-4xl font-extrabold text-[#111c2c] mb-12 tracking-tight relative z-10"
             >
               How can I help you today?
             </motion.h2>
@@ -229,7 +235,7 @@ export const ChatInterface = ({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
-              className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-2xl relative z-10"
+              className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 w-full relative z-10"
             >
               {[
                 { title: 'Summarize a document', icon: 'description', prompt: 'Can you summarize the main points of my uploaded document?' },
@@ -240,11 +246,13 @@ export const ChatInterface = ({
                 <button 
                   key={i}
                   onClick={() => { setInput(card.prompt); document.querySelector('form')?.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true })); }}
-                  className="bg-white border border-slate-100 p-4 rounded-3xl text-left hover:border-blue-200 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300 group flex flex-col gap-2 hover:-translate-y-1"
+                  className="bg-white border-0 shadow-[0_4px_20px_rgba(0,0,0,0.03)] p-6 rounded-[32px] text-left hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 group flex flex-col gap-3 min-h-[140px]"
                 >
-                  <span className="material-symbols-outlined text-blue-500 opacity-80 group-hover:opacity-100 transition-opacity">{card.icon}</span>
-                  <span className="font-bold text-slate-700 group-hover:text-blue-600 text-sm transition-colors">{card.title}</span>
-                  <span className="text-[11px] text-slate-400 truncate">{card.prompt}</span>
+                  <div className="w-10 h-10 rounded-full bg-[#e8f6f8] flex items-center justify-center text-[#2b7c8f] mb-2 group-hover:scale-110 transition-transform">
+                    <span className="material-symbols-outlined text-[20px]">{card.icon}</span>
+                  </div>
+                  <span className="font-bold text-[#111c2c] text-[15px]">{card.title}</span>
+                  <span className="text-[13px] text-gray-500 leading-relaxed pr-4">{card.prompt}</span>
                 </button>
               ))}
             </motion.div>

@@ -17,6 +17,7 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   
   const router = useRouter();
   const supabase = createClient();
@@ -74,6 +75,7 @@ export default function LoginPage() {
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
+        options: { captchaToken: captchaToken || undefined }
       });
       if (error) throw error;
       router.push("/workspace");
@@ -100,7 +102,8 @@ export default function LoginPage() {
           data: {
             first_name: firstName,
             last_name: lastName
-          }
+          },
+          captchaToken: captchaToken || undefined
         }
       });
       if (error) throw error;
@@ -243,7 +246,13 @@ export default function LoginPage() {
                   />
                 </div>
                 
-                {/* Turnstile Removed for local testing */}
+                {/* Cloudflare Turnstile */}
+                <div className="flex justify-center mt-2">
+                  <Turnstile
+                    siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA"}
+                    onSuccess={(token) => setCaptchaToken(token)}
+                  />
+                </div>
 
                 <button 
                   type="submit"
@@ -311,7 +320,13 @@ export default function LoginPage() {
                   />
                 </div>
                 
-                {/* Turnstile Removed for local testing */}
+                {/* Cloudflare Turnstile */}
+                <div className="flex justify-center mt-2">
+                  <Turnstile
+                    siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA"}
+                    onSuccess={(token) => setCaptchaToken(token)}
+                  />
+                </div>
 
                 <p className="text-[12px] text-on-tertiary-fixed-variant px-4 leading-relaxed text-gray-500">
                     By clicking sign up, you agree to our <a className="text-primary underline" href="#">Privacy Policy</a> and <a className="text-primary underline" href="#">Terms of Service</a>.

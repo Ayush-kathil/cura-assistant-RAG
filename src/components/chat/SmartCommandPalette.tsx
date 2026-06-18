@@ -118,10 +118,10 @@ export const SmartCommandPalette = ({
         )}
       </AnimatePresence>
 
-      <div className="max-w-4xl mx-auto w-full glass-panel border border-white/40 p-2 rounded-[2rem] shadow-xl flex flex-col group transition-all duration-300 focus-within:shadow-2xl focus-within:ring-2 focus-within:ring-primary/20">
-        <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-slate-100">
-          <div className="flex items-center gap-md relative">
-            <button type="button" onClick={() => setModelMenuOpen(!modelMenuOpen)} className="flex items-center gap-1 bg-blue-50 hover:bg-blue-100 text-[11px] font-bold text-blue-600 uppercase tracking-wider px-4 py-1.5 rounded-full cursor-pointer transition-all outline-none">
+      <div className="max-w-4xl mx-auto w-full bg-white border border-gray-100 p-2 rounded-[32px] shadow-[0_10px_40px_rgba(0,0,0,0.06)] flex flex-col group transition-all duration-300">
+        <div className="px-4 pt-2 pb-1">
+          <div className="flex items-center gap-2 relative">
+            <button type="button" onClick={() => setModelMenuOpen(!modelMenuOpen)} className="flex items-center gap-1 bg-[#e8f6f8] hover:bg-[#d0eff3] text-[11px] font-bold text-[#2b7c8f] uppercase tracking-wider px-4 py-1.5 rounded-full cursor-pointer transition-all outline-none">
               {selectedModel}
               <span className="material-symbols-outlined text-[14px]">expand_more</span>
             </button>
@@ -129,9 +129,9 @@ export const SmartCommandPalette = ({
               {modelMenuOpen && (
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="absolute bottom-full mb-2 left-0 w-48 bg-white border border-slate-200 rounded-3xl shadow-2xl overflow-hidden z-50">
                   {["Gemini 2.5 Flash", "Gemini 2.5 Pro", "Gemini 2.5 Flash-Lite"].map(m => (
-                    <button key={m} type="button" onClick={() => { onModelChange(m); setModelMenuOpen(false); }} className="w-full text-left px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-slate-700 hover:text-blue-700 hover:bg-blue-50 transition-colors border-b border-slate-100 last:border-0 flex items-center justify-between">
+                    <button key={m} type="button" onClick={() => { onModelChange(m); setModelMenuOpen(false); }} className="w-full text-left px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-slate-700 hover:text-[#2b7c8f] hover:bg-slate-50 transition-colors border-b border-slate-100 last:border-0 flex items-center justify-between">
                       {m}
-                      {selectedModel === m && <span className="material-symbols-outlined text-[14px] text-blue-600">check</span>}
+                      {selectedModel === m && <span className="material-symbols-outlined text-[14px] text-[#2b7c8f]">check</span>}
                     </button>
                   ))}
                 </motion.div>
@@ -139,7 +139,7 @@ export const SmartCommandPalette = ({
             </AnimatePresence>
           </div>
         </div>
-        <form onSubmit={onSubmit} className="relative flex items-center w-full">
+        <form onSubmit={onSubmit} className="relative flex items-center w-full px-2 pb-1">
           <div className={clsx("relative w-full flex items-center bg-transparent border-none transition-colors")}>
             <input 
               ref={inputRef}
@@ -149,10 +149,13 @@ export const SmartCommandPalette = ({
               onKeyDown={handleKeyDown}
               placeholder="Type your message here... (Type '/' for personas, '@' for docs)" 
               disabled={generationState !== "idle"} 
-              className="flex-grow bg-transparent border-none focus:ring-0 font-body-md text-on-surface placeholder:text-on-surface-variant/40 py-3 disabled:opacity-50" 
+              className="flex-grow bg-transparent border-none focus:ring-0 font-body-md text-gray-700 placeholder:text-gray-400 py-3 disabled:opacity-50 pl-2" 
             />
-            <button type="submit" disabled={!input.trim() || generationState !== "idle"} className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center squish-btn shadow-lg shadow-primary/20 hover:bg-primary-container hover:text-on-primary-container transition-all ml-2 disabled:opacity-50 disabled:bg-gray-300">
-              <span className="material-symbols-outlined text-[24px]" style={{fontVariationSettings: "'FILL' 1"}}>send</span>
+            <button type="button" className="p-2 text-gray-400 hover:text-gray-600 transition-colors mr-1 flex items-center justify-center">
+              <span className="material-symbols-outlined text-[24px]">mic</span>
+            </button>
+            <button type="submit" disabled={!input.trim() || generationState !== "idle"} className="w-12 h-12 rounded-full bg-[#e8f6f8] text-[#2b7c8f] flex items-center justify-center transition-all disabled:opacity-50 hover:bg-[#d0eff3]">
+              <span className="material-symbols-outlined text-[20px]" style={{fontVariationSettings: "'FILL' 1"}}>send</span>
             </button>
           </div>
         </form>
