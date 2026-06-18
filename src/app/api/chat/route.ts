@@ -95,16 +95,14 @@ export async function POST(req: NextRequest) {
 
     const persona = personaInstruction || "You are an elite AI assistant named Cura.";
 
-    const systemPrompt = `${persona} Use the provided context to answer questions accurately. 
-If the context does not contain the answer, say you do not know based on the provided document.
-Synthesize the answer fluidly. Use inline citations [Source: filename] when referencing facts.
+    const systemPrompt = `${persona} 
+${contextStr ? `Use the provided context to answer questions accurately. If the context does not contain the answer, say you do not know based on the provided document. Synthesize the answer fluidly. Use inline citations [Source: filename] when referencing facts.
 CRITICAL INSTRUCTION: The text of requested files has ALREADY been extracted and provided to you in the CONTEXT below. You MUST use the provided CONTEXT.
+CONTEXT:
+${contextStr}` : `You are a helpful and empathetic AI assistant. Answer the user's questions to the best of your ability. Treat the conversation naturally. (No specific context documents were selected.)`}
 
 IMPORTANT: At the very end of your response, you MUST provide exactly three highly relevant follow-up questions that the user might want to ask next based on your answer. Format these exactly like this, on a new line:
 ---SUGGESTIONS--- ["Question 1?", "Question 2?", "Question 3?"]
-
-CONTEXT:
-${contextStr ? contextStr : "No context documents were selected or found."}
 `;
 
     const formattedPrompt = `${systemPrompt}\nUSER QUERY: ${prompt}`;

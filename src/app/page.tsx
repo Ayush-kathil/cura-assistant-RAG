@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useEffect } from "react";
+import { motion } from "framer-motion";
+import { ScrollRevealText } from "@/components/ScrollRevealText";
 
 export default function Home() {
 
@@ -88,15 +90,21 @@ export default function Home() {
         {/* Features Section */}
         <section id="features" className="py-24 bg-white relative">
           <div className="container mx-auto px-4 md:px-10 max-w-container-max">
-            <div className="text-center mb-16 space-y-4">
-              <h2 className="font-headline-lg text-headline-lg text-primary">Thoughtfully Crafted Support</h2>
-              <p className="font-body-lg text-body-lg text-gray-600 max-w-2xl mx-auto">
-                Technology that feels human. We've built Cura with professional empathy at its core to ensure you feel heard, never judged.
-              </p>
+            <div className="text-center mb-16 space-y-4 max-w-4xl mx-auto flex justify-center">
+              <ScrollRevealText 
+                text="Thoughtfully Crafted Support. Technology that feels human. We've built Cura with professional empathy at its core to ensure you feel heard, never judged."
+                className="font-headline-lg text-headline-lg md:text-[48px] md:leading-[60px] tracking-tight text-center"
+              />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Feature 1 */}
-              <div className="glass-card p-8 rounded-lg border border-gray-200 transition-all hover:border-primary/50 group">
+              <motion.div 
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="glass-card p-8 rounded-lg border border-gray-200 transition-all hover:border-primary/50 group"
+              >
                 <div className="w-16 h-16 rounded-xl bg-primary-container/30 flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform">
                   <span className="material-symbols-outlined text-[32px]">favorite</span>
                 </div>
@@ -104,9 +112,15 @@ export default function Home() {
                 <p className="font-body-md text-body-md text-gray-600">
                   Our LLM is fine-tuned on therapeutic principles to recognize emotional nuances and provide comforting, relevant responses.
                 </p>
-              </div>
+              </motion.div>
               {/* Feature 2 */}
-              <div className="glass-card p-8 rounded-lg border border-gray-200 transition-all hover:border-primary/50 group">
+              <motion.div 
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="glass-card p-8 rounded-lg border border-gray-200 transition-all hover:border-primary/50 group"
+              >
                 <div className="w-16 h-16 rounded-xl bg-secondary-container/30 flex items-center justify-center text-secondary mb-6 group-hover:scale-110 transition-transform">
                   <span className="material-symbols-outlined text-[32px]">lock</span>
                 </div>
@@ -114,9 +128,15 @@ export default function Home() {
                 <p className="font-body-md text-body-md text-gray-600">
                   Your conversations are encrypted and private. We believe your mental health journey should be for your eyes only.
                 </p>
-              </div>
+              </motion.div>
               {/* Feature 3 */}
-              <div className="glass-card p-8 rounded-lg border border-gray-200 transition-all hover:border-primary/50 group">
+              <motion.div 
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                className="glass-card p-8 rounded-lg border border-gray-200 transition-all hover:border-primary/50 group"
+              >
                 <div className="w-16 h-16 rounded-xl bg-tertiary-container/30 flex items-center justify-center text-tertiary mb-6 group-hover:scale-110 transition-transform">
                   <span className="material-symbols-outlined text-[32px]">mood</span>
                 </div>
@@ -124,7 +144,7 @@ export default function Home() {
                 <p className="font-body-md text-body-md text-gray-600">
                   Track your emotional trends over time with visual insights that help you understand your triggers and triumphs.
                 </p>
-              </div>
+              </motion.div>
             </div>
           </div>
         </section>
@@ -133,7 +153,13 @@ export default function Home() {
         <section className="py-24 bg-[#f0f3ff]">
           <div className="container mx-auto px-4 md:px-10 max-w-container-max">
             <div className="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-6 h-auto md:h-[600px]">
-              <div className="md:col-span-2 md:row-span-2 rounded-xl bg-white p-10 flex flex-col justify-between overflow-hidden relative shadow-sm">
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5 }}
+                className="md:col-span-2 md:row-span-2 rounded-xl bg-white p-10 flex flex-col justify-between overflow-hidden relative shadow-sm"
+              >
                 <div className="relative z-10">
                   <h2 className="font-headline-lg text-headline-lg text-primary mb-6">Designed for your peace of mind.</h2>
                   <p className="font-body-lg text-body-lg text-gray-600 mb-8">
@@ -154,22 +180,40 @@ export default function Home() {
                     </li>
                   </ul>
                 </div>
-              </div>
-              <div className="md:col-span-2 rounded-xl bg-primary-container p-8 flex items-center justify-between shadow-sm group cursor-pointer overflow-hidden">
+              </motion.div>
+              <motion.div 
+                initial={{ opacity: 0, x: 50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="md:col-span-2 rounded-xl bg-primary-container p-8 flex items-center justify-between shadow-sm group cursor-pointer overflow-hidden"
+              >
                 <div>
                   <h3 className="font-headline-md text-headline-md text-[#005870] mb-2">Scientific Basis</h3>
                   <p className="font-body-md text-body-md text-[#005870]/80">Developed with clinical advisors for effective emotional support.</p>
                 </div>
                 <span className="material-symbols-outlined text-[48px] text-[#005870] opacity-50 group-hover:scale-125 transition-transform">menu_book</span>
-              </div>
-              <div className="rounded-xl bg-secondary-container p-8 shadow-sm flex flex-col justify-center items-center text-center">
+              </motion.div>
+              <motion.div 
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                className="rounded-xl bg-secondary-container p-8 shadow-sm flex flex-col justify-center items-center text-center"
+              >
                 <div className="text-headline-lg font-headline-lg text-[#3b6a6f]">98%</div>
                 <div className="text-label-sm font-label-sm text-[#3b6a6f]/70">User Satisfaction</div>
-              </div>
-              <div className="rounded-xl bg-white p-8 shadow-sm flex flex-col justify-center items-center text-center border border-gray-200">
+              </motion.div>
+              <motion.div 
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+                className="rounded-xl bg-white p-8 shadow-sm flex flex-col justify-center items-center text-center border border-gray-200"
+              >
                 <span className="material-symbols-outlined text-[40px] text-primary mb-2">rocket_launch</span>
                 <div className="text-label-md font-label-md text-primary">Fast & Responsive</div>
-              </div>
+              </motion.div>
             </div>
           </div>
         </section>
