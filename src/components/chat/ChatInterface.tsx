@@ -191,7 +191,7 @@ export const ChatInterface = ({
   };
 
   return (
-    <motion.div layout className="flex flex-col w-full h-full rounded-3xl border border-slate-200 bg-[#FAFCFF] shadow-2xl relative overflow-hidden">
+    <motion.div layout className="flex flex-col w-full h-full relative overflow-hidden bg-background">
       {threadMessages.length > 2 && (
          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 bg-white/80 backdrop-blur-md border border-slate-200 shadow-sm px-4 py-1.5 rounded-full flex gap-2 overflow-x-auto max-w-sm hide-scrollbar items-center">
             {threadMessages.filter(m => m.role === 'user').map((m, i) => (
@@ -260,8 +260,8 @@ export const ChatInterface = ({
             return (
               <div key={virtualItem.key} data-index={virtualItem.index} ref={virtualizer.measureElement} style={{ position: 'absolute', top: 0, left: 0, width: '100%', transform: `translateY(${virtualItem.start}px)` }} className="pb-6">
                 <div className={clsx("flex gap-3 md:gap-4 max-w-[95%] md:max-w-[85%]", msg.role === "user" ? "ml-auto flex-row-reverse" : "mr-auto")}>
-                  <div className={clsx("w-8 h-8 flex-shrink-0 rounded-full flex items-center justify-center mt-1", msg.role === "user" ? "bg-blue-500 text-white text-xs font-bold" : "bg-slate-100 p-1")}>
-                    {msg.role === "user" ? "U" : <img src="/mobile-assets/curio.png" alt="Curio" className="w-full h-full object-cover rounded-full p-0.5" />}
+                  <div className={clsx("w-10 h-10 flex-shrink-0 rounded-full flex items-center justify-center mt-1", msg.role === "user" ? "bg-primary text-white" : "bg-surface-container-highest")}>
+                    {msg.role === "user" ? <span className="material-symbols-outlined text-[20px]">person</span> : <span className="material-symbols-outlined text-primary text-[20px]" style={{fontVariationSettings: "'FILL' 1"}}>smart_toy</span>}
                   </div>
                   <div className="flex flex-col gap-1 w-full max-w-full">
                     {msg.orchestrationPath && msg.orchestrationPath.length > 0 && msg.role === "assistant" && (
@@ -273,7 +273,7 @@ export const ChatInterface = ({
                        </details>
                     )}
 
-                    <div className={clsx("group relative p-3 sm:p-4 rounded-2xl text-[14px] leading-relaxed font-medium transition-all duration-500", msg.role === "user" ? "bg-[#EBF3FF] text-slate-800 rounded-br-none" : "bg-white text-slate-800 shadow-sm flex flex-col rounded-bl-none")}>
+                    <div className={clsx("group relative text-[14px] leading-relaxed font-medium transition-all duration-500 message-entry p-5 rounded-lg", msg.role === "user" ? "bg-primary text-white shadow-xl shadow-primary/5" : "bg-white border border-gray-200 text-[#111c2c] shadow-[0_20px_20px_rgba(12,103,128,0.05)] flex flex-col")}>
                       {msg.role === "assistant" && generationState !== "idle" && virtualItem.index === threadMessages.length - 1 ? (
                         <div className="absolute inset-0 z-0 rounded-2xl rounded-bl-none overflow-hidden" style={{ padding: '1.5px' }}>
                            <div className="absolute inset-[-150%] animate-[spin_4s_linear_infinite] bg-[conic-gradient(from_0deg,transparent_0_280deg,rgba(59,130,246,0.6)_360deg)]" />
@@ -302,7 +302,7 @@ export const ChatInterface = ({
                         return (
                           <>
                             {msg.role === "assistant" && (
-                              <div className="flex items-center gap-2 mb-3">
+                              <div className="flex items-center gap-2 mb-3 hidden">
                                 <span className="font-bold text-slate-800 tracking-wide text-[13px]">Curio AI</span>
                               </div>
                             )}
@@ -435,7 +435,7 @@ export const ChatInterface = ({
         )}
       </div>
 
-      <div className="flex-none p-4 sticky bottom-0 z-50 bg-white/80 backdrop-blur-xl border-t border-slate-200 shrink-0">
+      <div className="flex-none p-4 sticky bottom-0 z-50 bg-background/80 backdrop-blur-xl shrink-0">
         <SmartCommandPalette 
            input={input}
            setInput={setInput}

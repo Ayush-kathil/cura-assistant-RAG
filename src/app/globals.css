@@ -1,11 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&family=Quicksand:wght@300..700&display=swap');
 @import "tailwindcss";
 @config "../../tailwind.config.ts";
 
 body {
   background-color: theme('colors.background');
-  color: theme('colors.on-surface');
+  color: theme('colors.on-background');
   overflow-x: hidden;
   min-height: 100vh;
+  font-family: theme('fontFamily.body-lg'), sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: theme('fontFamily.headline-lg'), sans-serif;
 }
 
 .material-symbols-outlined {
@@ -19,16 +25,17 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-
+/* Glassmorphism Styles for new Design System */
 .glass-card {
-  background: rgba(23, 28, 39, 0.7);
+  background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(144, 143, 160, 0.2);
+  border: 1px solid rgba(135, 206, 235, 0.2); /* Light Sky Blue border */
+  box-shadow: 0 4px 20px rgba(135, 206, 235, 0.05); /* Tinted Shadow */
 }
 
 .glass-panel {
-  background: rgba(14, 19, 30, 0.7);
+  background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
 }
@@ -40,33 +47,7 @@ body {
   border-radius: 50%;
   background: theme('colors.primary');
   cursor: pointer;
-  box-shadow: 0 0 10px rgba(192,193,255,0.5);
-}
-
-/* Mesh Gradient Background */
-.mesh-bg {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: -1;
-  background-color: var(--background);
-  background-image: 
-    radial-gradient(at 0% 0%, rgba(29, 78, 216, 0.15) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, rgba(124, 58, 237, 0.15) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, rgba(14, 165, 233, 0.15) 0px, transparent 50%),
-    radial-gradient(at 0% 100%, rgba(17, 24, 39, 0.8) 0px, transparent 50%);
-  animation: mesh-movement 20s ease-in-out infinite alternate;
-}
-
-@keyframes mesh-movement {
-  0% {
-    background-position: 0% 0%;
-  }
-  100% {
-    background-position: 100% 100%;
-  }
+  box-shadow: 0 0 10px rgba(135, 206, 235, 0.5);
 }
 
 /* Scrollbar Hide */
@@ -76,18 +57,6 @@ body {
 * {
   -ms-overflow-style: none;
   scrollbar-width: none;
-}
-
-.bg-mesh-gradient {
-  background-image: 
-    radial-gradient(at 0% 0%, rgba(29, 78, 216, 0.15) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, rgba(124, 58, 237, 0.15) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, rgba(14, 165, 233, 0.15) 0px, transparent 50%),
-    radial-gradient(at 0% 100%, rgba(17, 24, 39, 0.8) 0px, transparent 50%);
-}
-
-.animate-mesh-movement {
-  animation: mesh-movement 20s ease-in-out infinite alternate;
 }
 
 @keyframes spin-slow {
@@ -103,7 +72,7 @@ body {
   content: '';
   position: absolute;
   inset: -2px;
-  background: conic-gradient(from 0deg, transparent 0 280deg, #8b5cf6 300deg, #3b82f6 330deg, #06b6d4 360deg);
+  background: conic-gradient(from 0deg, transparent 0 280deg, #87ceeb 300deg, #b0e0e6 330deg, #f0f8ff 360deg);
   border-radius: 18px;
   z-index: -1;
   animation: spin-slow 3s linear infinite;

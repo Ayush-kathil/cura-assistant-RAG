@@ -118,7 +118,7 @@ export const SmartCommandPalette = ({
         )}
       </AnimatePresence>
 
-      <div className="w-full max-w-4xl mx-auto bg-white border border-slate-200 rounded-3xl shadow-xl transition-all duration-300 focus-within:border-blue-400 focus-within:shadow-[0_0_20px_rgba(59,130,246,0.1)] flex flex-col">
+      <div className="max-w-4xl mx-auto w-full glass-panel border border-white/40 p-2 rounded-[2rem] shadow-xl flex flex-col group transition-all duration-300 focus-within:shadow-2xl focus-within:ring-2 focus-within:ring-primary/20">
         <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-slate-100">
           <div className="flex items-center gap-md relative">
             <button type="button" onClick={() => setModelMenuOpen(!modelMenuOpen)} className="flex items-center gap-1 bg-blue-50 hover:bg-blue-100 text-[11px] font-bold text-blue-600 uppercase tracking-wider px-4 py-1.5 rounded-full cursor-pointer transition-all outline-none">
@@ -147,12 +147,12 @@ export const SmartCommandPalette = ({
               value={input} 
               onChange={(e) => setInput(e.target.value)} 
               onKeyDown={handleKeyDown}
-              placeholder="Ask a question... (Type '/' for personas, '@' for docs)" 
+              placeholder="Type your message here... (Type '/' for personas, '@' for docs)" 
               disabled={generationState !== "idle"} 
-              className="w-full bg-transparent py-4 pl-6 pr-16 text-base text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-0 focus:border-transparent border-transparent transition-all disabled:opacity-50 relative z-10 font-medium" 
+              className="flex-grow bg-transparent border-none focus:ring-0 font-body-md text-on-surface placeholder:text-on-surface-variant/40 py-3 disabled:opacity-50" 
             />
-            <button type="submit" disabled={!input.trim() || generationState !== "idle"} className="absolute right-2 p-3 min-h-[44px] min-w-[44px] flex items-center justify-center bg-blue-500 hover:bg-blue-600 disabled:bg-slate-100 disabled:text-slate-400 text-white rounded-full transition-all z-20 shadow-lg cursor-pointer">
-              <Send className="w-5 h-5 ml-0.5" />
+            <button type="submit" disabled={!input.trim() || generationState !== "idle"} className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center squish-btn shadow-lg shadow-primary/20 hover:bg-primary-container hover:text-on-primary-container transition-all ml-2 disabled:opacity-50 disabled:bg-gray-300">
+              <span className="material-symbols-outlined text-[24px]" style={{fontVariationSettings: "'FILL' 1"}}>send</span>
             </button>
           </div>
         </form>

@@ -1,65 +1,283 @@
 "use client";
 
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/utils/supabase/client";
 
-export default function UploadProPage() {
-  return (
-    <div className="min-h-screen bg-[#0A0A15] text-white p-8 font-sans">
-      <header className="flex justify-between items-center mb-16">
-        <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-amber-400 to-orange-400">
-          Nexus Pro
-        </h1>
-        <Link href="/workspace" className="px-6 py-2 bg-white/10 hover:bg-white/20 rounded-full font-medium transition-colors">
-          Back to Workspace
-        </Link>
-      </header>
+export default function UploadPage() {
+  const router = useRouter();
+  const supabase = createClient();
+  const [userEmail, setUserEmail] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [recentDocs, setRecentDocs] = useState<any[]>([]);
 
-      <div className="max-w-5xl mx-auto text-center mb-16">
-        <h2 className="text-5xl font-black mb-6">Unlock Massive PDF Power</h2>
-        <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-          Need to upload medical textbooks, extensive legal documents, or huge datasets? Our Pro tiers let you bypass the 50MB limit and process gigabytes of data instantly.
-        </p>
-      </div>
+  useEffect(() => {
+    async function loadUser() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserEmail(user.email || "");
+        // Fetch recent docs
+        const { data } = await supabase
+          .from('documents')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(3);
+        if (data) setRecentDocs(data);
+      } else {
+        router.push('/login');
+      }
+    }
+    loadUser();
+  }, [supabase, router]);
 
-      <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
-        {/* Tier 1 */}
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 hover:shadow-[0_0_30px_rgba(245,158,11,0.2)] transition-all flex flex-col">
-          <h3 className="text-2xl font-bold mb-2">1GB Capacity</h3>
-          <div className="text-4xl font-black text-amber-400 mb-6">₹100 <span className="text-sm text-gray-500 font-normal">/ upload</span></div>
-          <ul className="space-y-4 mb-8 flex-1 text-gray-300">
-            <li className="flex items-center gap-3"><span className="text-green-400">✓</span> Bypass 50MB limits</li>
-            <li className="flex items-center gap-3"><span className="text-green-400">✓</span> Lightning fast cloud processing</li>
-            <li className="flex items-center gap-3"><span className="text-green-400">✓</span> High-density RAG chunking</li>
-            <li className="flex items-center gap-3"><span className="text-green-400">✓</span> Permanent storage</li>
-          </ul>
-          <button className="w-full py-4 bg-white/10 hover:bg-white/20 rounded-2xl font-bold transition-colors">
-            Select 1GB Tier
-          </button>
-        </div>
-
-        {/* Tier 2 */}
-        <div className="bg-gradient-to-br from-amber-500/20 to-orange-600/20 backdrop-blur-xl border border-amber-500/50 rounded-3xl p-8 hover:shadow-[0_0_40px_rgba(245,158,11,0.4)] transition-all flex flex-col relative overflow-hidden">
-          <div className="absolute top-0 right-0 bg-amber-500 text-black text-xs font-bold px-4 py-1 rounded-bl-xl">BEST VALUE</div>
-          <h3 className="text-2xl font-bold mb-2 text-white">2GB Capacity</h3>
-          <div className="text-4xl font-black text-orange-400 mb-6">₹200 <span className="text-sm text-gray-500 font-normal">/ upload</span></div>
-          <ul className="space-y-4 mb-8 flex-1 text-gray-300">
-            <li className="flex items-center gap-3"><span className="text-green-400">✓</span> Massive 2GB limit</li>
-            <li className="flex items-center gap-3"><span className="text-green-400">✓</span> Priority cloud GPUs for processing</li>
-            <li className="flex items-center gap-3"><span className="text-green-400">✓</span> Ultra-dense RAG chunking</li>
-            <li className="flex items-center gap-3"><span className="text-green-400">✓</span> Permanent storage</li>
-          </ul>
-          <button className="w-full py-4 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 rounded-2xl font-bold transition-colors shadow-[0_0_15px_rgba(245,158,11,0.5)]">
-            Select 2GB Tier
-          </button>
-        </div>
-      </div>
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement> | any) => {
+    const file = event.target?.files?.[0] || event.dataTransfer?.files?.[0];
+    if (!file) return;
+    
+    setIsUploading(true);
+    setUploadProgress(10);
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
       
-      <div className="max-w-4xl mx-auto bg-white/5 border border-dashed border-white/20 rounded-3xl p-12 text-center cursor-pointer hover:bg-white/10 transition-colors">
-        <span className="material-symbols-outlined text-5xl text-gray-400 mb-4">cloud_upload</span>
-        <h3 className="text-xl font-bold mb-2">Drag & Drop Pro Files Here</h3>
-        <p className="text-gray-500">Supports PDF, DOCX, and TXT up to 2GB</p>
-      </div>
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
+      const filePath = `${user.id}/${fileName}`;
+      
+      setUploadProgress(40);
+      const { error: uploadError } = await supabase.storage.from('nexus_docs').upload(filePath, file);
+      if (uploadError) throw uploadError;
+      
+      setUploadProgress(70);
+      
+      const { data, error: dbError } = await supabase.from('documents').insert({
+        user_id: user.id,
+        file_name: file.name,
+        file_size_bytes: file.size,
+        storage_path: filePath,
+        vector_status: 'pending'
+      }).select().single();
+      
+      if (dbError) throw dbError;
+      
+      setRecentDocs(prev => [data, ...prev].slice(0, 3));
+      setUploadProgress(100);
+      
+    } catch (e) {
+      console.error(e);
+      alert("Failed to upload document");
+    } finally {
+      setIsUploading(false);
+      setUploadProgress(0);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    handleFileUpload(e);
+  };
+
+  const preventDefaults = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const firstName = userEmail.split('@')[0] || 'Guest';
+
+  return (
+    <div className="bg-background text-on-background font-body-md min-h-screen flex overflow-hidden">
+      
+      {/* SideNavBar Anchor */}
+      <aside className="hidden md:flex fixed left-0 top-0 h-full z-40 flex-col p-4 bg-surface-container-low h-screen w-64 rounded-r-lg shadow-lg shadow-primary/5 transition-all duration-300 ease-in-out">
+        <div className="flex items-center gap-3 mb-10 px-2">
+          <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center">
+            <span className="material-symbols-outlined text-primary" data-icon="clinical_notes">clinical_notes</span>
+          </div>
+          <div>
+            <h1 className="font-headline-md text-headline-md text-primary leading-tight">Cura AI</h1>
+            <p className="text-[10px] font-label-sm text-on-surface-variant uppercase tracking-wider">Your friendly companion</p>
+          </div>
+        </div>
+        
+        <nav className="flex-1 space-y-2">
+          <Link href="/workspace" className="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-secondary-container/50 transition-all rounded-xl font-body-md text-body-md">
+            <span className="material-symbols-outlined" data-icon="chat_bubble">chat_bubble</span>
+            <span>Chat</span>
+          </Link>
+          <Link href="/dashboard" className="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-secondary-container/50 transition-all rounded-xl font-body-md text-body-md">
+            <span className="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+            <span>Dashboard</span>
+          </Link>
+          <Link href="/upload-pro" className="flex items-center gap-4 px-4 py-3 bg-primary-container text-on-primary-container rounded-xl font-body-md text-body-md">
+            <span className="material-symbols-outlined" data-icon="auto_stories" style={{fontVariationSettings: "'FILL' 1"}}>auto_stories</span>
+            <span className="font-bold">Resources</span>
+          </Link>
+        </nav>
+        
+        <div className="mt-auto">
+          <Link href="/workspace" className="w-full py-4 bg-primary text-white rounded-xl font-label-md flex items-center justify-center gap-2 active:scale-95 transition-transform shadow-md">
+            <span className="material-symbols-outlined" data-icon="add">add</span>
+            New Conversation
+          </Link>
+        </div>
+      </aside>
+
+      {/* Main Content Canvas */}
+      <main className="flex-1 ml-0 md:ml-64 relative overflow-y-auto h-screen custom-scrollbar bg-background">
+        
+        {/* Floating Header */}
+        <header className="sticky top-0 z-30 px-margin-desktop py-6 flex justify-between items-center bg-background/80 backdrop-blur-md">
+          <div>
+            <h2 className="font-headline-lg text-headline-lg text-primary">Upload Documents</h2>
+            <p className="font-body-md text-on-surface-variant">Share medical reports or health logs with Cura for personalized insights.</p>
+          </div>
+          <div className="flex items-center gap-4">
+            <button className="p-2 rounded-full hover:bg-surface-container transition-colors">
+              <span className="material-symbols-outlined text-primary" data-icon="notifications">notifications</span>
+            </button>
+            <div className="w-10 h-10 rounded-full border-2 border-primary-container overflow-hidden bg-white flex items-center justify-center font-bold text-primary">
+              {firstName.charAt(0).toUpperCase()}
+            </div>
+          </div>
+        </header>
+        
+        <section className="px-margin-desktop pb-12 max-w-5xl mx-auto space-y-10">
+          
+          {/* Upload Area */}
+          <div 
+            onDragEnter={preventDefaults}
+            onDragOver={preventDefaults}
+            onDragLeave={preventDefaults}
+            onDrop={handleDrop}
+            onClick={() => fileInputRef.current?.click()}
+            className="relative overflow-hidden glass-panel rounded-xl p-12 flex flex-col items-center justify-center border-4 border-dashed border-primary-container/40 transition-all duration-300 group cursor-pointer hover:border-primary/50"
+          >
+            <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" accept=".pdf,.txt,.md" />
+            
+            <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+            
+            <div className="relative w-24 h-24 mb-6 flex items-center justify-center">
+              {isUploading ? (
+                <div className="w-20 h-20 bg-white shadow-xl shadow-primary/10 rounded-full flex items-center justify-center">
+                  <span className="material-symbols-outlined text-4xl text-primary animate-spin">refresh</span>
+                </div>
+              ) : (
+                <>
+                  <div className="absolute inset-0 bg-primary-container/20 rounded-full animate-ping opacity-25"></div>
+                  <div className="relative w-20 h-20 bg-white shadow-xl shadow-primary/10 rounded-full flex items-center justify-center">
+                    <span className="material-symbols-outlined text-5xl text-primary animate-bounce" data-icon="upload_file">upload_file</span>
+                  </div>
+                </>
+              )}
+            </div>
+            
+            <div className="text-center space-y-2 z-10">
+              <h3 className="font-headline-md text-headline-md text-on-surface">
+                {isUploading ? `Uploading ${uploadProgress}%...` : 'Drag & Drop PDF Reports'}
+              </h3>
+              <p className="font-body-md text-on-surface-variant max-w-sm mx-auto">Upload blood work, symptom logs, or wellness PDFs. Cura will analyze them with you.</p>
+            </div>
+            
+            <div className="mt-8 flex gap-4 z-10">
+              <button disabled={isUploading} className="px-6 py-3 bg-primary text-white rounded-full font-label-md hover:shadow-lg active:scale-95 transition-all disabled:opacity-50">
+                Browse Files
+              </button>
+            </div>
+            <p className="mt-6 text-label-sm text-on-tertiary-fixed-variant">Maximum file size: 25MB • Supported format: .PDF</p>
+          </div>
+          
+          {/* Recently Uploaded */}
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h4 className="font-headline-md text-headline-md text-primary">Recent Analysis</h4>
+              <button className="text-label-md text-primary hover:underline">View All</button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              
+              {recentDocs.length === 0 ? (
+                <div className="border-2 border-dashed border-outline-variant/30 rounded-lg p-5 flex items-center justify-center gap-3 text-on-surface-variant">
+                  <span className="font-label-md">No documents uploaded yet</span>
+                </div>
+              ) : (
+                recentDocs.map((doc, idx) => (
+                  <div key={idx} className="glass-panel rounded-lg p-5 flex items-start gap-4 hover:shadow-xl transition-all border border-transparent hover:border-primary-container/50">
+                    <div className="w-12 h-12 bg-surface-container-highest rounded-xl flex items-center justify-center shrink-0">
+                      <span className="material-symbols-outlined text-primary">picture_as_pdf</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-start mb-1">
+                        <h5 className="font-label-md text-on-surface truncate">{doc.file_name}</h5>
+                      </div>
+                      <p className="text-label-sm text-on-tertiary-fixed-variant mb-3">{(doc.file_size_bytes / 1024 / 1024).toFixed(2)} MB</p>
+                      
+                      <div className="flex items-center gap-2 py-1 px-3 bg-primary-container/30 w-fit rounded-full">
+                        <span className="material-symbols-outlined text-sm text-on-primary-container" style={{fontVariationSettings: "'FILL' 1"}}>check_circle</span>
+                        <span className="text-[11px] font-bold text-on-primary-container uppercase">Ready</span>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+              
+              <div onClick={() => fileInputRef.current?.click()} className="border-2 border-dashed border-outline-variant/30 rounded-lg p-5 flex items-center justify-center gap-3 text-on-surface-variant hover:border-primary-container transition-colors cursor-pointer group">
+                <span className="material-symbols-outlined text-3xl group-hover:scale-110 transition-transform">add_circle</span>
+                <span className="font-label-md">Upload more for history</span>
+              </div>
+            </div>
+          </div>
+          
+          {/* Educational Tip */}
+          <div className="p-8 rounded-xl bg-gradient-to-br from-primary-container/40 to-secondary-container/20 flex flex-col md:flex-row items-center gap-8 relative overflow-hidden">
+            <div className="absolute -right-12 -bottom-12 w-48 h-48 bg-white/20 rounded-full blur-3xl"></div>
+            <div className="w-24 h-24 shrink-0 rounded-full bg-white flex items-center justify-center shadow-lg">
+              <span className="material-symbols-outlined text-4xl text-primary" style={{fontVariationSettings: "'FILL' 1"}}>lock</span>
+            </div>
+            <div className="space-y-2">
+              <h4 className="font-headline-md text-headline-md text-primary">Your Privacy First</h4>
+              <p className="font-body-md text-on-primary-container">All uploaded documents are encrypted and only accessible to you. Cura uses local-first processing for sensitive medical metadata to ensure your data never leaves the secure environment without your consent.</p>
+            </div>
+          </div>
+        </section>
+        
+        {/* Footer */}
+        <footer className="w-full py-12 px-margin-desktop mt-auto flex flex-col items-center gap-4 bg-surface-container-highest rounded-t-xl">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+              <span className="material-symbols-outlined text-primary text-sm" data-icon="clinical_notes">clinical_notes</span>
+            </div>
+            <span className="font-headline-md text-primary">Cura AI</span>
+          </div>
+          <nav className="flex gap-8">
+            <a className="font-label-sm text-on-tertiary-fixed-variant hover:text-primary transition-colors" href="#">Privacy Policy</a>
+            <a className="font-label-sm text-on-tertiary-fixed-variant hover:text-primary transition-colors" href="#">Terms of Service</a>
+            <a className="font-label-sm text-on-tertiary-fixed-variant hover:text-primary transition-colors" href="#">Contact Us</a>
+          </nav>
+          <p className="font-label-sm text-on-tertiary-fixed-variant opacity-70">© 2024 Cura AI. Made with empathy.</p>
+        </footer>
+      </main>
+      
+      {/* Mobile Navigation */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-xl border-t border-primary-container/20 flex items-center justify-around px-4 z-50">
+        <Link href="/workspace" className="flex flex-col items-center gap-1 text-on-surface-variant">
+          <span className="material-symbols-outlined">chat_bubble</span>
+          <span className="text-[10px] font-bold">Chat</span>
+        </Link>
+        <Link href="/dashboard" className="flex flex-col items-center gap-1 text-on-surface-variant">
+          <span className="material-symbols-outlined">dashboard</span>
+          <span className="text-[10px] font-bold">Dash</span>
+        </Link>
+        <Link href="/upload-pro" className="flex flex-col items-center gap-1 text-primary">
+          <span className="material-symbols-outlined" style={{fontVariationSettings: "'FILL' 1"}}>auto_stories</span>
+          <span className="text-[10px] font-bold">Docs</span>
+        </Link>
+      </nav>
     </div>
   );
 }

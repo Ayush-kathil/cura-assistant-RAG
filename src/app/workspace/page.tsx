@@ -43,8 +43,6 @@ export default function WorkspacePage() {
     router.push('/login');
   };
 
-
-
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -105,175 +103,132 @@ export default function WorkspacePage() {
     }
   };
 
-  return (
-    <div className="bg-slate-50 text-slate-900 font-sans overflow-hidden min-h-[100dvh]">
-      <div className="flex h-[100dvh] overflow-hidden md:p-2 md:gap-2 relative bg-slate-100">
-        
-        {/* Overlay for mobile sidebar */}
-        {isSidebarOpen && (
-          <div 
-            className="md:hidden absolute inset-0 bg-slate-900/20 z-30 backdrop-blur-sm transition-opacity"
-            onClick={() => setIsSidebarOpen(false)}
-          />
-        )}
+  const firstName = userEmail?.split('@')[0] || 'Guest';
 
-        {/* Left Sidebar */}
-        <aside className={`bg-white border-r md:border border-slate-200 absolute md:relative h-full w-[280px] z-40 flex flex-col py-6 overflow-hidden md:rounded-3xl shadow-sm transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
-          <div className="px-6 mb-6">
-            <div className="flex items-center gap-3 bg-blue-50 p-3 rounded-xl border border-blue-100">
-              <div className="w-8 h-8 rounded bg-blue-500 flex items-center justify-center text-white font-bold">C</div>
-              <div className="flex-1 overflow-hidden">
-                <p className="font-bold text-sm text-blue-900 truncate">Curio Workspace</p>
-                <p className="text-[10px] text-blue-600 uppercase tracking-widest">Personal</p>
-              </div>
+  return (
+    <div className="font-body-md text-body-md bg-[#f9f9ff] text-[#111c2c] min-h-screen flex overflow-x-hidden">
+      
+      {/* Overlay for mobile sidebar */}
+      {isSidebarOpen && (
+        <div 
+          className="md:hidden absolute inset-0 bg-slate-900/20 z-30 backdrop-blur-sm transition-opacity"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      {/* SideNavBar */}
+      <aside className={`fixed md:relative left-0 top-0 h-full z-40 flex flex-col p-4 bg-white border-r border-gray-200 w-64 shadow-lg shadow-primary/5 transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+        <div className="flex flex-col gap-6 h-full">
+          <div className="px-2 pt-4">
+            <h1 className="font-headline-md text-headline-md text-primary font-bold">Cura AI</h1>
+            <p className="font-label-sm text-label-sm text-gray-500">Your friendly companion</p>
+          </div>
+          <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-xl">
+            <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center overflow-hidden">
+              <span className="material-symbols-outlined text-primary">person</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="font-label-md text-gray-800 capitalize">{firstName}</span>
+              <span className="text-[10px] uppercase tracking-wider text-primary font-bold">Free Plan</span>
             </div>
           </div>
+          
+          <button onClick={() => { clearChat(); setIsSidebarOpen(false); }} className="flex items-center justify-center gap-2 bg-primary text-white font-bold py-3 rounded-xl shadow-lg shadow-primary/20 hover:opacity-90 active:scale-95 transition-transform">
+            <span className="material-symbols-outlined">add</span>
+            <span className="font-label-md">New Chat</span>
+          </button>
 
-          <div className="px-6 mb-4">
-            <button onClick={() => { clearChat(); setIsSidebarOpen(false); }} className="w-full flex items-center justify-center gap-2 bg-blue-500 text-white font-bold text-sm py-3 rounded-2xl active:scale-95 transition-all hover:bg-blue-600 shadow-md">
-              <span className="material-symbols-outlined text-[18px]">add_comment</span>
-              New Chat
-            </button>
-          </div>
+          <nav className="flex-1 flex flex-col gap-2 mt-2">
+            <Link href="/dashboard" className="flex items-center gap-3 px-4 py-3 text-gray-500 hover:bg-gray-100 rounded-xl transition-all duration-300 ease-in-out">
+              <span className="material-symbols-outlined">dashboard</span>
+              <span className="font-label-md">Dashboard</span>
+            </Link>
+            <Link href="/workspace" className="flex items-center gap-3 px-4 py-3 bg-[#e7eeff] text-[#005870] rounded-xl transition-all duration-300 ease-in-out font-bold">
+              <span className="material-symbols-outlined" style={{fontVariationSettings: "'FILL' 1"}}>chat_bubble</span>
+              <span className="font-label-md">Chat</span>
+            </Link>
+            <Link href="/upload-pro" className="flex items-center gap-3 px-4 py-3 text-gray-500 hover:bg-gray-100 rounded-xl transition-all duration-300 ease-in-out">
+              <span className="material-symbols-outlined">upload_file</span>
+              <span className="font-label-md">Upload Data</span>
+            </Link>
+          </nav>
 
-          <div className="flex-1 overflow-y-auto px-4 space-y-6 relative z-10 custom-scrollbar">
-            {/* Knowledge Base Section */}
-            <div>
-              <div className="flex items-center justify-between mb-3 px-2">
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Knowledge Base</span>
-                <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-bold">{documents.length}</span>
-              </div>
-              
-              <div 
-                onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-slate-200 rounded-2xl p-4 text-center cursor-pointer hover:bg-slate-50 hover:border-blue-400 transition-all mb-3 group relative overflow-hidden"
-              >
-                {isUploading ? (
-                  <div className="flex flex-col items-center gap-2">
-                    <span className="material-symbols-outlined text-blue-500 animate-spin">refresh</span>
-                    <span className="text-xs font-bold text-blue-600">Uploading {uploadProgress}%</span>
-                    <div className="w-full h-1 bg-slate-100 rounded-full mt-1 overflow-hidden">
-                      <div className="h-full bg-blue-500 transition-all duration-300" style={{ width: `${uploadProgress}%` }}></div>
+          <div className="mt-auto pt-4 border-t border-gray-100 overflow-y-auto max-h-[250px] custom-scrollbar pr-2">
+            <h3 className="text-label-sm font-bold text-gray-400 uppercase tracking-wider mb-4 px-2">Recent Chats</h3>
+            <div className="flex flex-col gap-1">
+              {chatSessions.length === 0 ? (
+                <div className="px-2 py-2 text-label-md text-gray-400">No history yet</div>
+              ) : (
+                chatSessions.map(session => (
+                  <div key={session.id} className="flex justify-between items-center group">
+                    <div 
+                      onClick={() => { loadChatSession(session.id); setIsSidebarOpen(false); }} 
+                      className={`px-3 py-2 text-label-md rounded-xl truncate cursor-pointer flex-1 transition-all ${currentSessionId === session.id ? 'bg-[#e7eeff] text-[#005870] font-bold' : 'text-gray-500 hover:text-primary hover:bg-gray-50'}`}
+                    >
+                      {session.title}
                     </div>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center gap-1 opacity-70 group-hover:opacity-100 transition-opacity">
-                    <span className="material-symbols-outlined text-slate-400 group-hover:text-blue-500 transition-colors">cloud_upload</span>
-                    <span className="text-xs font-bold text-slate-600 group-hover:text-blue-600">Upload PDF</span>
-                  </div>
-                )}
-                <input 
-                  type="file" 
-                  ref={fileInputRef} 
-                  onChange={handleFileUpload} 
-                  className="hidden" 
-                  accept=".pdf,.txt,.md" 
-                />
-              </div>
-
-              <div className="space-y-1">
-                {documents.slice(0, 3).map(doc => (
-                  <div key={doc.id} className="group text-slate-600 bg-white border border-slate-100 rounded-xl p-2.5 flex items-center gap-2 text-xs hover:border-slate-200 transition-all shadow-sm">
-                    <span className="material-symbols-outlined text-[16px] text-blue-500">description</span>
-                    <span className="truncate flex-1 font-medium">{doc.file_name}</span>
-                    <button onClick={() => handleDeleteDocument(doc.id, doc.storage_path)} className="opacity-100 md:opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-all">
-                      <span className="material-symbols-outlined text-[14px]">delete</span>
+                    <button onClick={(e) => { e.stopPropagation(); deleteChatSession(session.id); }} className="opacity-0 group-hover:opacity-100 p-1.5 text-gray-400 hover:text-red-500 transition-opacity">
+                      <span className="material-symbols-outlined text-[16px]">delete</span>
                     </button>
                   </div>
-                ))}
-                {documents.length > 3 && (
-                  <div className="text-center mt-2">
-                    <button className="text-[10px] font-bold text-blue-500 hover:text-blue-700 uppercase tracking-wider">View All ({documents.length})</button>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Chat History Section */}
-            <div>
-              <div className="mb-3 px-2">
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Chat History</span>
-              </div>
-              <div className="space-y-1">
-                {chatSessions.length === 0 ? (
-                  <div className="px-2 py-2 text-center">
-                    <span className="text-xs font-medium text-slate-400">No history yet</span>
-                  </div>
-                ) : (
-                  chatSessions.map(session => (
-                    <div key={session.id} onClick={() => { loadChatSession(session.id); setIsSidebarOpen(false); }} className={`text-slate-600 hover:bg-slate-50 rounded-2xl p-2.5 flex items-center justify-between cursor-pointer transition-all group ${currentSessionId === session.id ? 'bg-blue-50 text-blue-700 font-medium' : ''}`}>
-                      <div className="flex items-center gap-2 overflow-hidden">
-                        <span className="material-symbols-outlined text-[16px]">chat</span>
-                        <span className="text-xs truncate font-medium">{session.title}</span>
-                      </div>
-                      <button onClick={(e) => { e.stopPropagation(); deleteChatSession(session.id); }} className="opacity-100 md:opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-all">
-                        <span className="material-symbols-outlined text-[14px]">delete</span>
-                      </button>
-                    </div>
-                  ))
-                )}
-              </div>
+                ))
+              )}
             </div>
           </div>
+        </div>
+      </aside>
 
-          <div className="mt-auto px-6 pt-4 border-t border-slate-100 pb-2">
-            <div className="text-center pb-2">
-               <p className="text-[10px] text-slate-400 font-medium">Developed by Kathil Softwares Limited by Ayush</p>
-            </div>
+      {/* Main Canvas Area */}
+      <main className="flex-1 flex flex-col relative bg-white md:bg-transparent min-w-0 md:rounded-l-3xl shadow-[-20px_0_40px_rgba(12,103,128,0.03)] border-l border-gray-200">
+        
+        {/* Chat Header */}
+        <header className="flex items-center justify-between px-6 py-4 md:py-6 z-20 bg-white/80 backdrop-blur-md border-b border-gray-100">
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => setIsSidebarOpen(true)}
+              className="md:hidden p-2 -ml-2 rounded-lg hover:bg-gray-100 text-gray-500"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+            <h2 className="font-headline-md text-headline-md text-primary font-bold">
+              {currentSessionId ? chatSessions.find(s => s.id === currentSessionId)?.title || "Current Session" : "New Session"}
+            </h2>
           </div>
-        </aside>
-
-        {/* Main Chat Area */}
-        <main className="flex-1 flex flex-col relative bg-[#FAFCFF] min-w-0 md:rounded-3xl md:border border-slate-200 shadow-sm overflow-hidden">
-          <header className="flex items-center justify-between px-4 md:px-6 py-3 md:py-4 border-b border-slate-200 bg-white/80 backdrop-blur-md sticky top-0 z-20">
-            <div className="flex items-center gap-3">
-              <button 
-                onClick={() => setIsSidebarOpen(true)}
-                className="md:hidden p-2 -ml-2 rounded-lg hover:bg-slate-100 text-slate-600"
-              >
-                <Menu className="w-5 h-5" />
-              </button>
-              <h2 className="text-lg font-bold tracking-tight text-slate-900 flex items-center gap-2">
-                <img src="/mobile-assets/curio.png" className="w-8 h-8 object-cover rounded-full bg-slate-100 border border-slate-200 shadow-sm p-0.5" /> 
-                <span className="hidden sm:inline">Curio AI</span>
-              </h2>
+          <div className="flex items-center gap-3">
+            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-[#f0f3ff] text-primary rounded-full font-bold">
+              <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+              <span className="text-[11px] uppercase tracking-wider">{documents.length} Docs Indexed</span>
             </div>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 px-3 py-1 bg-green-50 text-green-700 rounded-full border border-green-100">
-                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                <span className="font-bold text-[11px] uppercase tracking-wider">{documents.length} Docs Indexed</span>
-              </div>
-              <div onClick={() => router.push('/workspace/profile')} className="w-9 h-9 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold shadow-sm cursor-pointer hover:bg-blue-600 transition-colors">
-                {userEmail?.[0]?.toUpperCase() || "U"}
-              </div>
-            </div>
-          </header>
-
-          <div className="flex-1 overflow-hidden relative">
-            <ChatInterface 
-              messages={messages}
-              onSendMessage={(msg, parentId) => sendMessage(msg, parentId)}
-              generationState={generationState}
-              onNewSession={clearChat}
-              documents={documents.map(d => ({ id: d.id, filename: d.file_name }))}
-              activeDocumentIds={activeDocumentIds}
-              onToggleDocument={(id) => setActiveDocumentIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])}
-              currentLeafId={currentLeafId}
-              onNavigateBranch={(id) => {}}
-              onToggleKbExplorer={() => {}}
-              personaInstruction={personaInstruction}
-              onPersonaChange={setPersonaInstruction}
-              onSetScopedDocument={(id) => id ? setActiveDocumentIds([id]) : setActiveDocumentIds([])}
-              onApproveAction={() => {}}
-              onViewArtifact={() => {}}
-              isDevMode={true}
-              selectedModel={selectedModel}
-              onModelChange={setSelectedModel}
-            />
+            <button className="w-10 h-10 rounded-full flex items-center justify-center bg-white shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+              <span className="material-symbols-outlined text-primary">more_vert</span>
+            </button>
           </div>
-        </main>
-      </div>
+        </header>
 
+        {/* ChatInterface container */}
+        <div className="flex-1 overflow-hidden relative flex flex-col">
+          <ChatInterface 
+            messages={messages}
+            onSendMessage={(msg, parentId) => sendMessage(msg, parentId)}
+            generationState={generationState}
+            onNewSession={clearChat}
+            documents={documents.map(d => ({ id: d.id, filename: d.file_name }))}
+            activeDocumentIds={activeDocumentIds}
+            onToggleDocument={(id) => setActiveDocumentIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])}
+            currentLeafId={currentLeafId}
+            onNavigateBranch={(id) => {}}
+            onToggleKbExplorer={() => {}}
+            personaInstruction={personaInstruction}
+            onPersonaChange={setPersonaInstruction}
+            onSetScopedDocument={(id) => id ? setActiveDocumentIds([id]) : setActiveDocumentIds([])}
+            onApproveAction={() => {}}
+            onViewArtifact={() => {}}
+            isDevMode={true}
+            selectedModel={selectedModel}
+            onModelChange={setSelectedModel}
+          />
+        </div>
+      </main>
     </div>
   );
 }

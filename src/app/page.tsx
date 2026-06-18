@@ -1,127 +1,206 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { useEffect } from "react";
 
 export default function Home() {
+
+  useEffect(() => {
+    // Simple scroll interaction for the navbar
+    const handleScroll = () => {
+      const nav = document.getElementById('top-nav');
+      if (nav) {
+        if (window.scrollY > 20) {
+          nav.classList.add('shadow-xl');
+          nav.classList.remove('shadow-[0_20px_20px_rgba(12,103,128,0.05)]');
+        } else {
+          nav.classList.remove('shadow-xl');
+          nav.classList.add('shadow-[0_20px_20px_rgba(12,103,128,0.05)]');
+        }
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
-    <div className="bg-[#FAFCFF] min-h-screen text-slate-900 font-sans selection:bg-blue-200">
-      
-      {/* Navigation */}
-      <nav className="fixed w-full z-50 top-0 transition-all duration-300 bg-white/80 backdrop-blur-md border-b border-slate-100">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-             <img src="/mobile-assets/curio.png" alt="Curio AI" className="w-10 h-10 object-cover rounded-full bg-slate-100 border border-slate-200 shadow-sm p-1" />
-             <span className="font-bold text-xl tracking-tight text-slate-900">Curio AI</span>
-          </div>
-          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
-            <Link href="#features" className="hover:text-blue-600 transition-colors">Features</Link>
-            <Link href="#how-it-works" className="hover:text-blue-600 transition-colors">How it Works</Link>
-            <Link href="/login" className="hover:text-blue-600 transition-colors">Sign In</Link>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link href="/login" className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2.5 rounded-full text-sm font-bold shadow-md shadow-blue-500/20 transition-all active:scale-95">
-              Get Started
-            </Link>
-          </div>
+    <div className="bg-background text-on-surface">
+      {/* TopNavBar */}
+      <nav 
+        id="top-nav"
+        className="sticky top-4 z-50 flex justify-between items-center px-8 py-3 rounded-full mt-4 mx-auto w-[90%] max-w-container-max bg-white/70 backdrop-blur-xl border border-white/10 shadow-[0_20px_20px_rgba(12,103,128,0.05)] transition-all"
+      >
+        <div className="flex items-center gap-2">
+          <span className="font-headline-md text-headline-md font-bold text-primary">Cura</span>
+        </div>
+        <div className="hidden md:flex items-center gap-8">
+          <Link href="#features" className="font-label-md text-label-md text-primary font-bold border-b-2 border-primary transition-colors">Features</Link>
+          <Link href="#science" className="font-label-md text-label-md text-gray-500 hover:text-primary transition-colors">Science</Link>
+          <Link href="#pricing" className="font-label-md text-label-md text-gray-500 hover:text-primary transition-colors">Pricing</Link>
+          <Link href="#support" className="font-label-md text-label-md text-gray-500 hover:text-primary transition-colors">Support</Link>
+        </div>
+        <div className="flex items-center gap-4">
+          <Link href="/login" className="active:scale-95 transition-transform px-6 py-2 rounded-full bg-primary text-white font-label-md text-label-md hover:scale-105 shadow-lg shadow-primary/20">
+            Get Started
+          </Link>
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <main className="relative pt-24 pb-12 md:pt-32 md:pb-20 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 flex flex-col md:flex-row items-center gap-8 md:gap-12">
-          
-          <div className="flex-1 min-w-0 w-full text-center md:text-left">
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }} 
-              animate={{ opacity: 1, y: 0 }} 
-              transition={{ duration: 0.8 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-xs font-bold uppercase tracking-wider mb-8"
-            >
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-              </span>
-              Meet your new intelligent assistant
-            </motion.div>
-            
-            <motion.h1 
-              initial={{ opacity: 0, y: 20 }} 
-              animate={{ opacity: 1, y: 0 }} 
-              transition={{ duration: 0.8, delay: 0.1 }}
-              className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight mb-4 md:mb-6 text-slate-900"
-              style={{ fontFamily: 'Geist, sans-serif' }}
-            >
-              Say hello to <span className="text-blue-500">Curio.</span>
-            </motion.h1>
-            
-
-            
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }} 
-              animate={{ opacity: 1, y: 0 }} 
-              transition={{ duration: 0.8, delay: 0.3 }}
-              className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start"
-            >
-              <Link href="/login" className="bg-blue-500 hover:bg-blue-600 text-white px-8 py-4 rounded-full text-base font-bold shadow-lg shadow-blue-500/30 transition-all active:scale-95 flex items-center justify-center gap-2">
-                Start Chatting <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-              </Link>
-            </motion.div>
+      <main>
+        {/* Hero Section */}
+        <section className="relative flex items-center pt-12 md:pt-24 pb-20 overflow-hidden">
+          <div className="container mx-auto px-4 md:px-10 max-w-container-max relative z-10">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+              <div className="space-y-8 text-center lg:text-left">
+                <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm">
+                  <span className="material-symbols-outlined text-[18px] mr-2">sparkles</span>
+                  Meet your new AI mental health companion
+                </div>
+                <h1 className="font-headline-lg text-headline-lg md:text-[64px] md:leading-[72px] text-primary">
+                  Conversations that <br/><span className="text-primary-container drop-shadow-sm">truly understand you.</span>
+                </h1>
+                <p className="font-body-lg text-body-lg text-gray-600 max-w-xl mx-auto lg:mx-0">
+                  Cura is an AI-driven companion designed to provide emotional support, guidance, and a safe space for your thoughts. Always here, always listening.
+                </p>
+                <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+                  <Link href="/login" className="w-full sm:w-auto px-10 py-4 rounded-full bg-primary text-white font-headline-md text-headline-md shadow-lg shadow-primary/20 transition-all hover:-translate-y-1 active:scale-95 text-center">
+                    Get Started
+                  </Link>
+                  <Link href="#features" className="w-full sm:w-auto px-10 py-4 rounded-full bg-[#d8e3fa] text-primary font-headline-md text-headline-md transition-all hover:bg-[#dee8ff] active:scale-95 text-center">
+                    Learn More
+                  </Link>
+                </div>
+              </div>
+              <div className="relative flex justify-center items-center">
+                <div className="absolute w-[80%] h-[80%] bg-primary-container/30 rounded-full blur-[100px] animate-pulse"></div>
+                <div className="relative w-full max-w-md" style={{animation: 'floating 3s ease-in-out infinite'}}>
+                  <img 
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuDVg6OQrMsnNd4NM0FPVZ9kVrOfqYGk5nqIxx-m8X09GZBg3FpJ4x_uoJqJW5n5KBuUJLQ_E2g9pYyw9WWsiHIIdaC3XLoLlFlyTIVBxZjZXCZ0YZAMtYON8HD4E72JdMPTojnsGGo2B9eawB64g-jW1OEWBsfRdmyKsOT23w_KuCTIQOd4iyoWSHg-_qU9y6Qy-QKHLauYWDThTOi-DCJCbbz4KXDixcTOce_PaKZg_yoaMj2GHzL7FgFwZUiL0hhKPx4XeQMNLAvS" 
+                    alt="Cura Mascot" 
+                    className="w-full h-auto drop-shadow-2xl" 
+                  />
+                </div>
+              </div>
+            </div>
           </div>
+        </section>
 
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }} 
-            animate={{ opacity: 1, scale: 1 }} 
-            transition={{ duration: 1, delay: 0.2 }}
-            className="flex-1 w-full relative flex justify-center items-center"
-          >
-             <div className="absolute w-[80%] max-w-[250px] md:max-w-[300px] aspect-square bg-blue-400/20 blur-[100px] rounded-full"></div>
-             <img src="/mobile-assets/curio.png" alt="Curio Robot 3D" className="w-full max-w-[280px] md:max-w-[400px] aspect-square object-cover mt-8 md:mt-0 animate-bounce relative z-10" style={{ animationDuration: '4s' }} />
-          </motion.div>
+        {/* Features Section */}
+        <section id="features" className="py-24 bg-white relative">
+          <div className="container mx-auto px-4 md:px-10 max-w-container-max">
+            <div className="text-center mb-16 space-y-4">
+              <h2 className="font-headline-lg text-headline-lg text-primary">Thoughtfully Crafted Support</h2>
+              <p className="font-body-lg text-body-lg text-gray-600 max-w-2xl mx-auto">
+                Technology that feels human. We've built Cura with professional empathy at its core to ensure you feel heard, never judged.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Feature 1 */}
+              <div className="glass-card p-8 rounded-lg border border-gray-200 transition-all hover:border-primary/50 group">
+                <div className="w-16 h-16 rounded-xl bg-primary-container/30 flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform">
+                  <span className="material-symbols-outlined text-[32px]">favorite</span>
+                </div>
+                <h3 className="font-headline-md text-headline-md text-primary mb-4">Deep Empathy</h3>
+                <p className="font-body-md text-body-md text-gray-600">
+                  Our LLM is fine-tuned on therapeutic principles to recognize emotional nuances and provide comforting, relevant responses.
+                </p>
+              </div>
+              {/* Feature 2 */}
+              <div className="glass-card p-8 rounded-lg border border-gray-200 transition-all hover:border-primary/50 group">
+                <div className="w-16 h-16 rounded-xl bg-secondary-container/30 flex items-center justify-center text-secondary mb-6 group-hover:scale-110 transition-transform">
+                  <span className="material-symbols-outlined text-[32px]">lock</span>
+                </div>
+                <h3 className="font-headline-md text-headline-md text-primary mb-4">Privacy First</h3>
+                <p className="font-body-md text-body-md text-gray-600">
+                  Your conversations are encrypted and private. We believe your mental health journey should be for your eyes only.
+                </p>
+              </div>
+              {/* Feature 3 */}
+              <div className="glass-card p-8 rounded-lg border border-gray-200 transition-all hover:border-primary/50 group">
+                <div className="w-16 h-16 rounded-xl bg-tertiary-container/30 flex items-center justify-center text-tertiary mb-6 group-hover:scale-110 transition-transform">
+                  <span className="material-symbols-outlined text-[32px]">mood</span>
+                </div>
+                <h3 className="font-headline-md text-headline-md text-primary mb-4">Daily Mood Log</h3>
+                <p className="font-body-md text-body-md text-gray-600">
+                  Track your emotional trends over time with visual insights that help you understand your triggers and triumphs.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
 
-        </div>
+        {/* Interactive Bento Grid Section */}
+        <section className="py-24 bg-[#f0f3ff]">
+          <div className="container mx-auto px-4 md:px-10 max-w-container-max">
+            <div className="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-6 h-auto md:h-[600px]">
+              <div className="md:col-span-2 md:row-span-2 rounded-xl bg-white p-10 flex flex-col justify-between overflow-hidden relative shadow-sm">
+                <div className="relative z-10">
+                  <h2 className="font-headline-lg text-headline-lg text-primary mb-6">Designed for your peace of mind.</h2>
+                  <p className="font-body-lg text-body-lg text-gray-600 mb-8">
+                    Whether it's a late-night thought or a mid-day stressor, Cura is just a tap away with instant, calming interactions.
+                  </p>
+                  <ul className="space-y-4">
+                    <li className="flex items-center gap-3 font-label-md text-label-md text-gray-800">
+                      <span className="material-symbols-outlined text-primary">check_circle</span>
+                      Instant 24/7 Availability
+                    </li>
+                    <li className="flex items-center gap-3 font-label-md text-label-md text-gray-800">
+                      <span className="material-symbols-outlined text-primary">check_circle</span>
+                      Personalized Coping Strategies
+                    </li>
+                    <li className="flex items-center gap-3 font-label-md text-label-md text-gray-800">
+                      <span className="material-symbols-outlined text-primary">check_circle</span>
+                      Guided Breathing Exercises
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              <div className="md:col-span-2 rounded-xl bg-primary-container p-8 flex items-center justify-between shadow-sm group cursor-pointer overflow-hidden">
+                <div>
+                  <h3 className="font-headline-md text-headline-md text-[#005870] mb-2">Scientific Basis</h3>
+                  <p className="font-body-md text-body-md text-[#005870]/80">Developed with clinical advisors for effective emotional support.</p>
+                </div>
+                <span className="material-symbols-outlined text-[48px] text-[#005870] opacity-50 group-hover:scale-125 transition-transform">menu_book</span>
+              </div>
+              <div className="rounded-xl bg-secondary-container p-8 shadow-sm flex flex-col justify-center items-center text-center">
+                <div className="text-headline-lg font-headline-lg text-[#3b6a6f]">98%</div>
+                <div className="text-label-sm font-label-sm text-[#3b6a6f]/70">User Satisfaction</div>
+              </div>
+              <div className="rounded-xl bg-white p-8 shadow-sm flex flex-col justify-center items-center text-center border border-gray-200">
+                <span className="material-symbols-outlined text-[40px] text-primary mb-2">rocket_launch</span>
+                <div className="text-label-md font-label-md text-primary">Fast & Responsive</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* CTA Section */}
+        <section className="py-24 px-4 md:px-10">
+          <div className="max-w-container-max mx-auto bg-primary rounded-xl p-12 md:p-20 text-center relative overflow-hidden shadow-2xl">
+            <div className="relative z-10 space-y-8">
+              <h2 className="font-headline-lg text-headline-lg text-white md:text-[48px]">Ready to feel heard?</h2>
+              <p className="font-body-lg text-body-lg text-white/80 max-w-xl mx-auto">
+                Join thousands of people who use Cura to navigate their mental health journey with ease and compassion.
+              </p>
+              <Link href="/login" className="inline-block px-12 py-5 rounded-full bg-white text-primary font-headline-md text-headline-md hover:scale-105 transition-all shadow-lg">
+                Start Your First Chat
+              </Link>
+            </div>
+          </div>
+        </section>
       </main>
 
-      {/* Features Section */}
-      <section id="features" className="py-24 bg-white relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-3xl md:text-5xl font-bold mb-4 text-slate-900 tracking-tight">Everything you need.</h2>
-            <p className="text-slate-500 max-w-2xl mx-auto font-medium px-4">Curio combines powerful AI with a beautiful, friendly interface that works perfectly across all your devices.</p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-[#FAFCFF] border border-slate-100 p-8 rounded-3xl shadow-sm hover:shadow-md transition-shadow">
-              <div className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center mb-6">
-                <span className="material-symbols-outlined text-blue-600 text-[24px]">chat_bubble</span>
-              </div>
-              <h3 className="text-xl font-bold mb-3 text-slate-900">Natural Conversations</h3>
-              <p className="text-slate-600 leading-relaxed text-sm">Talk to Curio like a human. It understands context, remembers your history, and provides insightful answers.</p>
-            </div>
-
-            <div className="bg-[#FAFCFF] border border-slate-100 p-8 rounded-3xl shadow-sm hover:shadow-md transition-shadow">
-              <div className="w-12 h-12 bg-green-100 rounded-2xl flex items-center justify-center mb-6">
-                <span className="material-symbols-outlined text-green-600 text-[24px]">palette</span>
-              </div>
-              <h3 className="text-xl font-bold mb-3 text-slate-900">Image Generation</h3>
-              <p className="text-slate-600 leading-relaxed text-sm">Describe what you want to see, and Curio will generate stunning images instantly using advanced generative models.</p>
-            </div>
-
-            <div className="bg-[#FAFCFF] border border-slate-100 p-8 rounded-3xl shadow-sm hover:shadow-md transition-shadow">
-              <div className="w-12 h-12 bg-purple-100 rounded-2xl flex items-center justify-center mb-6">
-                <span className="material-symbols-outlined text-purple-600 text-[24px]">devices</span>
-              </div>
-              <h3 className="text-xl font-bold mb-3 text-slate-900">Works Everywhere</h3>
-              <p className="text-slate-600 leading-relaxed text-sm">Whether you are on your laptop or mobile phone, Curio adapts seamlessly to provide the best possible experience.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Footer */}
-      <footer className="bg-slate-50 py-12 border-t border-slate-200 text-center text-slate-500 text-sm font-medium">
-        <p className="mb-2 font-bold text-blue-600">Curio AI</p>
-        <p className="text-xs text-slate-400">Developed by Kathil Softwares Limited by Ayush</p>
+      <footer className="w-full py-12 px-10 mt-auto flex flex-col items-center gap-4 bg-[#d8e3fa] rounded-t-xl">
+        <div className="flex items-center gap-2 mb-4">
+          <span className="font-headline-md text-headline-md text-primary font-bold">Cura AI</span>
+        </div>
+        <div className="flex gap-8 mb-6">
+          <a className="font-label-sm text-label-sm text-gray-600 hover:text-primary transition-colors" href="#">Privacy Policy</a>
+          <a className="font-label-sm text-label-sm text-gray-600 hover:text-primary transition-colors" href="#">Terms of Service</a>
+          <a className="font-label-sm text-label-sm text-gray-600 hover:text-primary transition-colors" href="#">Contact Us</a>
+        </div>
+        <p className="font-label-sm text-label-sm text-gray-600">© 2024 Cura AI. Made with empathy.</p>
       </footer>
     </div>
   );
