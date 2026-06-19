@@ -127,11 +127,17 @@ export function useChatSession() {
       if (!activeWorkspace) throw new Error("No active workspace selected");
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const { data: session } = await supabase.from('chat_sessions').insert({
+        const sessionPayload = {
           user_id: user.id,
           workspace_id: activeWorkspace.id,
           title: msg.substring(0, 30) + '...'
-        }).select().single();
+        };
+        console.log("[DB Write] table: chat_sessions, payload:", sessionPayload);
+        const { data: session, error: sessionError } = await supabase.from('chat_sessions').insert(sessionPayload).select().single();
+        if (sessionError) {
+          console.error("[DB Error] table: chat_sessions, error:", sessionError);
+          throw sessionError;
+        }
         if (session) {
           activeSessionId = session.id;
           setCurrentSessionId(activeSessionId);
@@ -140,7 +146,13 @@ export function useChatSession() {
       }
     }
     if (activeSessionId) {
-      await supabase.from('chat_messages').insert({ session_id: activeSessionId, role: 'user', content: msg });
+      const msgPayload = { session_id: activeSessionId, role: 'user', content: msg };
+      console.log("[DB Write] table: chat_messages (user), payload:", msgPayload);
+      const { error: msgError } = await supabase.from('chat_messages').insert(msgPayload);
+      if (msgError) {
+        console.error("[DB Error] table: chat_messages (user), error:", msgError);
+        throw msgError;
+      }
     }
 
     setGenerationState("synthesizing");
@@ -201,7 +213,13 @@ export function useChatSession() {
       setMessages(prev => prev.map(m => m.id === botMsgId ? { ...m, content: m.content + `\n\n**Error:** ${err.message}` } : m));
     } finally {
       if (activeSessionId) {
-        await supabase.from('chat_messages').insert({ session_id: activeSessionId, role: 'assistant', content: finalAssistantText });
+        const msgPayload = { session_id: activeSessionId, role: 'assistant', content: finalAssistantText };
+        console.log("[DB Write] table: chat_messages (assistant), payload:", msgPayload);
+        const { error: msgError } = await supabase.from('chat_messages').insert(msgPayload);
+        if (msgError) {
+          console.error("[DB Error] table: chat_messages (assistant), error:", msgError);
+          // don't throw in finally block as it masks original errors, but log loudly
+        }
       }
       setGenerationState("idle");
     }

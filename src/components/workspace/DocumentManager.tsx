@@ -70,33 +70,42 @@ export const DocumentManager = ({ onDocumentsProcessed, onDocumentDeleted, isPro
 
       if (storageUploadError) throw storageUploadError;
 
+      const docPayload = {
+        workspace_id: activeWorkspace.id,
+        user_id: userProfile.id,
+        file_name: activeFile.name,
+        file_size_bytes: activeFile.size,
+        storage_path: storagePathIdentifier,
+        vector_status: 'processing'
+      };
+      console.log("[DB Write] table: documents, payload:", docPayload);
       const { data: insertedDocumentRow, error: databaseInsertError } = await supabase
         .from('documents')
-        .insert({
-          workspace_id: activeWorkspace.id,
-          user_id: userProfile.id,
-          file_name: activeFile.name,
-          file_size_bytes: activeFile.size,
-          storage_path: storagePathIdentifier,
-          vector_status: 'processing'
-        })
+        .insert(docPayload)
         .select()
         .single();
 
-      if (databaseInsertError) throw databaseInsertError;
+      if (databaseInsertError) {
+        console.error("[DB Error] table: documents, error:", databaseInsertError);
+        throw databaseInsertError;
+      }
 
+      const versionPayload = {
+        document_id: insertedDocumentRow.id,
+        version_number: 1,
+        checksum: "pending_checksum"
+      };
+      console.log("[DB Write] table: document_versions, payload:", versionPayload);
       const { data: versionData, error: versionError } = await supabase
         .from('document_versions')
-        .insert({
-          document_id: insertedDocumentRow.id,
-          version_number: 1,
-          storage_path: storagePathIdentifier,
-          file_size_bytes: activeFile.size
-        })
+        .insert(versionPayload)
         .select()
         .single();
 
-      if (versionError) throw versionError;
+      if (versionError) {
+        console.error("[DB Error] table: document_versions, error:", versionError);
+        throw versionError;
+      }
 
       await supabase.from('documents').update({
         current_version_id: versionData.id

@@ -62,25 +62,34 @@ export default function UploadPage() {
       
       setUploadProgress(70);
       
-      const { data: docData, error: dbError } = await supabase.from('documents').insert({
+      const docPayload = {
         workspace_id: activeWorkspace.id,
         user_id: user.id,
         file_name: file.name,
         file_size_bytes: file.size,
         storage_path: filePath,
         vector_status: 'pending'
-      }).select().single();
+      };
+      console.log("[DB Write] table: documents, payload:", docPayload);
+      const { data: docData, error: dbError } = await supabase.from('documents').insert(docPayload).select().single();
       
-      if (dbError) throw dbError;
+      if (dbError) {
+        console.error("[DB Error] table: documents, error:", dbError);
+        throw dbError;
+      }
 
-      const { data: versionData, error: versionError } = await supabase.from('document_versions').insert({
+      const versionPayload = {
         document_id: docData.id,
         version_number: 1,
-        storage_path: filePath,
-        file_size_bytes: file.size
-      }).select().single();
+        checksum: "pending_checksum"
+      };
+      console.log("[DB Write] table: document_versions, payload:", versionPayload);
+      const { data: versionData, error: versionError } = await supabase.from('document_versions').insert(versionPayload).select().single();
 
-      if (versionError) throw versionError;
+      if (versionError) {
+        console.error("[DB Error] table: document_versions, error:", versionError);
+        throw versionError;
+      }
 
       await supabase.from('documents').update({
         current_version_id: versionData.id
@@ -103,6 +112,23 @@ export default function UploadPage() {
       setIsUploading(false);
       setUploadProgress(0);
       if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleDeleteDocument = async (docId: string, storagePath: string) => {
+    if (!confirm("Are you sure you want to delete this document?")) return;
+    
+    try {
+      const { error: dbError } = await supabase.from('documents').delete().eq('id', docId);
+      if (dbError) throw dbError;
+      
+      const { error: storageError } = await supabase.storage.from('nexus_docs').remove([storagePath]);
+      if (storageError) throw storageError;
+
+      setRecentDocs(prev => prev.filter(d => d.id !== docId));
+    } catch (e) {
+      console.error(e);
+      alert("Failed to delete document");
     }
   };
 
@@ -240,8 +266,15 @@ export default function UploadPage() {
                       <span className="material-symbols-outlined text-primary">picture_as_pdf</span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-start mb-1">
-                        <h5 className="font-label-md text-on-surface truncate">{doc.file_name}</h5>
+                      <div className="flex justify-between items-start mb-1 gap-2">
+                        <h5 className="font-label-md text-on-surface truncate flex-1">{doc.file_name}</h5>
+                        <button 
+                          onClick={() => handleDeleteDocument(doc.id, doc.storage_path)}
+                          className="text-red-500 hover:bg-red-500/10 p-1.5 rounded-full transition-colors flex-shrink-0 flex items-center justify-center"
+                          title="Delete Document"
+                        >
+                          <span className="material-symbols-outlined text-sm">delete</span>
+                        </button>
                       </div>
                       <p className="text-label-sm text-on-tertiary-fixed-variant mb-3">{(doc.file_size_bytes / 1024 / 1024).toFixed(2)} MB</p>
                       
