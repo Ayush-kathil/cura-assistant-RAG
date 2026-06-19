@@ -3,6 +3,7 @@ import { Outfit, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import QueryProvider from "@/components/providers/QueryProvider";
+import { WorkspaceProvider } from "@/contexts/WorkspaceContext";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -49,7 +50,9 @@ export default function RootLayout({
       >
         <ThemeProvider>
           <QueryProvider>
-            {children}
+            <WorkspaceProvider>
+              {children}
+            </WorkspaceProvider>
           </QueryProvider>
         </ThemeProvider>
       </body>

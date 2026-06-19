@@ -10,8 +10,9 @@ const genAI = new GoogleGenerativeAI(GEMINI_API_KEY || "");
 
 export async function POST(req: NextRequest) {
   try {
-    const { documentId } = await req.json();
+    const { documentId, workspaceId } = await req.json();
     if (!documentId) return NextResponse.json({ error: "Missing documentId" }, { status: 400 });
+    if (!workspaceId) return NextResponse.json({ error: "Missing workspaceId" }, { status: 400 });
     if (!GEMINI_API_KEY) return NextResponse.json({ error: "Missing Gemini API Key on server" }, { status: 500 });
 
     const supabase = await createClient();
@@ -25,7 +26,7 @@ export async function POST(req: NextRequest) {
       .from("documents")
       .select("*")
       .eq("id", documentId)
-      .eq("user_id", user.id)
+      .eq("workspace_id", workspaceId)
       .single();
       
     if (docError || !doc) return NextResponse.json({ error: "Document not found" }, { status: 404 });
@@ -120,6 +121,20 @@ export async function POST(req: NextRequest) {
 
     // Update document status
     await supabase.from("documents").update({ vector_status: 'completed' }).eq("id", documentId);
+
+    // Trigger graph extraction in the background via Inngest
+    try {
+      const { inngest } = await import('@/lib/ingestion/inngest/client');
+      await inngest.send({
+        name: "doc.extract_graph",
+        data: {
+          documentId: documentId,
+          workspaceId: workspaceId
+        }
+      });
+    } catch (e) {
+      console.error("Failed to trigger Inngest graph extraction:", e);
+    }
 
     return NextResponse.json({ success: true, chunksProcessed: chunks.length });
 

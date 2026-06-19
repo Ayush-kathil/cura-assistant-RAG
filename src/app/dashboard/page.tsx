@@ -3,27 +3,31 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/client";
+import { useWorkspace } from "@/contexts/WorkspaceContext";
 
 export default function DashboardPage() {
   const supabase = createClient();
   const [user, setUser] = useState<any>(null);
   const [docCount, setDocCount] = useState(0);
   const [recentDocs, setRecentDocs] = useState<any[]>([]);
+  const { activeWorkspace } = useWorkspace();
 
   useEffect(() => {
     const fetchStats = async () => {
       const { data } = await supabase.auth.getUser();
       setUser(data.user);
       
-      const { count } = await supabase.from("documents").select("id", { count: "exact" });
-      setDocCount(count || 0);
+      if (activeWorkspace) {
+        const { count } = await supabase.from("documents").select("id", { count: "exact" }).eq("workspace_id", activeWorkspace.id);
+        setDocCount(count || 0);
 
-      const { data: docs } = await supabase.from("documents").select("*").order("created_at", { ascending: false }).limit(3);
-      if (docs) setRecentDocs(docs);
+        const { data: docs } = await supabase.from("documents").select("*").eq("workspace_id", activeWorkspace.id).order("created_at", { ascending: false }).limit(3);
+        if (docs) setRecentDocs(docs);
+      }
     };
     
     fetchStats();
-  }, [supabase]);
+  }, [supabase, activeWorkspace]);
 
   const firstName = user?.user_metadata?.first_name || user?.email?.split('@')[0] || 'Guest';
 

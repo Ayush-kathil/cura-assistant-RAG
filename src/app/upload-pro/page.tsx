@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
+import { useWorkspace } from "@/contexts/WorkspaceContext";
 
 export default function UploadPage() {
   const router = useRouter();
@@ -13,26 +14,27 @@ export default function UploadPage() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [recentDocs, setRecentDocs] = useState<any[]>([]);
+  const { activeWorkspace } = useWorkspace();
 
   useEffect(() => {
     async function loadUser() {
       const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
+      if (user && activeWorkspace) {
         setUserEmail(user.email || "");
         // Fetch recent docs
         const { data } = await supabase
           .from('documents')
           .select('*')
-          .eq('user_id', user.id)
+          .eq('workspace_id', activeWorkspace.id)
           .order('created_at', { ascending: false })
           .limit(3);
         if (data) setRecentDocs(data);
-      } else {
+      } else if (!user) {
         router.push('/login');
       }
     }
     loadUser();
-  }, [supabase, router]);
+  }, [supabase, router, activeWorkspace]);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement> | any) => {
     const file = event.target?.files?.[0] || event.dataTransfer?.files?.[0];
@@ -42,6 +44,11 @@ export default function UploadPage() {
     setUploadProgress(10);
     
     try {
+      if (!activeWorkspace) {
+        alert("No active workspace selected");
+        return;
+      }
+
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
       
@@ -55,7 +62,8 @@ export default function UploadPage() {
       
       setUploadProgress(70);
       
-      const { data, error: dbError } = await supabase.from('documents').insert({
+      const { data: docData, error: dbError } = await supabase.from('documents').insert({
+        workspace_id: activeWorkspace.id,
         user_id: user.id,
         file_name: file.name,
         file_size_bytes: file.size,
@@ -64,8 +72,28 @@ export default function UploadPage() {
       }).select().single();
       
       if (dbError) throw dbError;
+
+      const { data: versionData, error: versionError } = await supabase.from('document_versions').insert({
+        document_id: docData.id,
+        version_number: 1,
+        storage_path: filePath,
+        file_size_bytes: file.size
+      }).select().single();
+
+      if (versionError) throw versionError;
+
+      await supabase.from('documents').update({
+        current_version_id: versionData.id
+      }).eq('id', docData.id);
       
-      setRecentDocs(prev => [data, ...prev].slice(0, 3));
+      // Notify ingest
+      await fetch('/api/ingest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ documentId: docData.id, workspaceId: activeWorkspace.id })
+      });
+      
+      setRecentDocs(prev => [docData, ...prev].slice(0, 3));
       setUploadProgress(100);
       
     } catch (e) {

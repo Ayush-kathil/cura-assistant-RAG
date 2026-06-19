@@ -9,6 +9,7 @@ import { useChatSession } from "@/hooks/useChatSession";
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import { useWorkspace } from "@/contexts/WorkspaceContext";
 
 export default function WorkspacePage() {
   const router = useRouter();
@@ -38,6 +39,8 @@ export default function WorkspacePage() {
     deleteChatSession,
     clearChat
   } = useChatSession();
+  
+  const { activeWorkspace } = useWorkspace();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -52,6 +55,11 @@ export default function WorkspacePage() {
     setUploadProgress(10);
     
     try {
+      if (!activeWorkspace) {
+        alert("No active workspace selected");
+        return;
+      }
+
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
       
@@ -65,7 +73,8 @@ export default function WorkspacePage() {
       
       setUploadProgress(70);
       
-      const { data, error: dbError } = await supabase.from('documents').insert({
+      const { data: docData, error: dbError } = await supabase.from('documents').insert({
+        workspace_id: activeWorkspace.id,
         user_id: user.id,
         file_name: file.name,
         file_size_bytes: file.size,
@@ -74,8 +83,28 @@ export default function WorkspacePage() {
       }).select().single();
       
       if (dbError) throw dbError;
+
+      const { data: versionData, error: versionError } = await supabase.from('document_versions').insert({
+        document_id: docData.id,
+        version_number: 1,
+        storage_path: filePath,
+        file_size_bytes: file.size
+      }).select().single();
+
+      if (versionError) throw versionError;
+
+      await supabase.from('documents').update({
+        current_version_id: versionData.id
+      }).eq('id', docData.id);
       
-      setDocuments(prev => [data, ...prev]);
+      // Notify ingest
+      await fetch('/api/ingest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ documentId: docData.id, workspaceId: activeWorkspace.id })
+      });
+      
+      setDocuments(prev => [docData, ...prev]);
       setUploadProgress(100);
       
     } catch (e) {

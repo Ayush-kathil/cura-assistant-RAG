@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { Message } from "@/lib/storage";
+import { useWorkspace } from "@/contexts/WorkspaceContext";
 export type GenerationState = "idle" | "synthesizing";
 
 export interface DocumentItem {
@@ -25,17 +26,37 @@ export function useChatSession() {
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string>("");
   const [selectedModel, setSelectedModel] = useState("Gemini 2.5 Flash");
+  
+  const { activeWorkspace } = useWorkspace();
 
   useEffect(() => {
-    fetchDocuments();
-    fetchChatSessions();
-  }, []);
+    if (activeWorkspace) {
+      fetchDocuments();
+      fetchChatSessions();
+    }
+  }, [activeWorkspace]);
+
+  const fetchDocuments = async () => {
+    if (!activeWorkspace) return;
+    const { data } = await supabase.from('documents')
+      .select('*')
+      .eq('workspace_id', activeWorkspace.id)
+      .order('created_at', { ascending: false });
+    if (data) {
+      setDocuments(data);
+      setActiveDocumentIds(data.map((d: any) => d.id));
+    }
+  };
 
   const fetchChatSessions = async () => {
+    if (!activeWorkspace) return;
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
     setUserEmail(user.email || "U");
-    const { data } = await supabase.from('chat_sessions').select('*').order('created_at', { ascending: false });
+    const { data } = await supabase.from('chat_sessions')
+      .select('*')
+      .eq('workspace_id', activeWorkspace.id)
+      .order('created_at', { ascending: false });
     if (data) setChatSessions(data);
   };
 
@@ -69,19 +90,7 @@ export function useChatSession() {
     }
   };
 
-  const fetchDocuments = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    const { data, error } = await supabase
-      .from('documents')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false });
-    if (data) {
-      setDocuments(data);
-      setActiveDocumentIds(data.map((d: any) => d.id));
-    }
-  };
+
 
   const sendMessage = async (msg: string, parentId: string | null = null) => {
     if (!msg.trim()) return;
@@ -113,20 +122,25 @@ export function useChatSession() {
     });
     setCurrentLeafId(botMsgId);
 
-    const { data: { user } } = await supabase.auth.getUser();
     let activeSessionId = currentSessionId;
-    if (user) {
-      if (!activeSessionId) {
-        const { data: session } = await supabase.from('chat_sessions').insert({ user_id: user.id, title: msg.substring(0, 30) }).select().single();
+    if (!activeSessionId) {
+      if (!activeWorkspace) throw new Error("No active workspace selected");
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: session } = await supabase.from('chat_sessions').insert({
+          user_id: user.id,
+          workspace_id: activeWorkspace.id,
+          title: msg.substring(0, 30) + '...'
+        }).select().single();
         if (session) {
           activeSessionId = session.id;
           setCurrentSessionId(activeSessionId);
           setChatSessions(prev => [session, ...prev]);
         }
       }
-      if (activeSessionId) {
-        await supabase.from('chat_messages').insert({ session_id: activeSessionId, role: 'user', content: msg });
-      }
+    }
+    if (activeSessionId) {
+      await supabase.from('chat_messages').insert({ session_id: activeSessionId, role: 'user', content: msg });
     }
 
     setGenerationState("synthesizing");
@@ -138,10 +152,11 @@ export function useChatSession() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           prompt: msg, 
-          messages: newMsgsWithUser, // Need to pass the actual message array for history
+          messages: newMsgsWithUser,
           activeDocumentIds, 
           personaInstruction, 
-          selectedModel 
+          selectedModel,
+          workspaceId: activeWorkspace?.id
         }),
       });
 
@@ -185,7 +200,7 @@ export function useChatSession() {
       finalAssistantText += `\n\n**Error:** ${err.message}`;
       setMessages(prev => prev.map(m => m.id === botMsgId ? { ...m, content: m.content + `\n\n**Error:** ${err.message}` } : m));
     } finally {
-      if (user && activeSessionId) {
+      if (activeSessionId) {
         await supabase.from('chat_messages').insert({ session_id: activeSessionId, role: 'assistant', content: finalAssistantText });
       }
       setGenerationState("idle");

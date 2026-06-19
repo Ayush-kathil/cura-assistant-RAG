@@ -6,6 +6,7 @@ import { UploadCloud, FileText, Trash2, Loader2, Sparkles, AlertTriangle } from 
 import clsx from "clsx";
 import { createClient } from "@/utils/supabase/client";
 import { ChatDocument } from "@/lib/storage";
+import { useWorkspace } from "@/contexts/WorkspaceContext";
 
 interface DocumentManagerProps {
   onDocumentsProcessed: (docs: { text: string; filename: string; sizeBytes: number; dbId: string }[]) => Promise<void>;
@@ -22,6 +23,7 @@ export const DocumentManager = ({ onDocumentsProcessed, onDocumentDeleted, isPro
   const [userProfile, setUserProfile] = useState<any>(null);
   
   const [supabase] = useState(() => createClient());
+  const { activeWorkspace } = useWorkspace();
   const LIMIT_FREE = 500 * 1024 * 1024;
   const LIMIT_PRO = 1024 * 1024 * 1024;
   const currentLimit = planTier === "pro" ? LIMIT_PRO : LIMIT_FREE;
@@ -56,6 +58,10 @@ export const DocumentManager = ({ onDocumentsProcessed, onDocumentDeleted, isPro
     }
 
     try {
+      if (!activeWorkspace) {
+        alert("No active workspace selected");
+        return;
+      }
       const storagePathIdentifier = `${userProfile.id}/${Date.now()}_${activeFile.name}`;
       
       const { error: storageUploadError } = await supabase.storage
@@ -67,6 +73,7 @@ export const DocumentManager = ({ onDocumentsProcessed, onDocumentDeleted, isPro
       const { data: insertedDocumentRow, error: databaseInsertError } = await supabase
         .from('documents')
         .insert({
+          workspace_id: activeWorkspace.id,
           user_id: userProfile.id,
           file_name: activeFile.name,
           file_size_bytes: activeFile.size,
@@ -77,6 +84,23 @@ export const DocumentManager = ({ onDocumentsProcessed, onDocumentDeleted, isPro
         .single();
 
       if (databaseInsertError) throw databaseInsertError;
+
+      const { data: versionData, error: versionError } = await supabase
+        .from('document_versions')
+        .insert({
+          document_id: insertedDocumentRow.id,
+          version_number: 1,
+          storage_path: storagePathIdentifier,
+          file_size_bytes: activeFile.size
+        })
+        .select()
+        .single();
+
+      if (versionError) throw versionError;
+
+      await supabase.from('documents').update({
+        current_version_id: versionData.id
+      }).eq('id', insertedDocumentRow.id);
 
       const updatedStorageMetric = storageUsed + activeFile.size;
       const { error: profileUpdateError } = await supabase
@@ -92,7 +116,7 @@ export const DocumentManager = ({ onDocumentsProcessed, onDocumentDeleted, isPro
       const ingestResponse = await fetch("/api/ingest", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ documentId: insertedDocumentRow.id }),
+        body: JSON.stringify({ documentId: insertedDocumentRow.id, workspaceId: activeWorkspace.id }),
       });
       
       if (!ingestResponse.ok) {

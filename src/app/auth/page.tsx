@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/utils/supabase/client";
 import { Mail, ArrowRight, Loader2, KeyRound } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function AuthPage() {
   const [email, setEmail] = useState("");
@@ -160,6 +161,12 @@ export default function AuthPage() {
                 </motion.form>
               )}
             </AnimatePresence>
+          </div>
+
+          <div className="flex justify-center mt-4">
+            <Link href="/auth/forgot-password" className="text-sm text-gray-400 hover:text-white transition-colors">
+              Forgot Password?
+            </Link>
           </div>
         </div>
       </motion.div>
