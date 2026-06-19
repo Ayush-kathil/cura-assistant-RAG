@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Outfit, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import QueryProvider from "@/components/providers/QueryProvider";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -47,7 +48,9 @@ export default function RootLayout({
         style={{ fontFamily: "'Google Sans', 'Samsung Sans', var(--font-outfit), sans-serif" }}
       >
         <ThemeProvider>
-          {children}
+          <QueryProvider>
+            {children}
+          </QueryProvider>
         </ThemeProvider>
       </body>
     </html>
