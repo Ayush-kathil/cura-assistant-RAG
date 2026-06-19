@@ -91,7 +91,7 @@ export function CitationDrawer({ isOpen, citation, onClose }: CitationDrawerProp
                     style={{ width: `${citation.confidenceScore * 100}%` }}
                   />
                 </div>
-                <p className="text-xs text-slate-400 mt-2">Score derived via Reciprocal Rank Fusion (RRF) and Cohere Cross-Encoder.</p>
+                <p className="text-xs text-slate-400 mt-2">Score derived via Reciprocal Rank Fusion (RRF) and Gemini Reranker.</p>
               </div>
 
               {/* Similar Context (If Available) */}

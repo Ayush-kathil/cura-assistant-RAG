@@ -14,7 +14,7 @@ export class HybridSearchEngine {
 
   constructor() {
     this.embeddings = new GoogleGenerativeAIEmbeddings({
-      modelName: "text-embedding-004", // Or preferred Gemini embedding model
+      model: "text-embedding-004", // Or preferred Gemini embedding model
     });
   }
 

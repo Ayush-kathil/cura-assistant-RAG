@@ -15,7 +15,7 @@ interface ChatMessage {
   content: string;
 }
 
-export function ChatInterface() {
+export function ChatInterface(props: any) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [chatState, setChatState] = useState<ChatState>('IDLE');

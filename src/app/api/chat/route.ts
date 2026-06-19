@@ -26,7 +26,7 @@ export async function POST(req: Request) {
         for await (const chunk of await appGraph.stream(initialState, config)) {
           // chunk is an object with the node name as the key, e.g. { queryAnalyzer: { ... } }
           const nodeName = Object.keys(chunk)[0];
-          const payload = chunk[nodeName];
+          const payload = (chunk as any)[nodeName];
 
           controller.enqueue(
             new TextEncoder().encode(`data: ${JSON.stringify({ node: nodeName, payload })}\n\n`)

@@ -1,14 +1,11 @@
-import { CohereClient } from "cohere-ai";
-
-const cohere = new CohereClient({
-  token: process.env.COHERE_API_KEY!
-});
+import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
 
 export async function getEmbeddings(text: string): Promise<number[]> {
-  const response = await cohere.embed({
-    texts: [text],
-    model: "embed-english-v3.0",
-    inputType: "search_query"
+  const embeddings = new GoogleGenerativeAIEmbeddings({
+    model: "text-embedding-004",
+    apiKey: process.env.GOOGLE_API_KEY || "dummy",
   });
-  return response.embeddings[0] as number[];
+  
+  const response = await embeddings.embedQuery(text);
+  return response;
 }

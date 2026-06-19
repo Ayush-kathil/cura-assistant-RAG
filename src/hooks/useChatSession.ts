@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { Message } from "@/lib/storage";
-import { GenerationState } from "@/components/chat/ChatInterface";
+export type GenerationState = "idle" | "synthesizing";
 
 export interface DocumentItem {
   id: string;

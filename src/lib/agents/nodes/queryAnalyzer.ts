@@ -1,8 +1,8 @@
 import { AgentState } from "../graph";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { z } from "zod";
-import { StructuredOutputParser } from "langchain/output_parsers";
-import { PromptTemplate } from "@langchain/core/prompts";
+import { StructuredOutputParser } from "@langchain/core/output_parsers";
+import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { RunnableSequence } from "@langchain/core/runnables";
 
 const analyzerSchema = z.object({
@@ -13,32 +13,34 @@ const analyzerSchema = z.object({
 
 const parser = StructuredOutputParser.fromZodSchema(analyzerSchema);
 
-const promptTemplate = PromptTemplate.fromTemplate(`
-You are the Query Understanding module. 
+const promptTemplate = ChatPromptTemplate.fromMessages([
+  ["system", `You are the Query Understanding module. 
 Your ONLY job is to extract the intent, entities, and temporal context of the user query.
 DO NOT ANSWER THE QUESTION. JUST ANALYZE.
 
-User Query: "{query}"
-
-{format_instructions}
-`);
-
-const llm = new ChatGoogleGenerativeAI({
-  modelName: "gemini-1.5-flash",
-  temperature: 0,
-});
-
-const chain = RunnableSequence.from([
-  promptTemplate,
-  llm,
-  parser,
+{format_instructions}`],
+  ["human", `User Query: "{query}"`]
 ]);
+
+function getChain() {
+  const llm = new ChatGoogleGenerativeAI({
+    model: "gemini-1.5-flash",
+    temperature: 0,
+    apiKey: process.env.GOOGLE_API_KEY || "dummy",
+  });
+  return RunnableSequence.from([
+    promptTemplate,
+    llm,
+    parser,
+  ]);
+}
 
 export async function queryAnalyzerNode(state: AgentState): Promise<Partial<AgentState>> {
   const startTime = Date.now();
   console.log(`[QueryAnalyzer] Deeply analyzing intent for: "${state.query}"`);
   
   try {
+    const chain = getChain();
     const analysis = await chain.invoke({
       query: state.query,
       format_instructions: parser.getFormatInstructions(),

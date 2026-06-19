@@ -1,64 +1,50 @@
-# Cura: Enterprise Agentic Knowledge Platform
+# Cura: Serverless Multi-Agent RAG Platform
 
-Cura is a production-grade, highly scalable Agentic RAG (Retrieval-Augmented Generation) platform engineered to solve the "lost in the middle" context problem and eliminate LLM hallucinations in enterprise data environments.
+Cura is a production-hardened Agentic RAG (Retrieval-Augmented Generation) platform. It solves the "lost in the middle" context problem and enforces strict citation provenance by replacing traditional linear RAG chains with a LangGraph state machine.
 
-Unlike typical student RAG projects that glue together LangChain with a naive vector database, Cura implements a distributed ingestion DAG, strict entity resolution for Knowledge Graphs, and a state-machine driven LLM orchestrator guaranteeing 100% citation provenance.
+Built specifically to demonstrate staff-level engineering rigor, Cura features a distributed ingestion DAG, Reciprocal Rank Fusion (RRF), and robust concurrency controls capable of handling enterprise data safely within serverless limits.
 
-## 🚀 Key Features
+## 🚀 Technical Highlights
 
-* **3D Hybrid Graph Retrieval:** Fuses pgvector HNSW semantic search, Postgres BM25 keyword search, and Multi-Hop Knowledge Graph Traversal via a mathematically weighted Reciprocal Rank Fusion algorithm.
-* **Agentic LangGraph Orchestration:** Replaces static prompts with a cyclic State Machine. Agents dynamically compress context, generate answers, verify against source facts, and autonomously self-correct if hallucinations are detected.
-* **Resilient Distributed Ingestion:** Utilizes Inngest to map-reduce massive PDFs. Features guaranteed checkpoint recovery, rate-limit backoff, and robust error handling ensuring zero dropped data.
-* **Cryptographic Deduplication:** SHA-256 fingerprinting at the chunk level. If a V2 document is uploaded where 95% of the text is unchanged, the system skips expensive AI embeddings and graph extraction for the duplicates.
-* **Enterprise Security:** Full Postgres Row Level Security (RLS) ensuring strict multi-tenant workspace isolation.
+* **Multi-Agent LangGraph Orchestrator:** Implements an autonomous, cyclic workflow. Agents dynamically extract entities, route queries, generate answers, and self-verify against source chunks—looping until hallucinations are eliminated.
+* **Hybrid Search with RRF:** Fuses `pgvector` HNSW semantic search, Postgres BM25 full-text search, and recursive Graph Traversal using Reciprocal Rank Fusion to synthesize the optimal context window.
+* **Distributed Async Ingestion:** Utilizes Inngest to map-reduce document parsing and graph extraction. Features strict rate limiting, event batching, and exponential backoff to respect downstream LLM quotas.
+* **Concurrency-Safe Graph Storage:** Employs Postgres `ON CONFLICT DO UPDATE` schemas to guarantee idempotent insertions and prevent race conditions when thousands of chunks are ingested concurrently.
+* **100% Serverless Architecture:** Node.js (Vercel) + Supabase + Gemini 1.5 Flash. Zero persistent infrastructure overhead.
 
 ## 🏛️ Architecture
 
-Cura is built on a modern, serverless stack designed to scale infinitely from Vercel.
-
-* **Frontend:** Next.js 15 (App Router), React Server Components, Tailwind CSS, shadcn/ui.
-* **Backend:** Next.js Route Handlers, Inngest (Serverless queues), Supabase (PostgreSQL, pgvector, Auth, RLS).
-* **AI Infrastructure:** LangGraph.js, Gemini 1.5 Flash (Extraction/Generation), Cohere (Embeddings/Reranking).
+* **Frontend:** Next.js 15 (App Router), React Server Components, Tailwind CSS.
+* **Backend:** Next.js Route Handlers, Inngest (Serverless Queues).
+* **Database:** Supabase (PostgreSQL, `pgvector`, Row Level Security).
+* **AI Engine:** Gemini 1.5 Flash (via `@langchain/google-genai`).
 
 ### Agent Workflow (LangGraph)
 ```mermaid
 graph TD
-    A[User Query] --> B[Query Understanding Agent]
-    B --> C[Router Agent]
-    C --> D[Retrieve]
-    D --> E[Rerank & Compress]
-    E --> F[Generation Agent]
-    F --> G[Verification Agent]
+    A[User Query] --> B[Query Analyzer Node]
+    B --> C[Router]
+    C --> D[Hybrid Retrieval]
+    D --> E[Gemini Reranker]
+    E --> F[Generation Node]
+    F --> G[Verification Node]
     G -->|Hallucination Detected| F
     G -->|Verified| H[Final Answer Streamed]
 ```
 
-### Retrieval Pipeline (3D RRF)
+### Retrieval Pipeline
 ```mermaid
 graph LR
     Query --> Vector[HNSW Vector Search]
-    Query --> BM25[Full Text Search]
-    Query --> Graph[Knowledge Graph Traversal]
-    Vector --> RRF[3D Reciprocal Rank Fusion]
+    Query --> BM25[BM25 Text Search]
+    Query --> Graph[Recursive Graph Traversal]
+    Vector --> RRF[Reciprocal Rank Fusion]
     BM25 --> RRF
     Graph --> RRF
-    RRF --> Rerank[Cohere Rerank 3] --> Final[Context Window]
+    RRF --> Rerank[Gemini Context Rerank] --> Final[Agent Context]
 ```
 
-## 📊 Performance Benchmarks
-
-In rigorous testing against a golden dataset of 200 complex deductive queries, Cura's architecture completely eclipsed standard naive RAG pipelines:
-
-| Metric | Vector Only (Naive RAG) | Hybrid + Rerank | Cura 3D Graph Hybrid | Delta (vs Naive) |
-| :--- | :--- | :--- | :--- | :--- |
-| **Recall@5** | 0.38 | 0.62 | **0.91** | **+139%** |
-| **Recall@10** | 0.52 | 0.78 | **0.96** | **+84%** |
-| **MRR** | 0.31 | 0.55 | **0.88** | **+183%** |
-| **Latency** | 120ms | 350ms | 420ms | Acceptable Tradeoff |
-
-## 📦 Deployment & Setup
-
-Cura is designed to be deployed directly to Vercel and Supabase.
+## 📦 Local Setup
 
 1. **Clone & Install**
    ```bash
@@ -67,24 +53,24 @@ Cura is designed to be deployed directly to Vercel and Supabase.
    npm install
    ```
 2. **Environment Variables**
-   Create a `.env.local` file with:
+   Create a `.env.local` file:
    ```env
-   NEXT_PUBLIC_SUPABASE_URL=...
-   SUPABASE_SERVICE_ROLE_KEY=...
-   GEMINI_API_KEY=...
-   COHERE_API_KEY=...
-   INNGEST_SIGNING_KEY=...
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+   SUPABASE_SERVICE_ROLE_KEY=your_service_key
+   GOOGLE_API_KEY=your_gemini_api_key
+   INNGEST_EVENT_KEY=local
+   INNGEST_SIGNING_KEY=local
    ```
 3. **Database Migrations**
    ```bash
+   npx supabase start
    npx supabase db push
    ```
-4. **Run Locally**
+4. **Run Development Server**
    ```bash
    npx inngest-cli dev
    npm run dev
    ```
 
-## 🔮 Future Work
-- **Advanced OCR Pipeline:** Integrating Unstructured.io for pixel-perfect table and image extractions.
-- **Read Replicas:** Scaling pgvector HNSW scans horizontally for multi-million chunk datasets.
+*Disclaimer: This repository serves as an architectural demonstration of distributed AI systems engineering.*

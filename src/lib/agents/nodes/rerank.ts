@@ -1,5 +1,5 @@
 import { AgentState } from "../graph";
-import { rerankerService } from "../../rag/retrieval/reranker";
+import { geminiRerank } from "../../rag/retrieval/geminiRerank";
 import { retrievalTelemetry } from "../../rag/metrics/telemetry";
 import { createClient } from "@supabase/supabase-js";
 
@@ -14,11 +14,11 @@ export async function rerankNode(state: AgentState): Promise<Partial<AgentState>
 
   try {
     const topK = 5; // We only want the most highly relevant chunks to fit in the context window
-    const rerankedChunks = await rerankerService.rerankChunks(
+    let rerankedChunks = await geminiRerank(
       state.query,
-      state.retrievedChunks,
-      topK
+      state.retrievedChunks
     );
+    rerankedChunks = rerankedChunks.slice(0, topK);
 
     const latency = Date.now() - startTime;
     console.log(`[Rerank] Reranking complete. Kept ${rerankedChunks.length} chunks. Latency: ${latency}ms`);

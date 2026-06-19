@@ -1,7 +1,7 @@
 import { AgentState } from "../graph";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { z } from "zod";
-import { StructuredOutputParser } from "langchain/output_parsers";
+import { StructuredOutputParser } from "@langchain/core/output_parsers";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { RunnableSequence } from "@langchain/core/runnables";
 
@@ -31,16 +31,18 @@ RULES:
 {format_instructions}
 `);
 
-const llm = new ChatGoogleGenerativeAI({
-  modelName: "gemini-1.5-flash",
-  temperature: 0,
-});
-
-const chain = RunnableSequence.from([
-  verifyPromptTemplate,
-  llm,
-  parser,
-]);
+function getChain() {
+  const llm = new ChatGoogleGenerativeAI({
+    model: "gemini-1.5-flash",
+    temperature: 0,
+    apiKey: process.env.GOOGLE_API_KEY || "dummy",
+  });
+  return RunnableSequence.from([
+    verifyPromptTemplate,
+    llm,
+    parser,
+  ]);
+}
 
 export async function verifyNode(state: AgentState): Promise<Partial<AgentState>> {
   const startTime = Date.now();
@@ -66,7 +68,7 @@ export async function verifyNode(state: AgentState): Promise<Partial<AgentState>
 
   try {
     const formattedContext = state.compressedContext || "No context retrieved.";
-
+    const chain = getChain();
     const analysis = await chain.invoke({
       context: formattedContext,
       draft: state.draftResponse || "",
