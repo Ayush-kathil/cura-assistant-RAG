@@ -54,7 +54,7 @@ export function ChatInterface(props: ChatInterfaceProps) {
 
   // Sync activeSessionRef with props
   useEffect(() => {
-    activeSessionRef.current = currentSessionId;
+    activeSessionRef.current = currentSessionId || null;
   }, [currentSessionId]);
 
   // Subscribe to State Machine & Event Bus for Streaming text
