@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { Turnstile } from '@marsidev/react-turnstile';
+import Link from "next/link";
 
 export default function LoginPage() {
   const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login');
@@ -234,7 +235,7 @@ export default function LoginPage() {
                 <div className="space-y-2">
                   <div className="flex justify-between items-center px-4">
                     <label className="text-label-sm font-label-sm text-on-surface-variant text-gray-600">Password</label>
-                    <a className="text-label-sm font-label-sm text-primary hover:underline" href="#">Forgot?</a>
+                    <Link className="text-label-sm font-label-sm text-primary hover:underline" href="/auth/forgot-password">Forgot?</Link>
                   </div>
                   <input 
                     type="password"

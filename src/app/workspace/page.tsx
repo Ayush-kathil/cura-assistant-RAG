@@ -35,6 +35,8 @@ export default function WorkspacePage() {
     selectedModel,
     setSelectedModel,
     sendMessage,
+    saveUserMessage,
+    saveAssistantMessage,
     loadChatSession,
     deleteChatSession,
     clearChat
@@ -239,6 +241,10 @@ export default function WorkspacePage() {
         <div className="flex-1 overflow-hidden relative flex flex-col">
           <ChatInterface 
             messages={messages}
+            setMessages={setMessages}
+            currentSessionId={currentSessionId}
+            saveUserMessage={saveUserMessage}
+            saveAssistantMessage={saveAssistantMessage}
             onSendMessage={(msg, parentId) => sendMessage(msg, parentId)}
             generationState={generationState}
             onNewSession={clearChat}

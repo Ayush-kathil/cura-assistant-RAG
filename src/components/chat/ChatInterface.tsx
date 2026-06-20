@@ -19,7 +19,7 @@ interface ChatMessage {
 }
 
 export function ChatInterface(props: any) {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const { messages, setMessages, saveUserMessage, saveAssistantMessage, currentSessionId } = props;
   const [inputValue, setInputValue] = useState('');
   const [chatState, setChatState] = useState<ChatState>('IDLE');
   
@@ -40,6 +40,14 @@ export function ChatInterface(props: any) {
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  const currentGenerationRef = useRef<string>("");
+  const activeSessionRef = useRef<string | null>(null);
+
+  // Sync activeSessionRef with props
+  useEffect(() => {
+    activeSessionRef.current = currentSessionId;
+  }, [currentSessionId]);
+
   // Subscribe to State Machine & Event Bus for Streaming text
   useEffect(() => {
     const unsubscribeState = chatStateMachine.subscribe((state) => {
@@ -48,7 +56,8 @@ export function ChatInterface(props: any) {
 
     const unsubscribeBus = agentEventBus.subscribe('*', (event) => {
       if (event.type === 'generation_stream' && event.payload?.text) {
-        setMessages(prev => {
+        currentGenerationRef.current = event.payload.text;
+        setMessages((prev: any) => {
           const newMessages = [...prev];
           const lastIndex = newMessages.length - 1;
           if (lastIndex >= 0 && newMessages[lastIndex].role === 'assistant') {
@@ -60,6 +69,10 @@ export function ChatInterface(props: any) {
           }
           return prev;
         });
+      } else if (event.type === 'completed') {
+        if (activeSessionRef.current && saveAssistantMessage) {
+           saveAssistantMessage(activeSessionRef.current, currentGenerationRef.current);
+        }
       }
     });
 
@@ -67,7 +80,7 @@ export function ChatInterface(props: any) {
       unsubscribeState();
       unsubscribeBus();
     };
-  }, []);
+  }, [setMessages, saveAssistantMessage]);
 
   // Auto-scroll
   useEffect(() => {
@@ -91,13 +104,19 @@ export function ChatInterface(props: any) {
       }
     }
 
-    const userMsg: ChatMessage = { id: crypto.randomUUID(), role: 'user', content: queryText };
-    const initialAssistantMsg: ChatMessage = { id: crypto.randomUUID(), role: 'assistant', content: '' };
+    const userMsg = { id: crypto.randomUUID(), role: 'user', content: queryText };
+    const initialAssistantMsg = { id: crypto.randomUUID(), role: 'assistant', content: '' };
     
-    setMessages(prev => [...prev, userMsg, initialAssistantMsg]);
+    setMessages((prev: any) => [...prev, userMsg, initialAssistantMsg]);
     setInputValue('');
     setTargetDocumentId(null);
     setSelectedDocumentName(null);
+    currentGenerationRef.current = "";
+
+    if (saveUserMessage) {
+       const sid = await saveUserMessage(queryText);
+       activeSessionRef.current = sid;
+    }
 
     // Call Real SSE Streaming Hook
     await submitQuery(queryText, activeWorkspace?.id || 'default-workspace', currentTargetId);

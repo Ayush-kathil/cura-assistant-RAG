@@ -132,12 +132,8 @@ export function useChatSession() {
           workspace_id: activeWorkspace.id,
           title: msg.substring(0, 30) + '...'
         };
-        console.log("[DB Write] table: chat_sessions, payload:", sessionPayload);
         const { data: session, error: sessionError } = await supabase.from('chat_sessions').insert(sessionPayload).select().single();
-        if (sessionError) {
-          console.error("[DB Error] table: chat_sessions, error:", sessionError);
-          throw sessionError;
-        }
+        if (sessionError) throw sessionError;
         if (session) {
           activeSessionId = session.id;
           setCurrentSessionId(activeSessionId);
@@ -145,15 +141,52 @@ export function useChatSession() {
         }
       }
     }
+    
     if (activeSessionId) {
       const msgPayload = { session_id: activeSessionId, role: 'user', content: msg };
-      console.log("[DB Write] table: chat_messages (user), payload:", msgPayload);
-      const { error: msgError } = await supabase.from('chat_messages').insert(msgPayload);
-      if (msgError) {
-        console.error("[DB Error] table: chat_messages (user), error:", msgError);
-        throw msgError;
-      }
+      await supabase.from('chat_messages').insert(msgPayload);
     }
+
+    return activeSessionId;
+  };
+
+  const saveAssistantMessage = async (sessionId: string, msg: string) => {
+    if (!sessionId) return;
+    const msgPayload = { session_id: sessionId, role: 'assistant', content: msg };
+    await supabase.from('chat_messages').insert(msgPayload);
+  };
+
+  const sendMessage = async (msg: string, parentId: string | null = null) => {
+    if (!msg.trim()) return;
+    
+    // Default to the last message if parentId is not provided
+    const actualParentId = parentId || (messages.length > 0 ? messages[messages.length - 1].id : null);
+
+    const userMsgId = `msg-${Date.now()}`;
+    const userMsg: Message = { id: userMsgId, parentId: actualParentId, childrenIds: [], role: "user", content: msg };
+
+    let newMsgsWithUser: Message[] = [];
+    setMessages(prev => {
+      const newMsgs = [...prev];
+      const parent = newMsgs.find(p => p.id === actualParentId);
+      if (parent) parent.childrenIds.push(userMsgId);
+      newMsgsWithUser = [...newMsgs, userMsg];
+      return newMsgsWithUser;
+    });
+    setCurrentLeafId(userMsgId);
+
+    const botMsgId = `bot-${Date.now()}`;
+    const botMsg: Message = { id: botMsgId, parentId: userMsgId, childrenIds: [], role: "assistant", content: "" };
+
+    setMessages(prev => {
+      const newMsgs = [...prev];
+      const parent = newMsgs.find(p => p.id === userMsgId);
+      if (parent) parent.childrenIds.push(botMsgId);
+      return [...newMsgs, botMsg];
+    });
+    setCurrentLeafId(botMsgId);
+
+    const activeSessionId = await saveUserMessage(msg);
 
     setGenerationState("synthesizing");
 
@@ -245,8 +278,9 @@ export function useChatSession() {
     currentSessionId,
     userEmail,
     selectedModel,
-    setSelectedModel,
     sendMessage,
+    saveUserMessage,
+    saveAssistantMessage,
     loadChatSession,
     deleteChatSession,
     clearChat
