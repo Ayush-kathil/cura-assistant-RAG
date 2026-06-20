@@ -33,8 +33,6 @@ export default function WorkspacePage() {
     currentSessionId,
     userEmail,
     selectedModel,
-    setSelectedModel,
-    sendMessage,
     saveUserMessage,
     saveAssistantMessage,
     loadChatSession,
@@ -245,7 +243,6 @@ export default function WorkspacePage() {
             currentSessionId={currentSessionId}
             saveUserMessage={saveUserMessage}
             saveAssistantMessage={saveAssistantMessage}
-            onSendMessage={(msg, parentId) => sendMessage(msg, parentId)}
             generationState={generationState}
             onNewSession={clearChat}
             documents={documents.map(d => ({ id: d.id, filename: d.file_name }))}
