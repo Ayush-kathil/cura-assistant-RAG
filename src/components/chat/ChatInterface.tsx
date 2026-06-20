@@ -44,7 +44,7 @@ export function ChatInterface(props: any) {
       setChatState(state);
     });
 
-    const unsubscribeBus = agentEventBus.subscribe((event) => {
+    const unsubscribeBus = agentEventBus.subscribe('*', (event) => {
       if (event.type === 'generation_stream' && event.payload?.text) {
         setMessages(prev => {
           const newMessages = [...prev];
