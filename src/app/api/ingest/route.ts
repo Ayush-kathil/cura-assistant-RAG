@@ -174,10 +174,10 @@ export async function POST(req: NextRequest) {
     console.error(
       "[INGEST FATAL ERROR FULL]",
       error,
-      JSON.stringify(error, null, 2)
+      error instanceof Error ? error.message : JSON.stringify(error, null, 2)
     );
     return NextResponse.json(
-      { error: String(error) },
+      { error: error instanceof Error ? error.message : (typeof error === 'object' ? JSON.stringify(error) : String(error)) },
       { status: 500 }
     );
   }
