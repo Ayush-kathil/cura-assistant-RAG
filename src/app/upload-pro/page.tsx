@@ -103,6 +103,9 @@ export default function UploadPage() {
         body: JSON.stringify({ documentId: docData.id, workspaceId: activeWorkspace.id })
       });
       if (!ingestRes.ok) {
+        // Rollback: delete document if ingestion failed (e.g. timeout for large PDFs)
+        await supabase.from('documents').delete().eq('id', docData.id);
+        await supabase.storage.from('nexus_docs').remove([filePath]);
         throw new Error("[UPLOAD] /api/ingest failed: " + await ingestRes.text());
       }
       
@@ -111,7 +114,7 @@ export default function UploadPage() {
       
     } catch (e) {
       console.error(e);
-      alert("Failed to upload document");
+      alert("Failed to upload document. If it is a very large PDF, it may have timed out during vector generation.");
     } finally {
       setIsUploading(false);
       setUploadProgress(0);

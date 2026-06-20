@@ -8,6 +8,7 @@ import { AgentEventTimeline } from './AgentEventTimeline';
 import { CitationDrawer, CitationData } from './CitationDrawer';
 import { chatStateMachine, ChatState } from '@/lib/events/ChatStateMachine';
 import { agentEventBus } from '@/lib/events/AgentEventBus';
+import { useWorkspace } from '@/contexts/WorkspaceContext';
 import { Send, Bot, User, Loader2, StopCircle, FileText } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
@@ -25,6 +26,7 @@ export function ChatInterface(props: any) {
   // SSE Streaming Hook
   const { submitQuery, isStreaming, error } = useAgentStream();
   const { documents } = useChatSession();
+  const { activeWorkspace } = useWorkspace();
   
   // Document Mention State
   const [showMentionMenu, setShowMentionMenu] = useState(false);
@@ -78,10 +80,18 @@ export function ChatInterface(props: any) {
     if (e) e.preventDefault();
     if (!inputValue.trim() || isStreaming) return;
 
-    const queryText = inputValue;
-    const currentTargetId = targetDocumentId;
+    let queryText = inputValue.trim();
+    let currentTargetId = targetDocumentId;
 
-    const userMsg: ChatMessage = { id: crypto.randomUUID(), role: 'user', content: inputValue };
+    // Fallback: If user typed @filename manually without clicking the dropdown
+    if (!currentTargetId) {
+      const mentionedDoc = documents.find(doc => queryText.toLowerCase().includes(`@${doc.file_name.toLowerCase()}`));
+      if (mentionedDoc) {
+        currentTargetId = mentionedDoc.id;
+      }
+    }
+
+    const userMsg: ChatMessage = { id: crypto.randomUUID(), role: 'user', content: queryText };
     const initialAssistantMsg: ChatMessage = { id: crypto.randomUUID(), role: 'assistant', content: '' };
     
     setMessages(prev => [...prev, userMsg, initialAssistantMsg]);
@@ -90,7 +100,7 @@ export function ChatInterface(props: any) {
     setSelectedDocumentName(null);
 
     // Call Real SSE Streaming Hook
-    await submitQuery(queryText, 'default-workspace', currentTargetId);
+    await submitQuery(queryText, activeWorkspace?.id || 'default-workspace', currentTargetId);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
