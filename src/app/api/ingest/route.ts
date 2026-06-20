@@ -11,6 +11,10 @@ const genAI = new GoogleGenerativeAI(GEMINI_API_KEY || "");
 export async function POST(req: NextRequest) {
   try {
     const { documentId, workspaceId } = await req.json();
+    console.log("[INGEST REQUEST]", {
+      documentId,
+      workspaceId
+    });
     if (!documentId) return NextResponse.json({ error: "Missing documentId" }, { status: 400 });
     if (!workspaceId) return NextResponse.json({ error: "Missing workspaceId" }, { status: 400 });
     if (!GEMINI_API_KEY) return NextResponse.json({ error: "Missing Gemini API Key on server" }, { status: 500 });
@@ -29,7 +33,20 @@ export async function POST(req: NextRequest) {
       .eq("workspace_id", workspaceId)
       .single();
       
+    console.log("[DOCUMENT FETCH RESULT]", doc);
     if (docError || !doc) return NextResponse.json({ error: "Document not found" }, { status: 404 });
+
+    // Initialize telemetry job
+    let documentVersionId = doc.current_version_id;
+    if (!documentVersionId) {
+      const { data: ver } = await supabase.from('document_versions').select('id').eq('document_id', documentId).order('created_at', { ascending: false }).limit(1).single();
+      if (ver) documentVersionId = ver.id;
+    }
+    console.log("[DOCUMENT VERSION ID]", documentVersionId);
+    if (documentVersionId) {
+      const { error: jobError } = await supabase.from('ingestion_jobs').insert({ document_version_id: documentVersionId, status: 'running' });
+      if (jobError) throw jobError;
+    }
 
     // Download file
     // Nexus_docs bucket contains user_id/filename. Wait, doc.storage_path is full path inside bucket
@@ -71,6 +88,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (!fullText.trim()) {
+      if (documentVersionId) await supabase.from('ingestion_jobs').update({ status: 'failed' }).eq('document_version_id', documentVersionId);
       return NextResponse.json({ error: "Empty document or extraction failed" }, { status: 400 });
     }
 
@@ -82,6 +100,8 @@ export async function POST(req: NextRequest) {
     });
 
     const chunks = await splitter.splitText(fullText);
+    console.log("[CHUNK COUNT]", chunks.length);
+    console.log("[FIRST CHUNK PREVIEW]", chunks[0]?.substring(0,200));
 
     // Embeddings
     const embeddingModel = genAI.getGenerativeModel({ model: "text-embedding-004" });
@@ -101,10 +121,12 @@ export async function POST(req: NextRequest) {
       });
 
       const embeddings = result.embeddings;
+      console.log("[EMBEDDINGS COUNT]", embeddings.length);
 
       for (let j = 0; j < batchChunks.length; j++) {
         dbRows.push({
           document_id: documentId,
+          workspace_id: workspaceId,
           content: batchChunks[j],
           metadata: { chunk_index: i + j, source: doc.file_name },
           embedding: embeddings[j].values,
@@ -113,14 +135,26 @@ export async function POST(req: NextRequest) {
     }
 
     // Store in pgvector
+    console.log("[FIRST DB ROW]", JSON.stringify(dbRows[0], null, 2));
+    console.log("[INSERTING CHUNKS]", dbRows.length);
     const { error: insertError } = await supabase
       .from("document_chunks")
       .insert(dbRows);
 
-    if (insertError) throw insertError;
+    if (insertError) {
+      console.error(
+        "[DOCUMENT_CHUNKS INSERT ERROR FULL]",
+        JSON.stringify(insertError, null, 2)
+      );
+      if (documentVersionId) await supabase.from('ingestion_jobs').update({ status: 'failed', error_message: insertError.message }).eq('document_version_id', documentVersionId);
+      throw insertError;
+    }
 
     // Update document status
     await supabase.from("documents").update({ vector_status: 'completed' }).eq("id", documentId);
+    if (documentVersionId) {
+      await supabase.from('ingestion_jobs').update({ status: 'completed' }).eq('document_version_id', documentVersionId);
+    }
 
     // Trigger graph extraction in the background via Inngest
     try {
@@ -138,8 +172,15 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, chunksProcessed: chunks.length });
 
-  } catch (error: any) {
-    console.error("Ingestion error:", error);
-    return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
+  } catch (error) {
+    console.error(
+      "[INGEST FATAL ERROR FULL]",
+      error,
+      JSON.stringify(error, null, 2)
+    );
+    return NextResponse.json(
+      { error: String(error) },
+      { status: 500 }
+    );
   }
 }

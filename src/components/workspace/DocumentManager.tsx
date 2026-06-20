@@ -122,6 +122,7 @@ export const DocumentManager = ({ onDocumentsProcessed, onDocumentDeleted, isPro
       setStorageUsed(updatedStorageMetric);
 
       // Call the server-side ingestion endpoint to chunk and embed the document
+      console.log("[UPLOAD] Triggering /api/ingest for document:", insertedDocumentRow.id);
       const ingestResponse = await fetch("/api/ingest", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

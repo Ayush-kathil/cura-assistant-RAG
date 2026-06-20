@@ -96,11 +96,15 @@ export default function UploadPage() {
       }).eq('id', docData.id);
       
       // Notify ingest
-      await fetch('/api/ingest', {
+      console.log("[UPLOAD] Triggering /api/ingest for document:", docData.id);
+      const ingestRes = await fetch('/api/ingest', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ documentId: docData.id, workspaceId: activeWorkspace.id })
       });
+      if (!ingestRes.ok) {
+        throw new Error("[UPLOAD] /api/ingest failed: " + await ingestRes.text());
+      }
       
       setRecentDocs(prev => [docData, ...prev].slice(0, 3));
       setUploadProgress(100);
