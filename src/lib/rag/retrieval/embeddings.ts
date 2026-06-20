@@ -6,6 +6,11 @@ export async function getEmbeddings(text: string): Promise<number[]> {
     apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || "dummy",
   });
   
-  const response = await embeddings.embedQuery(text);
+  let response = await embeddings.embedQuery(text);
+  if (response.length > 768) {
+    response = response.slice(0, 768);
+    const magnitude = Math.sqrt(response.reduce((sum, val) => sum + val * val, 0));
+    if (magnitude > 0) response = response.map(val => val / magnitude);
+  }
   return response;
 }

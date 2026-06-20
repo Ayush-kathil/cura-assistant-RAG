@@ -32,7 +32,14 @@ export class HybridSearchEngine {
   ): Promise<RetrievedChunk[]> {
     
     // 1. Generate Embedding for the query
-    const queryEmbedding = await this.embeddings.embedQuery(queryText);
+    let queryEmbedding = await this.embeddings.embedQuery(queryText);
+    if (queryEmbedding.length > 768) {
+      queryEmbedding = queryEmbedding.slice(0, 768);
+      const magnitude = Math.sqrt(queryEmbedding.reduce((sum, val) => sum + val * val, 0));
+      if (magnitude > 0) {
+        queryEmbedding = queryEmbedding.map(val => val / magnitude);
+      }
+    }
 
     // 2. Execute Hybrid Search RPC
     const { data, error } = await supabase.rpc('hybrid_search_chunks', {

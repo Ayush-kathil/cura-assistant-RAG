@@ -122,12 +122,23 @@ export async function POST(req: NextRequest) {
       console.log("[EMBEDDINGS COUNT]", embeddings.length);
 
       for (let j = 0; j < batchChunks.length; j++) {
+        let embeddingValues = embeddings[j].values;
+        if (embeddingValues.length > 768) {
+          // Truncate to 768 (Matryoshka Representation Learning)
+          embeddingValues = embeddingValues.slice(0, 768);
+          // Normalize vector
+          const magnitude = Math.sqrt(embeddingValues.reduce((sum, val) => sum + val * val, 0));
+          if (magnitude > 0) {
+            embeddingValues = embeddingValues.map(val => val / magnitude);
+          }
+        }
+        
         dbRows.push({
           document_id: documentId,
           workspace_id: workspaceId,
           content: batchChunks[j],
           metadata: { chunk_index: i + j, source: doc.file_name },
-          embedding: embeddings[j].values,
+          embedding: embeddingValues,
         });
       }
     }
