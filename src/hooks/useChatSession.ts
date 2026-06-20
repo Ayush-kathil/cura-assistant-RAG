@@ -151,6 +151,7 @@ export function useChatSession() {
     setCurrentSessionId,
     userEmail,
     selectedModel,
+    setSelectedModel,
     saveUserMessage,
     saveAssistantMessage,
     loadChatSession,
