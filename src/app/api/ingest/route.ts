@@ -70,18 +70,16 @@ export async function POST(req: NextRequest) {
     let fullText = "";
     
     if (doc.file_name.toLowerCase().endsWith(".pdf")) {
-      const pdfjsLib = await import("pdfjs-dist/legacy/build/pdf.mjs");
-      // Disable worker for Node.js environment
-      pdfjsLib.GlobalWorkerOptions.workerSrc = "";
-      
+      const { extractText } = await import("unpdf");
       const uint8Array = new Uint8Array(buffer);
-      const loadingTask = pdfjsLib.getDocument({ data: uint8Array, standardFontDataUrl: `node_modules/pdfjs-dist/standard_fonts/` });
-      const pdf = await loadingTask.promise;
+      const pdfText = await extractText(uint8Array);
       
-      for (let i = 1; i <= pdf.numPages; i++) {
-         const page = await pdf.getPage(i);
-         const textContent = await page.getTextContent();
-         fullText += textContent.items.map((item: any) => item.str + (item.hasEOL ? '\n' : '')).join("") + "\n";
+      if (typeof pdfText === 'string') {
+        fullText = pdfText;
+      } else if (pdfText && pdfText.text) {
+        fullText = typeof pdfText.text === 'string' ? pdfText.text : (Array.isArray(pdfText.text) ? pdfText.text.join('\\n') : String(pdfText.text));
+      } else {
+        fullText = String(pdfText);
       }
     } else {
       fullText = buffer.toString("utf-8"); // Assume text or markdown
