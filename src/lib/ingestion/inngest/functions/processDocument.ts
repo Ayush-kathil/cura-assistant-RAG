@@ -11,7 +11,7 @@ import mammoth from "mammoth";
 export const runtime = "nodejs";
 
 const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || "http://localhost:54321");
-const supabaseKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || "dummy_key");
+const supabaseKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "dummy_key");
 
 async function parseFileContent(filePath: string, fileName: string): Promise<string> {
   const ext = path.extname(fileName).toLowerCase();
