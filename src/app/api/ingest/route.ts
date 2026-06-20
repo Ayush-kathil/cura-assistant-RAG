@@ -104,7 +104,7 @@ export async function POST(req: NextRequest) {
     console.log("[FIRST CHUNK PREVIEW]", chunks[0]?.substring(0,200));
 
     // Embeddings
-    const embeddingModel = genAI.getGenerativeModel({ model: "embedding-001" });
+    const embeddingModel = genAI.getGenerativeModel({ model: "gemini-embedding-2" });
     
     // Batch process to avoid payload too large
     const BATCH_SIZE = 50;

@@ -30,7 +30,7 @@ export async function generateNode(state: AgentState): Promise<Partial<AgentStat
 
   try {
     const llm = new ChatGoogleGenerativeAI({
-      model: "gemini-1.5-flash",
+      model: "gemini-2.5-pro",
       temperature: 0.3,
       streaming: true, // We will listen to stream events if invoked via .stream()
     });

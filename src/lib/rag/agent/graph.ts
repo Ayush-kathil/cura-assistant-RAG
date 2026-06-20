@@ -19,10 +19,10 @@ export const AgentState = Annotation.Root({
 });
 
 function getLlm() {
-  return new ChatGoogleGenerativeAI({ model: "gemini-1.5-flash", temperature: 0.2, apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || "dummy" });
+  return new ChatGoogleGenerativeAI({ model: "gemini-3.1-flash-lite", temperature: 0.2, apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || "dummy" });
 }
 function getVerifierLlm() {
-  return new ChatGoogleGenerativeAI({ model: "gemini-1.5-flash", temperature: 0, apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || "dummy" });
+  return new ChatGoogleGenerativeAI({ model: "gemini-3.1-flash-lite", temperature: 0, apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || "dummy" });
 }
 
 // Nodes

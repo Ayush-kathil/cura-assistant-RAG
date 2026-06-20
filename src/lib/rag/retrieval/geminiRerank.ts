@@ -16,7 +16,7 @@ export async function geminiRerank(query: string, chunks: RetrievedChunk[]): Pro
   if (chunks.length === 0) return [];
   
   const llm = new ChatGoogleGenerativeAI({
-    model: "gemini-1.5-flash",
+    model: "gemini-3.1-flash-lite",
     temperature: 0,
     apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || "dummy",
   });

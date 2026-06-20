@@ -34,7 +34,7 @@ export async function compressNode(state: AgentState): Promise<Partial<AgentStat
 
   try {
     const llm = new ChatGoogleGenerativeAI({
-      model: "gemini-1.5-flash",
+      model: "gemini-3.1-flash-lite",
       temperature: 0,
     });
 

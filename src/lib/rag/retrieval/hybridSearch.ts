@@ -15,7 +15,7 @@ export class HybridSearchEngine {
   constructor() {
     this.embeddings = new GoogleGenerativeAIEmbeddings({
       apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY,
-      model: "embedding-001", // Or preferred Gemini embedding model
+      model: "gemini-embedding-2", // Or preferred Gemini embedding model
     });
   }
 

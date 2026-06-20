@@ -52,7 +52,7 @@ export const extractGraphWorkflow = inngest.createFunction(
 
     // STEP 1: ENTITY EXTRACTION
     const rawGraph = await step.run("extract-entities", async () => {
-      const llm = new ChatGoogleGenerativeAI({ model: "gemini-1.5-flash", temperature: 0 });
+      const llm = new ChatGoogleGenerativeAI({ model: "gemini-3.1-flash-lite", temperature: 0 });
       const chain = prompt.pipe(llm).pipe(parser);
       return await chain.invoke({
         chunk: content,

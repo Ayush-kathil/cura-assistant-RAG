@@ -7,7 +7,7 @@ export class MultiQueryGenerator {
   
   constructor() {
     this.llm = new ChatGoogleGenerativeAI({ apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || "dummy",
-      model: 'gemini-1.5-flash',
+      model: 'gemini-3.1-flash-lite',
       temperature: 0.2, // Low temperature for deterministic queries
     });
   }
