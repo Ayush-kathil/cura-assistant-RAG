@@ -18,8 +18,17 @@ interface ChatMessage {
   content: string;
 }
 
-export function ChatInterface(props: any) {
-  const { messages, setMessages, saveUserMessage, saveAssistantMessage, currentSessionId } = props;
+interface ChatInterfaceProps {
+  messages: ChatMessage[];
+  setMessages: any;
+  saveUserMessage?: (msg: string) => Promise<string>;
+  saveAssistantMessage?: (sessionId: string, msg: string) => Promise<void>;
+  currentSessionId?: string | null;
+  [key: string]: any;
+}
+
+export function ChatInterface(props: ChatInterfaceProps) {
+  const { messages = [], setMessages, saveUserMessage, saveAssistantMessage, currentSessionId } = props;
   const [inputValue, setInputValue] = useState('');
   const [chatState, setChatState] = useState<ChatState>('IDLE');
   
