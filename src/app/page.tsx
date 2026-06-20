@@ -36,10 +36,10 @@ export default function Home() {
           <span className="font-headline-md text-headline-md font-bold text-primary">Cura</span>
         </div>
         <div className="hidden md:flex items-center gap-8">
-          <Link href="#features" className="font-label-md text-label-md text-primary font-bold border-b-2 border-primary transition-colors">Features</Link>
-          <Link href="#science" className="font-label-md text-label-md text-gray-500 hover:text-primary transition-colors">Science</Link>
-          <Link href="#pricing" className="font-label-md text-label-md text-gray-500 hover:text-primary transition-colors">Pricing</Link>
-          <Link href="#support" className="font-label-md text-label-md text-gray-500 hover:text-primary transition-colors">Support</Link>
+          <Link href="#features" className="font-label-md text-label-md text-gray-500 hover:text-primary transition-colors">Features</Link>
+          <Link href="/science" className="font-label-md text-label-md text-gray-500 hover:text-primary transition-colors">Science</Link>
+          <Link href="/pricing" className="font-label-md text-label-md text-gray-500 hover:text-primary transition-colors">Pricing</Link>
+          <Link href="/dashboard" className="font-label-md text-label-md text-gray-500 hover:text-primary transition-colors">Dashboard</Link>
         </div>
         <div className="flex items-center gap-4">
           <Link href="/login" className="active:scale-95 transition-transform px-6 py-2 rounded-full bg-primary text-white font-label-md text-label-md hover:scale-105 shadow-lg shadow-primary/20">
