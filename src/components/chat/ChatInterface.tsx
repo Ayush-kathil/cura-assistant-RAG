@@ -3,10 +3,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAgentStream } from '@/hooks/useAgentStream';
+import { useChatSession } from '@/hooks/useChatSession';
 import { AgentEventTimeline } from './AgentEventTimeline';
 import { CitationDrawer, CitationData } from './CitationDrawer';
 import { chatStateMachine, ChatState } from '@/lib/events/ChatStateMachine';
-import { Send, Bot, User, Loader2, StopCircle } from 'lucide-react';
+import { agentEventBus } from '@/lib/events/AgentEventBus';
+import { Send, Bot, User, Loader2, StopCircle, FileText } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
 interface ChatMessage {
@@ -21,20 +23,48 @@ export function ChatInterface(props: any) {
   const [chatState, setChatState] = useState<ChatState>('IDLE');
   
   // SSE Streaming Hook
-  const { submitQueryMock, isStreaming, error } = useAgentStream();
+  const { submitQuery, isStreaming, error } = useAgentStream();
+  const { documents } = useChatSession();
   
+  // Document Mention State
+  const [showMentionMenu, setShowMentionMenu] = useState(false);
+  const [mentionQuery, setMentionQuery] = useState('');
+  const [targetDocumentId, setTargetDocumentId] = useState<string | null>(null);
+  const [selectedDocumentName, setSelectedDocumentName] = useState<string | null>(null);
+
   // Citation State
   const [isCitationOpen, setIsCitationOpen] = useState(false);
   const [activeCitation, setActiveCitation] = useState<CitationData | null>(null);
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Subscribe to State Machine
+  // Subscribe to State Machine & Event Bus for Streaming text
   useEffect(() => {
-    const unsubscribe = chatStateMachine.subscribe((state) => {
+    const unsubscribeState = chatStateMachine.subscribe((state) => {
       setChatState(state);
     });
-    return unsubscribe;
+
+    const unsubscribeBus = agentEventBus.subscribe((event) => {
+      if (event.type === 'generation_stream' && event.payload?.text) {
+        setMessages(prev => {
+          const newMessages = [...prev];
+          const lastIndex = newMessages.length - 1;
+          if (lastIndex >= 0 && newMessages[lastIndex].role === 'assistant') {
+            newMessages[lastIndex] = {
+              ...newMessages[lastIndex],
+              content: event.payload!.text!
+            };
+            return newMessages;
+          }
+          return prev;
+        });
+      }
+    });
+
+    return () => {
+      unsubscribeState();
+      unsubscribeBus();
+    };
   }, []);
 
   // Auto-scroll
@@ -48,40 +78,46 @@ export function ChatInterface(props: any) {
     if (e) e.preventDefault();
     if (!inputValue.trim() || isStreaming) return;
 
+    const queryText = inputValue;
+    const currentTargetId = targetDocumentId;
+
     const userMsg: ChatMessage = { id: crypto.randomUUID(), role: 'user', content: inputValue };
-    setMessages(prev => [...prev, userMsg]);
-    setInputValue('');
-
-    // Trigger Mock SSE Streaming Workflow
-    await submitQueryMock(userMsg.content, 'default-workspace');
+    const initialAssistantMsg: ChatMessage = { id: crypto.randomUUID(), role: 'assistant', content: '' };
     
-    // Once complete, we'd normally append the final LLM response here.
-    // For Phase 1 mock, we just add a static completion.
-    setMessages(prev => [...prev, {
-      id: crypto.randomUUID(),
-      role: 'assistant',
-      content: "Based on the retrieved context, the system architecture supports asynchronous processing using Inngest, and implements a multi-tenant design with strict Row Level Security. [1]"
-    }]);
+    setMessages(prev => [...prev, userMsg, initialAssistantMsg]);
+    setInputValue('');
+    setTargetDocumentId(null);
+    setSelectedDocumentName(null);
+
+    // Call Real SSE Streaming Hook
+    await submitQuery(queryText, 'default-workspace', currentTargetId);
   };
 
-  const handleCitationClick = () => {
-    setActiveCitation({
-      id: 'mock-1',
-      sourceFile: 'Architecture_Design.md',
-      pageNumber: 4,
-      snippet: 'The system architecture supports asynchronous processing using Inngest, and implements a multi-tenant design with strict Row Level Security.',
-      confidenceScore: 0.92,
-      similarChunks: [
-        { id: 'mock-2', snippet: 'Inngest allows us to bypass Vercel serverless timeouts.' }
-      ]
-    });
-    setIsCitationOpen(true);
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    setInputValue(value);
+
+    // Naive @ detection at the end of string
+    const match = value.match(/@(\w*)$/);
+    if (match) {
+      setShowMentionMenu(true);
+      setMentionQuery(match[1].toLowerCase());
+    } else {
+      setShowMentionMenu(false);
+    }
   };
+
+  const handleDocumentSelect = (docId: string, fileName: string) => {
+    setTargetDocumentId(docId);
+    setSelectedDocumentName(fileName);
+    setInputValue(prev => prev.replace(/@\w*$/, '') + `@${fileName} `);
+    setShowMentionMenu(false);
+  };
+
+  const filteredDocs = documents.filter(doc => doc.file_name.toLowerCase().includes(mentionQuery));
 
   return (
     <div className="flex flex-col h-full bg-white relative">
-      
-      {/* Main Scrollable Area */}
       <div className="flex-1 overflow-y-auto p-4 md:p-8" ref={scrollRef}>
         <div className="max-w-4xl mx-auto flex flex-col gap-8 pb-32">
           
@@ -108,25 +144,15 @@ export function ChatInterface(props: any) {
                 `}>
                   {msg.role === 'assistant' ? (
                     <div className="prose prose-slate prose-sm max-w-none">
-                      <ReactMarkdown
-                        components={{
-                          a: ({ node, ...props }) => {
-                            if (props.children?.toString().match(/\[\d+\]/)) {
-                              return (
-                                <button 
-                                  onClick={handleCitationClick}
-                                  className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-100 text-blue-700 text-xs font-bold mx-1 hover:bg-blue-200 transition-colors"
-                                >
-                                  {props.children?.toString().replace(/[\[\]]/g, '')}
-                                </button>
-                              );
-                            }
-                            return <a {...props} className="text-blue-600 hover:underline" />;
-                          }
-                        }}
-                      >
-                        {msg.content.replace(/\[(\d+)\]/g, '[$1](citation)')}
-                      </ReactMarkdown>
+                      {msg.content === '' && chatState !== 'COMPLETED' ? (
+                        <div className="flex items-center gap-2 text-slate-400">
+                           <Loader2 className="w-4 h-4 animate-spin" /> Thinking...
+                        </div>
+                      ) : (
+                        <ReactMarkdown>
+                          {msg.content.replace(/\[(\d+)\]/g, '[$1](citation)')}
+                        </ReactMarkdown>
+                      )}
                     </div>
                   ) : (
                     <p className="whitespace-pre-wrap">{msg.content}</p>
@@ -142,7 +168,6 @@ export function ChatInterface(props: any) {
             ))}
           </AnimatePresence>
 
-          {/* Agent Execution Visualizer (Only visible when streaming or recently completed) */}
           {chatState !== 'IDLE' && chatState !== 'SUBMITTING' && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="ml-12">
               <AgentEventTimeline />
@@ -158,23 +183,52 @@ export function ChatInterface(props: any) {
         </div>
       </div>
 
-      {/* Unified Input Area */}
       <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-white via-white to-transparent pt-10 pb-4 px-4 md:px-8">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-4xl mx-auto relative">
+          
+          {/* Document Mention Popover */}
+          <AnimatePresence>
+            {showMentionMenu && filteredDocs.length > 0 && (
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                className="absolute bottom-full mb-2 left-0 w-64 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden z-50"
+              >
+                <div className="p-2 bg-slate-50 text-xs font-semibold text-slate-500 border-b border-slate-100">
+                  Select Document Context
+                </div>
+                <div className="max-h-48 overflow-y-auto py-1">
+                  {filteredDocs.map(doc => (
+                    <button
+                      key={doc.id}
+                      type="button"
+                      onClick={() => handleDocumentSelect(doc.id, doc.file_name)}
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-slate-100 flex items-center gap-2 text-slate-700 transition-colors"
+                    >
+                      <FileText className="w-4 h-4 text-blue-500 shrink-0" />
+                      <span className="truncate">{doc.file_name}</span>
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           <form 
             onSubmit={handleSubmit}
             className="relative bg-white border border-slate-300 shadow-xl shadow-slate-200/50 rounded-2xl overflow-hidden focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10 transition-all"
           >
             <textarea
               value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
+              onChange={handleInputChange}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
                   handleSubmit();
                 }
               }}
-              placeholder="Ask the Agentic AI..."
+              placeholder="Ask the Agentic AI (Type @ to mention a PDF)..."
               className="w-full max-h-48 min-h-[56px] resize-none border-0 bg-transparent py-4 pl-4 pr-14 text-slate-800 placeholder:text-slate-400 focus:ring-0 outline-none"
               rows={1}
             />
@@ -198,18 +252,12 @@ export function ChatInterface(props: any) {
               )}
             </div>
           </form>
-          <div className="text-center mt-2">
-            <span className="text-xs text-slate-400">Agentic Platform | v1.5 Frontend Architecture</span>
+          <div className="text-center mt-2 flex justify-between">
+            <span className="text-xs text-slate-400">Target Document: {selectedDocumentName || 'All Documents'}</span>
+            <span className="text-xs text-slate-400">Agentic Platform | Engine Connected</span>
           </div>
         </div>
       </div>
-
-      {/* Citation Drawer */}
-      <CitationDrawer 
-        isOpen={isCitationOpen} 
-        citation={activeCitation} 
-        onClose={() => setIsCitationOpen(false)} 
-      />
     </div>
   );
 }

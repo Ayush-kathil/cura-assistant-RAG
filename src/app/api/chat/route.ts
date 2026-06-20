@@ -1,7 +1,7 @@
 import { appGraph } from "@/lib/rag/agent/graph";
 
 export async function POST(req: Request) {
-  const { query, workspaceId } = await req.json();
+  const { query, workspaceId, targetDocumentId } = await req.json();
 
   if (!query || !workspaceId) {
     return new Response(JSON.stringify({ error: "Missing query or workspaceId" }), { status: 400 });
@@ -13,6 +13,7 @@ export async function POST(req: Request) {
         const initialState = {
           query,
           workspaceId,
+          targetDocumentId: targetDocumentId || null,
           queryEmbedding: [],
           retrievedChunks: [],
           generation: "",

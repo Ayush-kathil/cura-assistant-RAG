@@ -16,7 +16,7 @@ function getLLM() {
   });
 }
 
-export async function hybridGraphSearch(workspaceId: string, query: string, queryEmbedding: number[]) {
+export async function hybridGraphSearch(workspaceId: string, query: string, queryEmbedding: number[], targetDocumentId?: string) {
   const llm = getLLM();
   const entityDetectionPrompt = `Extract key entities (people, organizations, concepts, technologies) from the following query as a comma separated list. If none, output NONE.\nQuery: "${query}"`;
   const entitiesResult = await llm.invoke(entityDetectionPrompt);
@@ -41,6 +41,7 @@ export async function hybridGraphSearch(workspaceId: string, query: string, quer
     target_workspace_id: workspaceId,
     query_embedding: queryEmbedding,
     query_text: query,
+    target_document_id: targetDocumentId || null,
     match_count: 20
   });
   

@@ -6,13 +6,11 @@ export function useAgentStream() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // This is a mock function to simulate the SSE endpoint for Phase 1
-  const submitQueryMock = useCallback(async (query: string, workspaceId: string) => {
+  const submitQueryMock = useCallback(async (query: string, workspaceId: string, targetDocumentId?: string | null) => {
     setIsStreaming(true);
     setError(null);
     chatStateMachine.transition('SUBMITTING');
 
-    // Helper to emit events
     const emit = (event: Omit<AgentStreamEvent, 'id' | 'timestamp'>) => {
       agentEventBus.publish({
         id: crypto.randomUUID(),
@@ -21,65 +19,83 @@ export function useAgentStream() {
       });
     };
 
-    // Simulate Network Latency
-    await new Promise(r => setTimeout(r, 500));
     chatStateMachine.transition('ANALYZING');
     emit({ type: 'agent_started' });
 
-    await new Promise(r => setTimeout(r, 800));
-    emit({ 
-      type: 'query_analyzed', 
-      payload: { intent: 'RAG', entities: ['System Architecture', 'Performance'] } 
-    });
-
-    chatStateMachine.transition('RETRIEVING');
-    emit({ type: 'document_retrieval_started' });
-
-    await new Promise(r => setTimeout(r, 1200));
-    emit({ 
-      type: 'document_retrieval_completed', 
-      payload: { count: 12 },
-      metadata: { latency: 1200 }
-    });
-
-    chatStateMachine.transition('RERANKING');
-    emit({ type: 'rerank_started' });
-
-    await new Promise(r => setTimeout(r, 900));
-    emit({ 
-      type: 'rerank_completed',
-      metadata: { latency: 900 }
-    });
-
-    chatStateMachine.transition('GENERATING');
-    emit({ type: 'generation_started' });
-
-    // Simulate streaming text chunks (for the chat interface to consume)
-    const mockAnswer = "Based on the retrieved context, the system architecture supports asynchronous processing using Inngest, and implements a multi-tenant design with strict Row Level Security.";
-    const chunks = mockAnswer.split(' ');
-    
-    for (const chunk of chunks) {
-      await new Promise(r => setTimeout(r, 50));
-      emit({
-        type: 'generation_stream',
-        payload: { text: chunk + ' ' }
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, workspaceId, targetDocumentId }),
       });
+
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.statusText}`);
+      }
+
+      if (!response.body) throw new Error("No response body");
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let done = false;
+      let generationBuffer = "";
+
+      while (!done) {
+        const { value, done: readerDone } = await reader.read();
+        done = readerDone;
+        if (value) {
+          const chunkString = decoder.decode(value, { stream: true });
+          const events = chunkString.split('\n\n').filter(Boolean);
+          
+          for (const ev of events) {
+            if (ev.startsWith('data: ')) {
+              const dataStr = ev.replace('data: ', '');
+              if (dataStr === '[DONE]') {
+                 chatStateMachine.transition('COMPLETED');
+                 emit({ type: 'completed' });
+                 break;
+              }
+              try {
+                const data = JSON.parse(dataStr);
+                
+                if (data.node === 'queryAnalyzer') {
+                  emit({ type: 'query_analyzed', payload: { intent: 'RAG', entities: [] } });
+                  chatStateMachine.transition('RETRIEVING');
+                  emit({ type: 'document_retrieval_started' });
+                } else if (data.node === 'retrieve') {
+                  const chunkCount = data.payload?.retrievedChunks?.length || 0;
+                  emit({ type: 'document_retrieval_completed', payload: { count: chunkCount } });
+                  chatStateMachine.transition('GENERATING');
+                  emit({ type: 'generation_started' });
+                } else if (data.node === 'generate') {
+                  // If the node completed generation, we emit the stream event
+                  // In LangGraph, we just get the whole generation string at the end of the node.
+                  const fullText = data.payload?.generation || "";
+                  emit({ type: 'generation_stream', payload: { text: fullText } });
+                  chatStateMachine.transition('VERIFYING');
+                  emit({ type: 'verification_started' });
+                } else if (data.node === 'verify') {
+                  emit({ type: 'verification_completed' });
+                }
+              } catch(err) {
+                console.error("Failed to parse SSE event", err);
+              }
+            }
+          }
+        }
+      }
+    } catch (err: any) {
+      setError(err.message);
+      chatStateMachine.transition('IDLE');
+    } finally {
+      setIsStreaming(false);
     }
-
-    chatStateMachine.transition('VERIFYING');
-    emit({ type: 'verification_started' });
-    
-    await new Promise(r => setTimeout(r, 800));
-    emit({ type: 'verification_completed' });
-
-    chatStateMachine.transition('COMPLETED');
-    emit({ type: 'completed' });
-    setIsStreaming(false);
 
   }, []);
 
   return {
-    submitQueryMock,
+    submitQueryMock, // Keeping the same name to avoid breaking ChatInterface references before we update it
+    submitQuery: submitQueryMock,
     isStreaming,
     error
   };

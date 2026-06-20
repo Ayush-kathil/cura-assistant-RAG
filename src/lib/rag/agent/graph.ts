@@ -7,6 +7,7 @@ import { getEmbeddings } from "../retrieval/embeddings"; // Assume exists
 export const AgentState = Annotation.Root({
   query: Annotation<string>,
   workspaceId: Annotation<string>,
+  targetDocumentId: Annotation<string | null>,
   queryEmbedding: Annotation<number[]>,
   retrievedChunks: Annotation<any[]>,
   generation: Annotation<string>,
@@ -31,7 +32,7 @@ async function queryAnalyzer(state: typeof AgentState.State) {
 }
 
 async function retrieve(state: typeof AgentState.State) {
-  const chunks = await hybridGraphSearch(state.workspaceId, state.query, state.queryEmbedding);
+  const chunks = await hybridGraphSearch(state.workspaceId, state.query, state.queryEmbedding, state.targetDocumentId || undefined);
   return { retrievedChunks: chunks };
 }
 
