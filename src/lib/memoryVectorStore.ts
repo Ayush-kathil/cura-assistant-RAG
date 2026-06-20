@@ -11,7 +11,7 @@ export class CustomGeminiEmbeddings {
   }
   async embedQuery(text: string): Promise<number[]> {
     try {
-      const model = this.genAI.getGenerativeModel({ model: "text-embedding-004" });
+      const model = this.genAI.getGenerativeModel({ model: "embedding-001" });
       const result = await model.embedContent(text);
       return result.embedding.values;
     } catch (e) {
@@ -21,7 +21,7 @@ export class CustomGeminiEmbeddings {
   }
   async embedDocuments(texts: string[]): Promise<number[][]> {
     try {
-      const model = this.genAI.getGenerativeModel({ model: "text-embedding-004" });
+      const model = this.genAI.getGenerativeModel({ model: "embedding-001" });
       const result = await model.batchEmbedContents({
           requests: texts.map(text => ({ content: { role: 'user', parts: [{ text }] } }))
       });
