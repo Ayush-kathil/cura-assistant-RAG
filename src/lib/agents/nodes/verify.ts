@@ -35,7 +35,7 @@ function getChain() {
   const llm = new ChatGoogleGenerativeAI({
     model: "gemini-1.5-flash",
     temperature: 0,
-    apiKey: process.env.GOOGLE_API_KEY || "dummy",
+    apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || "dummy",
   });
   return RunnableSequence.from([
     verifyPromptTemplate,
