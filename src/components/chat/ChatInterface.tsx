@@ -366,6 +366,7 @@ export function ChatInterface(props: ChatInterfaceProps) {
           </div>
         </div>
       </div>
+      </div>
       <SplitPaneViewer 
         documentId={viewerDocumentId} 
         citationText={viewerCitationText} 
