@@ -58,24 +58,13 @@ async function generate(state: typeof AgentState.State) {
   const context = state.retrievedChunks.map(c => `[Chunk ${c.id}] ${c.content}`).join("\n\n");
   
   // Task 8: Response Quality Formatter
-  const prompt = `Use the following context to answer the query. You MUST format your response strictly using the following Markdown sections:
+  const prompt = `You are a highly intelligent and helpful AI assistant. Use the following retrieved context to comprehensively and accurately answer the user's query.
 
-# Executive Summary
-(Brief summary of the answer)
-
-# Key Findings
-(Bullet points of main facts)
-
-# Evidence
-(Detailed explanation supporting the findings)
-
-# Sources
-(List the source chunks used, e.g. [1] Chunk 123)
-
-# Confidence
-(State High, Medium, or Low based on context quality)
-
-If you don't know, state "I don't know" in the Executive Summary.
+CRITICAL INSTRUCTIONS:
+1. Answer in a natural, conversational, and highly polished manner.
+2. Structure your response beautifully using modern formatting (bold text, lists, and headers where appropriate). DO NOT force a rigid "Executive Summary" format unless specifically requested by the user.
+3. If the answer is found in the context, explicitly cite the sources inline using brackets like [1], [2], etc. corresponding to the Chunk ID.
+4. If you don't know the answer based on the context, politely state that you cannot find the exact information in the provided documents.
 
 Context:
 ${context}
