@@ -89,8 +89,7 @@ export default function WorkspacePage() {
       const { data: versionData, error: versionError } = await supabase.from('document_versions').insert({
         document_id: docData.id,
         version_number: 1,
-        storage_path: filePath,
-        file_size_bytes: file.size
+        checksum: "pending_checksum"
       }).select().single();
 
       if (versionError) throw versionError;
