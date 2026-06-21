@@ -1,12 +1,12 @@
 // @ts-nocheck
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { ChatInterface } from "@/components/chat/ChatInterface";
 import { useChatSession } from "@/hooks/useChatSession";
-import { Menu, X, MessageSquare, LayoutDashboard, Database, PlusCircle, User, Trash2, MoreVertical } from "lucide-react";
+import { Menu, X, MessageSquare, LayoutDashboard, Database, PlusCircle, User, Trash2, MoreVertical, Search, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
@@ -39,8 +39,33 @@ export default function WorkspacePage() {
     saveAssistantMessage,
     loadChatSession,
     deleteChatSession,
-    clearChat
+    clearChat,
+    fetchChatSessions,
+    sessionPage,
+    hasMoreSessions,
+    isLoadingSessions
   } = useChatSession();
+  
+  const [localSearchQuery, setLocalSearchQuery] = useState("");
+  const observerRef = useRef<IntersectionObserver | null>(null);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      fetchChatSessions(0, localSearchQuery, false);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [localSearchQuery]);
+
+  const lastSessionElementRef = useCallback((node: any) => {
+    if (isLoadingSessions) return;
+    if (observerRef.current) observerRef.current.disconnect();
+    observerRef.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasMoreSessions) {
+        fetchChatSessions(sessionPage + 1, localSearchQuery, true);
+      }
+    });
+    if (node) observerRef.current.observe(node);
+  }, [isLoadingSessions, hasMoreSessions, sessionPage, localSearchQuery, fetchChatSessions]);
   
   const { activeWorkspace } = useWorkspace();
 
@@ -98,12 +123,18 @@ export default function WorkspacePage() {
         current_version_id: versionData.id
       }).eq('id', docData.id);
       
+      setUploadProgress(85);
+      
       // Notify ingest
-      await fetch('/api/ingest', {
+      const ingestRes = await fetch('/api/ingest', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ documentId: docData.id, workspaceId: activeWorkspace.id })
       });
+      
+      if (!ingestRes.ok) {
+         throw new Error("Document uploaded but failed to parse and ingest.");
+      }
       
       setDocuments(prev => [docData, ...prev]);
       setUploadProgress(100);
@@ -121,7 +152,7 @@ export default function WorkspacePage() {
   const handleDeleteDocument = async (docId: string, storagePath: string) => {
     try {
       const { error: storageError } = await supabase.storage.from('nexus_docs').remove([storagePath]);
-      if (storageError) console.error("Storage deletion error:", storageError);
+      if (storageError) throw new Error(`Storage deletion failed: ${storageError.message}`);
       
       const { error: dbError } = await supabase.from('documents').delete().eq('id', docId);
       if (dbError) throw dbError;
@@ -184,7 +215,20 @@ export default function WorkspacePage() {
           </Link>
         </nav>
 
-        <div className="flex-1 overflow-y-auto custom-scrollbar mt-4 px-4 pb-4 space-y-6">
+        <div className="px-4 mt-2 mb-2">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <input 
+              type="text" 
+              placeholder="Search history..." 
+              value={localSearchQuery}
+              onChange={(e) => setLocalSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 bg-slate-100 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500/50 transition-all text-slate-700 placeholder-slate-400"
+            />
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-y-auto custom-scrollbar px-4 pb-4 space-y-6">
           {(() => {
             const groups: Record<string, any[]> = { 'Today': [], 'Previous 7 Days': [], 'Older': [] };
             const today = new Date();
@@ -221,8 +265,14 @@ export default function WorkspacePage() {
             ));
           })()}
           
-          {chatSessions.length === 0 && (
+          {chatSessions.length === 0 && !isLoadingSessions && (
             <div className="px-2 py-2 text-xs text-slate-400 font-light">No history yet</div>
+          )}
+
+          {hasMoreSessions && chatSessions.length > 0 && (
+            <div ref={lastSessionElementRef} className="py-4 flex justify-center items-center">
+              <Loader2 className="w-5 h-5 text-slate-300 animate-spin" />
+            </div>
           )}
         </div>
 

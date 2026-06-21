@@ -9,7 +9,7 @@ import { CitationDrawer, CitationData } from './CitationDrawer';
 import { chatStateMachine, ChatState } from '@/lib/events/ChatStateMachine';
 import { agentEventBus } from '@/lib/events/AgentEventBus';
 import { useWorkspace } from '@/contexts/WorkspaceContext';
-import { Send, Bot, User, Loader2, StopCircle, FileText, Plus } from 'lucide-react';
+import { Send, Bot, User, Loader2, StopCircle, FileText, Plus, ThumbsUp, ThumbsDown } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { SplitPaneViewer } from '../pdf/SplitPaneViewer';
 
@@ -18,6 +18,8 @@ interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   verificationResult?: any[];
+  sources?: any[];
+  feedback?: 'up' | 'down';
 }
 
 interface ChatInterfaceProps {
@@ -71,7 +73,20 @@ export function ChatInterface(props: ChatInterfaceProps) {
     });
 
     const unsubscribeBus = agentEventBus.subscribe('*', (event) => {
-      if (event.type === 'generation_stream' && event.payload?.text) {
+      if (event.type === 'document_retrieval_completed' && event.payload?.chunks) {
+        setMessages((prev: any) => {
+          const newMessages = [...prev];
+          const lastIndex = newMessages.length - 1;
+          if (lastIndex >= 0 && newMessages[lastIndex].role === 'assistant') {
+            newMessages[lastIndex] = {
+              ...newMessages[lastIndex],
+              sources: event.payload.chunks
+            };
+            return newMessages;
+          }
+          return prev;
+        });
+      } else if (event.type === 'generation_stream' && event.payload?.text) {
         currentGenerationRef.current = event.payload.text;
         setMessages((prev: any) => {
           const newMessages = [...prev];
@@ -168,8 +183,30 @@ export function ChatInterface(props: ChatInterfaceProps) {
   const handleDocumentSelect = (docId: string, fileName: string) => {
     setTargetDocumentId(docId);
     setSelectedDocumentName(fileName);
-    setInputValue(prev => prev.replace(/@\w*$/, '') + `@${fileName} `);
+    setInputValue(prev => (prev || '').replace(/@\w*$/, '') + `@${fileName} `);
     setShowMentionMenu(false);
+  };
+
+  const handleFeedback = async (msgId: string, isPositive: boolean) => {
+    try {
+      const targetMsg = messages.find(m => m.id === msgId);
+      if (!targetMsg || targetMsg.role !== 'assistant') return;
+
+      const userMsgIdx = messages.findIndex(m => m.id === msgId) - 1;
+      const userMsg = userMsgIdx >= 0 ? messages[userMsgIdx] : null;
+      const queryText = userMsg?.content || "unknown query";
+
+      const res = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: queryText, isPositive })
+      });
+      if (res.ok) {
+        setMessages((prev: ChatMessage[]) => prev.map(m => m.id === msgId ? { ...m, feedback: isPositive ? 'up' : 'down' } : m));
+      }
+    } catch (e) {
+      console.error("Failed to submit feedback", e);
+    }
   };
 
   const filteredDocs = documents.filter(doc => doc.file_name.toLowerCase().includes(mentionQuery));
@@ -266,21 +303,33 @@ export function ChatInterface(props: ChatInterfaceProps) {
                             code: ({ node, ...props }) => <code className="bg-slate-100 text-slate-800 px-1.5 py-0.5 rounded-md font-mono text-[13px] border border-slate-200/60" {...props} />,
                             a: ({ node, ...props }) => {
                               if (props.href === 'citation') {
+                                const citationIdx = parseInt(props.children?.toString() || "1", 10) - 1;
+                                const sourceChunk = msg.sources?.[citationIdx];
+                                
                                 return (
-                                  <a 
-                                    href="#"
-                                    onClick={(e) => { e.preventDefault(); handleCitationClick(props.children?.toString() || ""); }}
-                                    className="inline-flex items-center justify-center px-2 py-0.5 ml-1.5 text-xs font-bold bg-blue-50 text-blue-700 rounded-md border border-blue-100 hover:bg-blue-600 hover:text-white hover:border-blue-600 hover:shadow-md transition-all cursor-pointer transform hover:-translate-y-0.5"
-                                  >
-                                    {props.children}
-                                  </a>
+                                  <div className="relative inline-block group">
+                                    <a 
+                                      href="#"
+                                      onClick={(e) => { e.preventDefault(); handleCitationClick(props.children?.toString() || ""); }}
+                                      className="inline-flex items-center justify-center px-2 py-0.5 ml-1.5 text-xs font-bold bg-blue-50 text-blue-700 rounded-md border border-blue-100 hover:bg-blue-600 hover:text-white hover:border-blue-600 hover:shadow-md transition-all cursor-pointer transform hover:-translate-y-0.5"
+                                    >
+                                      {props.children}
+                                    </a>
+                                    {sourceChunk && (
+                                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-72 bg-slate-900 text-white text-xs rounded-xl p-3 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                                        <div className="font-semibold text-blue-300 mb-1">Source {citationIdx + 1}</div>
+                                        <div className="line-clamp-4 leading-relaxed">{sourceChunk.content}</div>
+                                        <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45"></div>
+                                      </div>
+                                    )}
+                                  </div>
                                 );
                               }
                               return <a className="text-blue-600 hover:text-blue-700 hover:underline underline-offset-2 transition-colors" {...props} />;
                             }
                           }}
                         >
-                          {msg.content.replace(/\[(\d+)\]/g, '[$1](citation)')}
+                          {(msg.content || '').replace(/\[(\d+)\]/g, '[$1](citation)')}
                         </ReactMarkdown>
                       )}
                       
@@ -299,6 +348,26 @@ export function ChatInterface(props: ChatInterfaceProps) {
                               </li>
                             ))}
                           </ul>
+                        </div>
+                      )}
+                      
+                      {/* RLHF Feedback Loop */}
+                      {msg.content !== '' && chatState === 'COMPLETED' && (
+                        <div className="flex items-center gap-2 mt-3 pt-3 border-t border-slate-100">
+                          <button 
+                            onClick={() => handleFeedback(msg.id, true)}
+                            className={`p-1.5 rounded-md hover:bg-slate-100 transition-colors ${msg.feedback === 'up' ? 'text-green-600 bg-green-50' : 'text-slate-400'}`}
+                            title="Helpful"
+                          >
+                            <ThumbsUp className="w-4 h-4" />
+                          </button>
+                          <button 
+                            onClick={() => handleFeedback(msg.id, false)}
+                            className={`p-1.5 rounded-md hover:bg-slate-100 transition-colors ${msg.feedback === 'down' ? 'text-red-600 bg-red-50' : 'text-slate-400'}`}
+                            title="Not Helpful"
+                          >
+                            <ThumbsDown className="w-4 h-4" />
+                          </button>
                         </div>
                       )}
                     </div>

@@ -23,6 +23,11 @@ export function useChatSession() {
   const [personaInstruction, setPersonaInstruction] = useState<string>("");
 
   const [chatSessions, setChatSessions] = useState<any[]>([]);
+  const [sessionPage, setSessionPage] = useState(0);
+  const [hasMoreSessions, setHasMoreSessions] = useState(true);
+  const [isLoadingSessions, setIsLoadingSessions] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string>("");
   const [selectedModel, setSelectedModel] = useState("Gemini 2.5 Flash");
@@ -48,16 +53,46 @@ export function useChatSession() {
     }
   };
 
-  const fetchChatSessions = async () => {
+  const fetchChatSessions = async (page = 0, query = searchQuery, append = false) => {
     if (!activeWorkspace) return;
+    setIsLoadingSessions(true);
+    
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!user) {
+      setIsLoadingSessions(false);
+      return;
+    }
     setUserEmail(user.email || "U");
-    const { data } = await supabase.from('chat_sessions')
+
+    const pageSize = 15;
+    const start = page * pageSize;
+    const end = start + pageSize - 1;
+
+    let dbQuery = supabase.from('chat_sessions')
       .select('*')
       .eq('workspace_id', activeWorkspace.id)
-      .order('created_at', { ascending: false });
-    if (data) setChatSessions(data);
+      .order('created_at', { ascending: false })
+      .range(start, end);
+
+    if (query) {
+      dbQuery = dbQuery.ilike('title', `%${query}%`);
+    }
+
+    const { data } = await dbQuery;
+    
+    if (data) {
+      if (append) {
+        setChatSessions(prev => [...prev, ...data]);
+      } else {
+        setChatSessions(data);
+      }
+      setHasMoreSessions(data.length === pageSize);
+      setSessionPage(page);
+      setSearchQuery(query);
+    } else {
+      setHasMoreSessions(false);
+    }
+    setIsLoadingSessions(false);
   };
 
   const loadChatSession = async (sessionId: string) => {
@@ -156,6 +191,11 @@ export function useChatSession() {
     saveAssistantMessage,
     loadChatSession,
     deleteChatSession,
+    fetchChatSessions,
+    sessionPage,
+    hasMoreSessions,
+    isLoadingSessions,
+    searchQuery,
     clearChat
   };
 }

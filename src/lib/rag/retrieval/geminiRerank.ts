@@ -15,10 +15,13 @@ const rerankSchema = z.object({
 export async function geminiRerank(query: string, chunks: RetrievedChunk[]): Promise<RetrievedChunk[]> {
   if (chunks.length === 0) return [];
   
+  const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+  if (!apiKey) throw new Error("Missing Gemini API Key in reranker.");
+
   const llm = new ChatGoogleGenerativeAI({
     model: "gemini-3.1-flash-lite",
     temperature: 0,
-    apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || "dummy",
+    apiKey,
   });
 
   const parser = StructuredOutputParser.fromZodSchema(rerankSchema);

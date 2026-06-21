@@ -91,11 +91,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Empty document or extraction failed" }, { status: 400 });
     }
 
-    // Semantic Chunking: Preserve paragraphs, chunk size 600
+    // Semantic Boundary Chunking: Prioritize markdown headers and paragraphs
     const splitter = new RecursiveCharacterTextSplitter({
-      chunkSize: 600,
-      chunkOverlap: 100,
-      separators: ["\n\n", "\n", ".", " ", ""],
+      chunkSize: 1500,
+      chunkOverlap: 300,
+      separators: ["\n# ", "\n## ", "\n### ", "\n\n\n", "\n\n", "\n", ". ", " ", ""],
     });
 
     const chunks = await splitter.splitText(fullText);
@@ -125,13 +125,17 @@ export async function POST(req: NextRequest) {
       for (let j = 0; j < batchChunks.length; j++) {
         let embeddingValues = embeddings[j].values;
         if (embeddingValues.length > 768) {
-          // Truncate to 768 (Matryoshka Representation Learning)
           embeddingValues = embeddingValues.slice(0, 768);
-          // Normalize vector
           const magnitude = Math.sqrt(embeddingValues.reduce((sum, val) => sum + val * val, 0));
           if (magnitude > 0) {
             embeddingValues = embeddingValues.map(val => val / magnitude);
           }
+        } else if (embeddingValues.length < 768) {
+          const padded = new Array(768).fill(0);
+          for (let k = 0; k < embeddingValues.length; k++) {
+            padded[k] = embeddingValues[k];
+          }
+          embeddingValues = padded;
         }
         
         dbRows.push({
@@ -182,12 +186,27 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, chunksProcessed: chunks.length });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error(
       "[INGEST FATAL ERROR FULL]",
       error,
       error instanceof Error ? error.message : JSON.stringify(error, null, 2)
     );
+    
+    // Safely attempt to fail the job if documentId is present
+    try {
+      const supabase = await createClient();
+      const body = await req.clone().json().catch(() => ({}));
+      if (body.documentId) {
+        const { data: ver } = await supabase.from('document_versions').select('id').eq('document_id', body.documentId).order('created_at', { ascending: false }).limit(1).single();
+        if (ver) {
+          await supabase.from('ingestion_jobs').update({ status: 'failed', error_message: error.message || 'Unknown fatal error' }).eq('document_version_id', ver.id);
+        }
+      }
+    } catch (e) {
+      console.error("Failed to update ingestion job status during fatal error", e);
+    }
+
     return NextResponse.json(
       { error: error instanceof Error ? error.message : (typeof error === 'object' ? JSON.stringify(error) : String(error)) },
       { status: 500 }

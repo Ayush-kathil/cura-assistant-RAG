@@ -11,6 +11,10 @@ export async function getEmbeddings(text: string): Promise<number[]> {
     response = response.slice(0, 768);
     const magnitude = Math.sqrt(response.reduce((sum, val) => sum + val * val, 0));
     if (magnitude > 0) response = response.map(val => val / magnitude);
+  } else if (response.length < 768) {
+    const padded = new Array(768).fill(0);
+    for(let k = 0; k < response.length; k++) padded[k] = response[k];
+    response = padded;
   }
   return response;
 }

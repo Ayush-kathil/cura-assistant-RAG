@@ -118,11 +118,11 @@ export default function UploadPage() {
     if (!confirm("Are you sure you want to delete this document?")) return;
     
     try {
+      const { error: storageError } = await supabase.storage.from('nexus_docs').remove([storagePath]);
+      if (storageError) throw new Error(`Storage deletion failed: ${storageError.message}`);
+
       const { error: dbError } = await supabase.from('documents').delete().eq('id', docId);
       if (dbError) throw dbError;
-      
-      const { error: storageError } = await supabase.storage.from('nexus_docs').remove([storagePath]);
-      if (storageError) throw storageError;
 
       setRecentDocs(prev => prev.filter(d => d.id !== docId));
     } catch (e) {

@@ -23,11 +23,15 @@ export const AgentState = Annotation.Root({
 });
 
 function getLlm() {
-  return new ChatGoogleGenerativeAI({ model: "gemini-3.1-flash-lite", temperature: 0.2, apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || "dummy" });
+  const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+  if (!apiKey) throw new Error("Missing Gemini API Key. Please configure GEMINI_API_KEY in your environment variables.");
+  return new ChatGoogleGenerativeAI({ model: "gemini-3.1-flash-lite", temperature: 0.2, apiKey });
 }
 
 function getVerifierLlm() {
-  return new ChatGoogleGenerativeAI({ model: "gemini-3.1-flash-lite", temperature: 0, apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || "dummy" });
+  const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+  if (!apiKey) throw new Error("Missing Gemini API Key. Please configure GEMINI_API_KEY in your environment variables.");
+  return new ChatGoogleGenerativeAI({ model: "gemini-3.1-flash-lite", temperature: 0, apiKey });
 }
 
 // Nodes
@@ -55,7 +59,14 @@ async function retrieve(state: typeof AgentState.State) {
 }
 
 async function generate(state: typeof AgentState.State) {
-  const context = state.retrievedChunks.map(c => `[Chunk ${c.id}] ${c.content}`).join("\n\n");
+  let joinedContext = "";
+  const maxChars = 80000; // ~20k tokens to prevent overflow
+  for (let i = 0; i < Math.min(30, state.retrievedChunks.length); i++) {
+    const chunkText = `[Chunk ${state.retrievedChunks[i].id}] ${state.retrievedChunks[i].content}\n\n`;
+    if (joinedContext.length + chunkText.length > maxChars) break;
+    joinedContext += chunkText;
+  }
+  const context = joinedContext.trim();
   
   // Task 8: Response Quality Formatter
   const prompt = `You are a highly intelligent and helpful AI assistant. Use the following retrieved context to comprehensively and accurately answer the user's query.

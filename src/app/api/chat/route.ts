@@ -20,6 +20,13 @@ export async function POST(req: Request) {
   }
   rateLimitMap.set(ip, rateInfo);
 
+  // Prevent memory leaks by cleaning up expired entries if map grows too large
+  if (rateLimitMap.size > 1000) {
+    for (const [key, val] of rateLimitMap.entries()) {
+      if (val.resetTime < now) rateLimitMap.delete(key);
+    }
+  }
+
   if (rateInfo.count > MAX_REQUESTS_PER_WINDOW) {
     return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again later." }), { status: 429 });
   }
@@ -51,23 +58,39 @@ export async function POST(req: Request) {
 
         // Stream from LangGraph
         for await (const chunk of await appGraph.stream(initialState, config)) {
-          // chunk is an object with the node name as the key, e.g. { queryAnalyzer: { ... } }
+          if (req.signal.aborted) {
+            console.log("Client aborted stream.");
+            return; // Exit stream cleanly
+          }
           const nodeName = Object.keys(chunk)[0];
           const payload = (chunk as any)[nodeName];
 
-          controller.enqueue(
-            new TextEncoder().encode(`data: ${JSON.stringify({ node: nodeName, payload })}\n\n`)
-          );
+          try {
+            controller.enqueue(
+              new TextEncoder().encode(`data: ${JSON.stringify({ node: nodeName, payload })}\n\n`)
+            );
+          } catch(e) {
+            console.log("Stream closed during enqueue");
+            return;
+          }
         }
 
-        controller.enqueue(new TextEncoder().encode(`data: [DONE]\n\n`));
-        controller.close();
+        try {
+          if (!req.signal.aborted) {
+            controller.enqueue(new TextEncoder().encode(`data: [DONE]\n\n`));
+            controller.close();
+          }
+        } catch(e) {}
       } catch (error) {
         console.error("LangGraph Streaming Error:", error);
-        controller.enqueue(
-          new TextEncoder().encode(`data: ${JSON.stringify({ error: "Internal Server Error" })}\n\n`)
-        );
-        controller.close();
+        try {
+          if (!req.signal.aborted) {
+            controller.enqueue(
+              new TextEncoder().encode(`data: ${JSON.stringify({ error: "Internal Server Error" })}\n\n`)
+            );
+            controller.close();
+          }
+        } catch(e) {}
       }
     }
   });

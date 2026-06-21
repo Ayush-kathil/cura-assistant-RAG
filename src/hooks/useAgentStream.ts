@@ -38,16 +38,19 @@ export function useAgentStream() {
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let done = false;
-      let generationBuffer = "";
+      let sseBuffer = "";
 
       while (!done) {
         const { value, done: readerDone } = await reader.read();
         done = readerDone;
         if (value) {
-          const chunkString = decoder.decode(value, { stream: true });
-          const events = chunkString.split('\n\n').filter(Boolean);
+          sseBuffer += decoder.decode(value, { stream: true });
+          const parts = sseBuffer.split('\n\n');
+          // The last element is either an empty string (if exactly ending in \n\n) or an incomplete chunk
+          sseBuffer = parts.pop() || "";
           
-          for (const ev of events) {
+          for (const ev of parts) {
+            if (!ev.trim()) continue;
             if (ev.startsWith('data: ')) {
               const dataStr = ev.replace('data: ', '');
               if (dataStr === '[DONE]') {
@@ -63,13 +66,11 @@ export function useAgentStream() {
                   chatStateMachine.transition('RETRIEVING');
                   emit({ type: 'document_retrieval_started' });
                 } else if (data.node === 'retrieve') {
-                  const chunkCount = data.payload?.retrievedChunks?.length || 0;
-                  emit({ type: 'document_retrieval_completed', payload: { count: chunkCount } });
+                  const chunks = data.payload?.retrievedChunks || [];
+                  emit({ type: 'document_retrieval_completed', payload: { count: chunks.length, chunks } });
                   chatStateMachine.transition('GENERATING');
                   emit({ type: 'generation_started' });
                 } else if (data.node === 'generate') {
-                  // If the node completed generation, we emit the stream event
-                  // In LangGraph, we just get the whole generation string at the end of the node.
                   const fullText = data.payload?.generation || "";
                   emit({ type: 'generation_stream', payload: { text: fullText } });
                   chatStateMachine.transition('VERIFYING');
@@ -79,7 +80,7 @@ export function useAgentStream() {
                   emit({ type: 'verification_completed', payload: { verificationResult: payload } });
                 }
               } catch(err) {
-                console.error("Failed to parse SSE event", err);
+                console.error("Failed to parse SSE event", err, "Raw data:", dataStr);
               }
             }
           }
