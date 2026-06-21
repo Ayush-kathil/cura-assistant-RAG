@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/client";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
-import { MessageSquare, LayoutDashboard, Database, PlusCircle, User, Zap, Bell, FileText, Download, Activity, FileCheck2, HeartPulse } from "lucide-react";
+import { MessageSquare, LayoutDashboard, Database, PlusCircle, User, Zap, Bell, FileText, Download, Activity, FileCheck2, HeartPulse, Save, Camera } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function DashboardPage() {
@@ -12,6 +12,9 @@ export default function DashboardPage() {
   const [user, setUser] = useState<any>(null);
   const [docCount, setDocCount] = useState(0);
   const [recentDocs, setRecentDocs] = useState<any[]>([]);
+  const [profileName, setProfileName] = useState("");
+  const [profileEmail, setProfileEmail] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
   const { activeWorkspace } = useWorkspace();
 
   useEffect(() => {
@@ -26,10 +29,25 @@ export default function DashboardPage() {
         const { data: docs } = await supabase.from("documents").select("*").eq("workspace_id", activeWorkspace.id).order("created_at", { ascending: false }).limit(3);
         if (docs) setRecentDocs(docs);
       }
+      
+      // Initialize profile forms
+      const name = data.user?.user_metadata?.first_name || data.user?.email?.split('@')[0] || 'Guest';
+      setProfileName(name);
+      setProfileEmail(data.user?.email || '');
     };
     
     fetchStats();
   }, [supabase, activeWorkspace]);
+
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSaving(true);
+    // Simulate API call for now
+    setTimeout(() => {
+      setIsSaving(false);
+      alert("Profile updated successfully!");
+    }, 1000);
+  };
 
   const firstName = user?.user_metadata?.first_name || user?.email?.split('@')[0] || 'Guest';
 
@@ -177,7 +195,7 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="col-span-12 bg-white rounded-3xl p-8 shadow-xl shadow-slate-200/40 border border-slate-200"
+            className="col-span-12 lg:col-span-6 bg-white rounded-3xl p-8 shadow-xl shadow-slate-200/40 border border-slate-200"
           >
             <div className="flex items-center justify-between mb-8">
               <h4 className="text-lg font-medium text-slate-900">Recent Uploads</h4>
@@ -223,6 +241,67 @@ export default function DashboardPage() {
                 </tbody>
               </table>
             </div>
+          </motion.div>
+
+          {/* User Profile Card */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="col-span-12 lg:col-span-6 bg-white rounded-3xl p-8 shadow-xl shadow-slate-200/40 border border-slate-200"
+          >
+            <div className="flex items-center justify-between mb-8">
+              <h4 className="text-lg font-medium text-slate-900">Profile Settings</h4>
+            </div>
+            
+            <form onSubmit={handleUpdateProfile} className="space-y-6">
+              <div className="flex items-center gap-6 mb-8">
+                <div className="relative group">
+                  <div className="w-24 h-24 rounded-full border-2 border-slate-200 bg-slate-50 flex items-center justify-center text-3xl font-light text-slate-600 shadow-sm overflow-hidden">
+                    {profileName ? profileName.charAt(0).toUpperCase() : 'U'}
+                    <div className="absolute inset-0 bg-slate-900/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer backdrop-blur-sm">
+                      <Camera className="w-6 h-6 text-white" />
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <h5 className="text-slate-900 font-medium">Profile Photo</h5>
+                  <p className="text-xs text-slate-500 mt-1">Upload a JPG or PNG, max 5MB.</p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-medium text-slate-500 uppercase tracking-widest mb-2">Display Name</label>
+                  <input 
+                    type="text" 
+                    value={profileName}
+                    onChange={(e) => setProfileName(e.target.value)}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-500 uppercase tracking-widest mb-2">Email Address</label>
+                  <input 
+                    type="email" 
+                    value={profileEmail}
+                    onChange={(e) => setProfileEmail(e.target.value)}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-4 flex justify-end">
+                <button 
+                  type="submit" 
+                  disabled={isSaving}
+                  className="flex items-center gap-2 px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-medium transition-all shadow-lg shadow-slate-900/10 disabled:opacity-70"
+                >
+                  {isSaving ? <Activity className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  {isSaving ? "Saving..." : "Save Changes"}
+                </button>
+              </div>
+            </form>
           </motion.div>
         </section>
       </main>

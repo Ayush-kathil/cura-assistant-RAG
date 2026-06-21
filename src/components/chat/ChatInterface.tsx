@@ -9,7 +9,7 @@ import { CitationDrawer, CitationData } from './CitationDrawer';
 import { chatStateMachine, ChatState } from '@/lib/events/ChatStateMachine';
 import { agentEventBus } from '@/lib/events/AgentEventBus';
 import { useWorkspace } from '@/contexts/WorkspaceContext';
-import { Send, Bot, User, Loader2, StopCircle, FileText } from 'lucide-react';
+import { Send, Bot, User, Loader2, StopCircle, FileText, Plus } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { SplitPaneViewer } from '../pdf/SplitPaneViewer';
 
@@ -344,11 +344,20 @@ export function ChatInterface(props: ChatInterfaceProps) {
             )}
           </AnimatePresence>
 
-          <div className="relative p-[2px] rounded-[1.25rem] bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-[length:200%_auto] animate-[gradient_3s_linear_infinite] shadow-lg shadow-purple-500/20 transition-all focus-within:shadow-xl focus-within:shadow-purple-500/40">
+          <div className="relative p-[2px] rounded-t-[3rem] rounded-b-xl bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-[length:200%_auto] animate-[gradient_3s_linear_infinite] shadow-lg shadow-purple-500/20 transition-all focus-within:shadow-xl focus-within:shadow-purple-500/40">
             <form 
               onSubmit={handleSubmit}
-              className="relative bg-white rounded-2xl overflow-hidden"
+              className="relative bg-white rounded-t-[3rem] rounded-b-xl overflow-hidden flex"
             >
+            <div className="flex items-end pb-2 pl-4">
+              <button
+                type="button"
+                className="p-2.5 bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-blue-600 rounded-full transition-colors shrink-0"
+                title="Add Context / Upload File"
+              >
+                <Plus className="w-5 h-5" />
+              </button>
+            </div>
             <textarea
               value={inputValue}
               onChange={handleInputChange}
@@ -359,7 +368,7 @@ export function ChatInterface(props: ChatInterfaceProps) {
                 }
               }}
               placeholder="Ask the Agentic AI (Type @ to mention a PDF)..."
-              className="w-full max-h-48 min-h-[56px] resize-none border-0 bg-transparent py-4 pl-4 pr-14 text-slate-800 placeholder:text-slate-400 focus:ring-0 outline-none"
+              className="w-full max-h-48 min-h-[56px] resize-none border-0 bg-transparent py-5 pl-4 pr-32 text-slate-800 placeholder:text-slate-400 focus:ring-0 outline-none self-center"
               rows={1}
             />
             
