@@ -162,8 +162,17 @@ export function ChatInterface(props: ChatInterfaceProps) {
        activeSessionRef.current = sid;
     }
 
+    // Conversational Memory Windowing: Inject last 4 messages as context
+    const memoryWindow = messages.slice(-4);
+    let contextualQuery = queryText;
+    
+    if (memoryWindow.length > 0) {
+      const transcript = memoryWindow.map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`).join('\n');
+      contextualQuery = `[Previous Chat Context]\n${transcript}\n\n[Current Question]\n${queryText}`;
+    }
+
     // Call Real SSE Streaming Hook
-    await submitQuery(queryText, activeWorkspace?.id || 'default-workspace', currentTargetId, researchMode);
+    await submitQuery(contextualQuery, activeWorkspace?.id || 'default-workspace', currentTargetId, researchMode);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -316,7 +325,7 @@ export function ChatInterface(props: ChatInterfaceProps) {
                                       {props.children}
                                     </a>
                                     {sourceChunk && (
-                                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-72 bg-slate-900 text-white text-xs rounded-xl p-3 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-72 bg-slate-900 text-white text-xs rounded-xl p-3 shadow-xl opacity-0 invisible md:group-hover:opacity-100 md:group-hover:visible transition-all duration-200 z-50 pointer-events-none md:pointer-events-auto">
                                         <div className="font-semibold text-blue-300 mb-1">Source {citationIdx + 1}</div>
                                         <div className="line-clamp-4 leading-relaxed">{sourceChunk.content}</div>
                                         <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45"></div>
