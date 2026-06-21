@@ -114,7 +114,8 @@ export default function LoginPage() {
             first_name: firstName,
             last_name: lastName
           },
-          captchaToken: captchaToken || undefined
+          captchaToken: captchaToken || undefined,
+          emailRedirectTo: `${window.location.origin}/auth/callback`
         }
       });
       if (error) throw error;
