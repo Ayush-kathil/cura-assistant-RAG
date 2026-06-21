@@ -65,42 +65,6 @@ export default async function AdminLayout({ children }: { children: React.ReactN
                   <Database className="w-4 h-4" />
                   <span>Ingestion Monitor</span>
                 </Link>
-                <Link href="/admin/graph" className="flex items-center gap-3 px-4 py-2 text-slate-300 hover:bg-slate-800 hover:text-white transition-all rounded-lg text-sm font-medium">
-                  <Network className="w-4 h-4" />
-                  <span>Knowledge Graph</span>
-                </Link>
-              </nav>
-            </div>
-
-            <div>
-              <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 pl-2">Infrastructure</h3>
-              <nav className="space-y-1">
-                <Link href="/admin/models" className="flex items-center gap-3 px-4 py-2 text-slate-300 hover:bg-slate-800 hover:text-white transition-all rounded-lg text-sm font-medium">
-                  <Cpu className="w-4 h-4" />
-                  <span>Model Management</span>
-                </Link>
-                <Link href="/admin/costs" className="flex items-center gap-3 px-4 py-2 text-slate-300 hover:bg-slate-800 hover:text-white transition-all rounded-lg text-sm font-medium">
-                  <BookOpen className="w-4 h-4" />
-                  <span>Cost Monitoring</span>
-                </Link>
-                <Link href="/admin/integrations" className="flex items-center gap-3 px-4 py-2 text-slate-300 hover:bg-slate-800 hover:text-white transition-all rounded-lg text-sm font-medium">
-                  <Key className="w-4 h-4" />
-                  <span>API & Integrations</span>
-                </Link>
-              </nav>
-            </div>
-
-            <div>
-              <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 pl-2">Security</h3>
-              <nav className="space-y-1">
-                <Link href="/admin/security" className="flex items-center gap-3 px-4 py-2 text-slate-300 hover:bg-slate-800 hover:text-white transition-all rounded-lg text-sm font-medium">
-                  <ShieldCheck className="w-4 h-4" />
-                  <span>Security Center</span>
-                </Link>
-                <Link href="/admin/logs" className="flex items-center gap-3 px-4 py-2 text-slate-300 hover:bg-slate-800 hover:text-white transition-all rounded-lg text-sm font-medium">
-                  <Settings className="w-4 h-4" />
-                  <span>Audit Logs</span>
-                </Link>
               </nav>
             </div>
 

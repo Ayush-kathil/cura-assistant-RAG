@@ -11,17 +11,24 @@ export default function UsersAdmin() {
 
   useEffect(() => {
     async function fetchUsers() {
-      // Trying to fetch from auth.users requires service_role key, which we don't use on client.
-      // So we use mock data with Google-level touch points as requested.
-      setTimeout(() => {
-        setUsers([
-          { id: '1', name: 'Ayush Kathil', email: 'ayush@example.com', lastActive: '2 mins ago', docs: 124, queries: 1405, storage: '1.2 GB', status: 'Active' },
-          { id: '2', name: 'Sarah Connor', email: 'sarah.c@techcorp.com', lastActive: '5 hours ago', docs: 12, queries: 45, storage: '50 MB', status: 'Active' },
-          { id: '3', name: 'John Doe', email: 'j.doe@unknown.net', lastActive: '2 days ago', docs: 0, queries: 0, storage: '0 MB', status: 'Suspended' },
-          { id: '4', name: 'Elena Rostova', email: 'elena.r@research.edu', lastActive: 'Just now', docs: 890, queries: 12500, storage: '14.5 GB', status: 'Active' },
-        ]);
-        setIsLoading(false);
-      }, 500);
+      const { data, error } = await supabase.from('admin_users_view').select('*').limit(50);
+      
+      if (data && !error) {
+        const mapped = data.map((u: any) => ({
+          id: u.id,
+          name: u.raw_user_meta_data?.full_name || 'Unknown User',
+          email: u.email,
+          lastActive: u.last_sign_in_at ? new Date(u.last_sign_in_at).toLocaleDateString() : 'Never',
+          docs: u.total_docs || 0,
+          queries: u.total_queries || 0,
+          storage: 'Calculating...',
+          status: 'Active'
+        }));
+        setUsers(mapped);
+      } else {
+        setUsers([]);
+      }
+      setIsLoading(false);
     }
     fetchUsers();
   }, []);

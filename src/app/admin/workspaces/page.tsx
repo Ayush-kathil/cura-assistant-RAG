@@ -11,29 +11,26 @@ export default function WorkspacesAdmin() {
 
   useEffect(() => {
     async function fetchWorkspaces() {
-      // Try to fetch real workspaces
-      const { data, error } = await supabase.from('workspaces').select('*').limit(10);
+      const { data, error } = await supabase.from('workspaces').select(`
+        id,
+        name,
+        created_at,
+        documents (id)
+      `).limit(50);
       
-      if (data && data.length > 0 && !error) {
-        // Map real data
+      if (data && !error) {
         const mapped = data.map((ws: any) => ({
           id: ws.id,
           name: ws.name,
           status: 'Active',
-          storage: '1.2 GB', // Mocked storage
-          queries: 1250, // Mocked queries
-          users: 1, // Mocked users
+          storage: 'Calculating...', 
+          queries: 0, 
+          users: 1, 
           created: new Date(ws.created_at).toLocaleDateString()
         }));
         setWorkspaces(mapped);
       } else {
-        // Mock data
-        setWorkspaces([
-          { id: '1', name: 'Enterprise Alpha', status: 'Active', storage: '45.2 GB', queries: 124500, users: 45, created: '2023-10-12' },
-          { id: '2', name: 'Beta Labs', status: 'Suspended', storage: '12.1 GB', queries: 8400, users: 12, created: '2023-11-05' },
-          { id: '3', name: 'Legal Corp', status: 'Active', storage: '180.5 GB', queries: 450200, users: 120, created: '2024-01-22' },
-          { id: '4', name: 'Startup Inc', status: 'Active', storage: '2.4 GB', queries: 150, users: 3, created: '2024-05-18' },
-        ]);
+        setWorkspaces([]);
       }
       setIsLoading(false);
     }

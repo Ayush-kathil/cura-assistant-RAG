@@ -30,30 +30,44 @@ export function RotatingWheel() {
   const y3 = useTransform(scrollYProgress, [0.65, 0.75], [50, 0]);
   const scale3 = useTransform(scrollYProgress, [0.65, 0.75, 0.95, 1], [0.8, 1, 1, 0.8]);
 
+  // Generate spokes for the cycle wheel
+  const spokes = Array.from({ length: 16 });
+
   return (
     <div ref={containerRef} className="h-[300vh] w-full bg-slate-900 relative">
-      <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center perspective-[1000px]">
+      <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center perspective-[1200px]">
         
-        {/* The 3D Wheel Background Structure */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-30">
+        {/* The 3D Cycle Wheel Structure */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-40">
           <motion.div 
             style={{ 
-              rotateX: 60, 
+              rotateX: 65, 
               rotateZ,
               transformStyle: "preserve-3d"
             }}
-            className="w-[800px] h-[800px] rounded-full border-[1px] border-dashed border-blue-400/50 flex items-center justify-center"
+            className="w-[800px] h-[800px] rounded-full border-8 border-slate-700/80 shadow-[0_0_50px_rgba(0,0,0,0.5)_inset] flex items-center justify-center relative"
           >
-            <div className="w-[600px] h-[600px] rounded-full border border-indigo-500/30"></div>
-            <div className="absolute w-[400px] h-[400px] rounded-full border border-purple-500/20 flex items-center justify-center">
-               <div className="w-1 h-[800px] bg-gradient-to-b from-transparent via-blue-500/20 to-transparent absolute"></div>
-               <div className="w-[800px] h-1 bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent absolute"></div>
+            {/* Inner Rim */}
+            <div className="absolute w-[760px] h-[760px] rounded-full border-4 border-slate-600/50"></div>
+            
+            {/* Center Hub */}
+            <div className="absolute w-16 h-16 rounded-full bg-slate-800 border-[6px] border-slate-600 shadow-2xl z-10 flex items-center justify-center">
+              <div className="w-4 h-4 rounded-full bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,1)]"></div>
             </div>
+
+            {/* Spokes */}
+            {spokes.map((_, i) => (
+              <div 
+                key={i}
+                className="absolute w-[1px] h-[800px] bg-gradient-to-b from-slate-500/40 via-transparent to-slate-500/40"
+                style={{ transform: `rotate(${i * (180 / 16)}deg)` }}
+              ></div>
+            ))}
           </motion.div>
         </div>
 
         {/* Center glowing orb to anchor the wheel */}
-        <div className="absolute w-32 h-32 rounded-full bg-blue-600/20 blur-3xl shadow-[0_0_100px_rgba(37,99,235,0.5)]"></div>
+        <div className="absolute w-40 h-40 rounded-full bg-blue-600/10 blur-3xl shadow-[0_0_120px_rgba(37,99,235,0.4)] pointer-events-none"></div>
 
         {/* Content Container */}
         <div className="relative z-10 w-full max-w-7xl px-8 flex justify-between items-center">
@@ -66,7 +80,8 @@ export function RotatingWheel() {
               style={{ opacity: opacity1, y: y1, scale: scale1 }}
               className="absolute inset-0 flex items-center"
             >
-              <div className="bg-white/10 backdrop-blur-xl border border-white/20 p-8 rounded-2xl shadow-2xl w-full">
+              {/* Cloud Frame Shape using organic border-radius */}
+              <div className="bg-white/10 backdrop-blur-xl border border-white/20 p-10 shadow-2xl w-full relative rounded-[3rem] rounded-tl-[6rem] rounded-br-[5rem]">
                 <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center mb-6 border border-blue-400/30">
                   <Database className="text-blue-400 w-6 h-6" />
                 </div>
@@ -82,7 +97,8 @@ export function RotatingWheel() {
               style={{ opacity: opacity2, y: y2, scale: scale2 }}
               className="absolute inset-0 flex items-center pointer-events-none"
             >
-              <div className="bg-white/10 backdrop-blur-xl border border-white/20 p-8 rounded-2xl shadow-2xl w-full">
+              {/* Cloud Frame Shape using organic border-radius */}
+              <div className="bg-white/10 backdrop-blur-xl border border-white/20 p-10 shadow-2xl w-full relative rounded-[4rem] rounded-tr-[6rem] rounded-bl-[5rem]">
                 <div className="w-12 h-12 rounded-xl bg-indigo-500/20 flex items-center justify-center mb-6 border border-indigo-400/30">
                   <Network className="text-indigo-400 w-6 h-6" />
                 </div>
@@ -101,7 +117,8 @@ export function RotatingWheel() {
               style={{ opacity: opacity3, y: y3, scale: scale3 }}
               className="absolute inset-0 flex items-center pointer-events-none"
             >
-              <div className="bg-white/10 backdrop-blur-xl border border-white/20 p-8 rounded-2xl shadow-2xl w-full">
+              {/* Cloud Frame Shape using organic border-radius */}
+              <div className="bg-white/10 backdrop-blur-xl border border-white/20 p-10 shadow-2xl w-full relative rounded-[3.5rem] rounded-tl-[5rem] rounded-br-[6rem]">
                 <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center mb-6 border border-purple-400/30">
                   <Cpu className="text-purple-400 w-6 h-6" />
                 </div>
@@ -114,9 +131,8 @@ export function RotatingWheel() {
 
           </div>
 
-          {/* Right Side: Visual Context or Empty Space */}
+          {/* Right Side: Empty Space to show the wheel */}
           <div className="hidden md:flex w-1/2 h-full items-center justify-center">
-             {/* This space is intentionally left empty so the 3D wheel is visible on the right side of the screen */}
           </div>
 
         </div>

@@ -1,17 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Lock } from "lucide-react";
+import { ShieldAlert } from "lucide-react";
 
-export function AdminAuthWrapper({ 
-  expectedPasscode, 
-  children 
-}: { 
-  expectedPasscode: string; 
-  children: React.ReactNode; 
-}) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+export function AdminAuthWrapper({ children, expectedPasscode = "1234" }: { children: React.ReactNode, expectedPasscode?: string }) {
   const [passcode, setPasscode] = useState("");
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [error, setError] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -19,7 +13,7 @@ export function AdminAuthWrapper({
     if (passcode === expectedPasscode) {
       setIsAuthenticated(true);
     } else {
-      setError("Incorrect passcode");
+      setError("Invalid passcode.");
       setPasscode("");
     }
   };
@@ -29,35 +23,32 @@ export function AdminAuthWrapper({
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl">
-        <div className="flex justify-center mb-6">
-          <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center">
-            <Lock className="w-8 h-8 text-blue-600" />
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 selection:bg-blue-100 selection:text-blue-900">
+      <div className="max-w-md w-full bg-white rounded-3xl p-8 shadow-xl border border-slate-200">
+        <div className="text-center mb-8">
+          <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-blue-100">
+            <ShieldAlert className="w-8 h-8 text-blue-600" />
           </div>
+          <h1 className="text-2xl font-light text-slate-900 tracking-tight mb-2">Admin Authentication</h1>
+          <p className="text-slate-500 font-light text-sm">Enter the master passcode to access the admin panel.</p>
         </div>
-        <h2 className="text-2xl font-light text-center text-slate-900 mb-2">Admin Authentication</h2>
-        <p className="text-sm text-center text-slate-500 mb-8">Please enter the 4-digit master passcode to continue.</p>
         
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <input 
+            <input
               type="password"
-              maxLength={4}
+              placeholder="Enter Passcode"
               value={passcode}
               onChange={(e) => setPasscode(e.target.value)}
-              className="w-full text-center tracking-[1em] text-3xl font-light py-4 border-b-2 border-slate-200 focus:border-blue-600 outline-none transition-colors"
-              placeholder="••••"
-              autoFocus
+              className="w-full text-center text-2xl tracking-widest font-medium bg-slate-50 border border-slate-200 rounded-xl py-4 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             />
-            {error && <p className="text-red-500 text-sm text-center mt-2">{error}</p>}
           </div>
-          
-          <button 
-            type="submit" 
-            className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-all shadow-lg shadow-blue-600/20"
+          {error && <p className="text-red-500 text-sm text-center font-medium">{error}</p>}
+          <button
+            type="submit"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-xl transition-all shadow-md shadow-blue-600/20"
           >
-            Unlock Command Center
+            Authenticate
           </button>
         </form>
       </div>
