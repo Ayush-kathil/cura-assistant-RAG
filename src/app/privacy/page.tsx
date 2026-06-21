@@ -2,84 +2,72 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Shield, Book, UserCircle, Database, Server, AlertTriangle, FileText, Ban, Sparkles, Scale, RefreshCcw, Mail } from "lucide-react";
+import { Shield, Database, Lock, EyeOff, Globe, Clock, UserCheck, HardDrive, Trash2, ShieldAlert } from "lucide-react";
 
 const policies = [
   {
     id: 1,
-    icon: Book,
-    title: "Acceptance of Terms",
-    content: "By accessing or using CURA, you agree to be bound by these Terms of Service. If you do not agree, you may not access the Platform."
+    icon: Database,
+    title: "Information We Collect",
+    content: "We collect account information (name, email), user content (documents, chat history, vectors), and technical metadata (IP address, usage logs) to provide and improve the service."
   },
   {
     id: 2,
-    icon: Sparkles,
-    title: "Description of Service",
-    content: "CURA is an AI-powered knowledge management and document intelligence platform. It enables uploading documents, searching, generating summaries, and collaborating within workspaces."
+    icon: EyeOff,
+    title: "How We Use Information",
+    content: "We use data exclusively to provide AI-powered search, generate summaries, maintain workspace isolation, and secure accounts against fraud."
   },
   {
     id: 3,
-    icon: UserCircle,
-    title: "User Accounts",
-    content: "You must be at least 13 years old. You are responsible for maintaining account confidentiality and all activities occurring under your account. Provide accurate information."
+    icon: Shield,
+    title: "AI Processing",
+    content: "Documents are processed into vector embeddings. We do not use customer documents to train proprietary foundation models unless explicitly disclosed and consented to."
   },
   {
     id: 4,
-    icon: FileText,
-    title: "User Content",
-    content: "You retain ownership of all uploaded content (documents, PDFs, chat history). You represent that you own the content or have permission, and it does not violate laws or IP rights."
+    icon: HardDrive,
+    title: "Data Storage",
+    content: "Information is stored in secure application databases, vector indexes, and encrypted backups with commercially reasonable safeguards."
   },
   {
     id: 5,
-    icon: Shield,
-    title: "AI-Generated Outputs",
-    content: "AI outputs may contain inaccuracies. Generated outputs should be independently verified before making professional decisions. CURA does not guarantee output accuracy."
+    icon: Lock,
+    title: "Data Sharing",
+    content: "We do not sell personal information. We only share data with strict infrastructure and AI model sub-processors, or when legally required by authorities."
   },
   {
     id: 6,
-    icon: Ban,
-    title: "Prohibited Uses",
-    content: "You agree not to upload malicious software, conduct denial-of-service attacks, reverse engineer the platform, abuse APIs, or generate spam and deceptive content."
+    icon: Clock,
+    title: "Data Retention",
+    content: "We retain data only as long as necessary. Upon account deletion, all documents, embeddings, and chat history are permanently removed according to our retention schedule."
   },
   {
     id: 7,
-    icon: Database,
-    title: "Data Security",
-    content: "We implement encryption in transit, workspace isolation, and Row-Level Security (RLS). However, no security system can guarantee absolute protection."
+    icon: UserCheck,
+    title: "User Rights",
+    content: "Depending on your jurisdiction, you have the right to access, export, correct, delete, or restrict processing of your personal information."
   },
   {
     id: 8,
-    icon: Scale,
-    title: "Intellectual Property",
-    content: "CURA and its underlying architecture are owned by CURA. Users retain ownership of uploaded content and generated work products."
+    icon: ShieldAlert,
+    title: "Security Measures",
+    content: "We implement TLS encryption, encrypted storage, rigorous authentication controls, Workspace isolation, and database Row-Level Security (RLS)."
   },
   {
     id: 9,
-    icon: Server,
-    title: "Service Availability",
-    content: "We strive for reliable service but do not guarantee uninterrupted availability. We may modify or suspend portions of the Service at any time."
+    icon: Globe,
+    title: "International Transfers",
+    content: "Information may be processed outside your jurisdiction where our service providers operate. Appropriate safeguards are applied where legally required."
   },
   {
     id: 10,
-    icon: AlertTriangle,
-    title: "Limitation of Liability",
-    content: "CURA shall not be liable for indirect, incidental, special, consequential, or punitive damages, including loss of profits or reliance on AI-generated outputs."
-  },
-  {
-    id: 11,
-    icon: RefreshCcw,
-    title: "Changes & Termination",
-    content: "We may update these Terms periodically. We may suspend accounts that violate these terms or present security risks. Continued use constitutes acceptance."
-  },
-  {
-    id: 12,
-    icon: Mail,
-    title: "Contact",
-    content: "Questions regarding these Terms may be directed to support@cura-ai.com."
+    icon: Trash2,
+    title: "Children's Privacy",
+    content: "CURA is not intended for children under 13. We do not knowingly collect or maintain personal information from anyone under the age of 13."
   }
 ];
 
-export default function TermsPage() {
+export default function PrivacyPage() {
   return (
     <div className="bg-slate-50 min-h-screen text-slate-800 font-sans pb-32">
       {/* Navigation */}
@@ -96,7 +84,7 @@ export default function TermsPage() {
           transition={{ duration: 0.5 }}
           className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-xs font-bold tracking-widest uppercase mb-6"
         >
-          <Shield className="w-4 h-4" /> Legal & Compliance
+          <Lock className="w-4 h-4" /> Data Protection
         </motion.div>
         <motion.h1 
           initial={{ opacity: 0, y: 30 }}
@@ -104,7 +92,7 @@ export default function TermsPage() {
           transition={{ duration: 0.8, delay: 0.1 }}
           className="text-5xl md:text-7xl font-black tracking-tighter text-slate-900 mb-6"
         >
-          Terms of Service
+          Privacy Policy
         </motion.h1>
         <motion.p 
           initial={{ opacity: 0, y: 20 }}

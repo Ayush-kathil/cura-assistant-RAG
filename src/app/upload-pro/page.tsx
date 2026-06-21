@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
+import { motion, AnimatePresence } from "framer-motion";
+import { FileUp, MessageSquare, LayoutDashboard, Database, RefreshCw, FileText, Trash2, PlusCircle, ShieldCheck, FileCheck2, Loader2, ArrowLeft } from "lucide-react";
 
 export default function UploadPage() {
   const router = useRouter();
@@ -27,7 +29,7 @@ export default function UploadPage() {
           .select('*')
           .eq('workspace_id', activeWorkspace.id)
           .order('created_at', { ascending: false })
-          .limit(3);
+          .limit(4);
         if (data) setRecentDocs(data);
       } else if (!user) {
         router.push('/login');
@@ -70,46 +72,36 @@ export default function UploadPage() {
         storage_path: filePath,
         vector_status: 'pending'
       };
-      console.log("[DB Write] table: documents, payload:", docPayload);
       const { data: docData, error: dbError } = await supabase.from('documents').insert(docPayload).select().single();
       
-      if (dbError) {
-        console.error("[DB Error] table: documents, error:", dbError);
-        throw dbError;
-      }
+      if (dbError) throw dbError;
 
       const versionPayload = {
         document_id: docData.id,
         version_number: 1,
         checksum: "pending_checksum"
       };
-      console.log("[DB Write] table: document_versions, payload:", versionPayload);
       const { data: versionData, error: versionError } = await supabase.from('document_versions').insert(versionPayload).select().single();
 
-      if (versionError) {
-        console.error("[DB Error] table: document_versions, error:", versionError);
-        throw versionError;
-      }
+      if (versionError) throw versionError;
 
       await supabase.from('documents').update({
         current_version_id: versionData.id
       }).eq('id', docData.id);
       
       // Notify ingest
-      console.log("[UPLOAD] Triggering /api/ingest for document:", docData.id);
       const ingestRes = await fetch('/api/ingest', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ documentId: docData.id, workspaceId: activeWorkspace.id })
       });
       if (!ingestRes.ok) {
-        // Rollback: delete document if ingestion failed (e.g. timeout for large PDFs)
         await supabase.from('documents').delete().eq('id', docData.id);
         await supabase.storage.from('nexus_docs').remove([filePath]);
         throw new Error("[UPLOAD] /api/ingest failed: " + await ingestRes.text());
       }
       
-      setRecentDocs(prev => [docData, ...prev].slice(0, 3));
+      setRecentDocs(prev => [docData, ...prev].slice(0, 4));
       setUploadProgress(100);
       
     } catch (e) {
@@ -153,63 +145,59 @@ export default function UploadPage() {
   const firstName = userEmail.split('@')[0] || 'Guest';
 
   return (
-    <div className="bg-background text-on-background font-body-md min-h-screen flex overflow-hidden">
+    <div className="bg-slate-50 min-h-screen text-slate-800 font-sans selection:bg-blue-100 selection:text-blue-900 flex overflow-hidden">
       
-      {/* SideNavBar Anchor */}
-      <aside className="hidden md:flex fixed left-0 top-0 h-full z-40 flex-col p-4 bg-surface-container-low h-screen w-64 rounded-r-lg shadow-lg shadow-primary/5 transition-all duration-300 ease-in-out">
-        <div className="flex items-center gap-3 mb-10 px-2">
-          <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center">
-            <span className="material-symbols-outlined text-primary" data-icon="clinical_notes">clinical_notes</span>
-          </div>
+      {/* Sidebar */}
+      <aside className="hidden md:flex fixed left-0 top-0 h-full z-40 flex-col w-64 bg-white/80 backdrop-blur-xl border-r border-slate-200 transition-all duration-300">
+        <div className="flex items-center gap-3 p-6 mb-4">
+          <img src="/bot.jpg" alt="Cura Logo" className="w-10 h-10 rounded-full object-cover border border-slate-200 shadow-sm" />
           <div>
-            <h1 className="font-headline-md text-headline-md text-primary leading-tight">Cura AI</h1>
-            <p className="text-[10px] font-label-sm text-on-surface-variant uppercase tracking-wider">Your friendly companion</p>
+            <h1 className="font-light text-xl tracking-tighter text-slate-900 uppercase">Cura</h1>
+            <p className="text-[10px] text-slate-400 font-medium uppercase tracking-widest">Your AI Companion</p>
           </div>
         </div>
         
-        <nav className="flex-1 space-y-2">
-          <Link href="/workspace" className="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-secondary-container/50 transition-all rounded-xl font-body-md text-body-md">
-            <span className="material-symbols-outlined" data-icon="chat_bubble">chat_bubble</span>
+        <nav className="flex-1 px-4 space-y-1">
+          <Link href="/workspace" className="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-100 transition-all rounded-xl text-sm font-medium">
+            <MessageSquare className="w-4 h-4" />
             <span>Chat</span>
           </Link>
-          <Link href="/dashboard" className="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-secondary-container/50 transition-all rounded-xl font-body-md text-body-md">
-            <span className="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+          <Link href="/dashboard" className="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-100 transition-all rounded-xl text-sm font-medium">
+            <LayoutDashboard className="w-4 h-4" />
             <span>Dashboard</span>
           </Link>
-          <Link href="/upload-pro" className="flex items-center gap-4 px-4 py-3 bg-primary-container text-on-primary-container rounded-xl font-body-md text-body-md">
-            <span className="material-symbols-outlined" data-icon="auto_stories" style={{fontVariationSettings: "'FILL' 1"}}>auto_stories</span>
-            <span className="font-bold">Resources</span>
+          <Link href="/upload-pro" className="flex items-center gap-3 px-4 py-3 bg-blue-50 text-blue-700 rounded-xl text-sm font-medium">
+            <Database className="w-4 h-4" />
+            <span>Resources</span>
           </Link>
         </nav>
         
-        <div className="mt-auto">
-          <Link href="/workspace" className="w-full py-4 bg-primary text-white rounded-xl font-label-md flex items-center justify-center gap-2 active:scale-95 transition-transform shadow-md">
-            <span className="material-symbols-outlined" data-icon="add">add</span>
-            New Conversation
+        <div className="p-4 mt-auto">
+          <Link href="/workspace" className="w-full py-3.5 bg-slate-900 text-white rounded-xl text-sm font-medium flex items-center justify-center gap-2 hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/10">
+            <PlusCircle className="w-4 h-4" />
+            New Session
           </Link>
         </div>
       </aside>
 
       {/* Main Content Canvas */}
-      <main className="flex-1 ml-0 md:ml-64 relative overflow-y-auto h-screen custom-scrollbar bg-background">
+      <main className="flex-1 md:ml-64 relative overflow-y-auto h-screen custom-scrollbar">
         
-        {/* Floating Header */}
-        <header className="sticky top-0 z-30 px-margin-desktop py-6 flex justify-between items-center bg-background/80 backdrop-blur-md">
+        {/* Header */}
+        <header className="sticky top-0 z-30 px-8 py-6 flex justify-between items-center bg-white/80 backdrop-blur-md border-b border-slate-200">
           <div>
-            <h2 className="font-headline-lg text-headline-lg text-primary">Upload Documents</h2>
-            <p className="font-body-md text-on-surface-variant">Share medical reports or health logs with Cura for personalized insights.</p>
+            <h2 className="text-2xl font-light text-slate-900 tracking-tight">Upload Documents</h2>
+            <p className="text-sm text-slate-500 font-light mt-1">Share knowledge with Cura for personalized insights.</p>
           </div>
           <div className="flex items-center gap-4">
-            <button className="p-2 rounded-full hover:bg-surface-container transition-colors">
-              <span className="material-symbols-outlined text-primary" data-icon="notifications">notifications</span>
-            </button>
-            <div className="w-10 h-10 rounded-full border-2 border-primary-container overflow-hidden bg-white flex items-center justify-center font-bold text-primary">
+            <Link href="/" className="text-sm font-medium uppercase tracking-wider text-slate-500 hover:text-blue-600 transition-colors mr-2 hidden md:block">Return Home</Link>
+            <div className="w-10 h-10 rounded-full border border-slate-200 bg-slate-50 flex items-center justify-center font-medium text-slate-600 shadow-sm">
               {firstName.charAt(0).toUpperCase()}
             </div>
           </div>
         </header>
         
-        <section className="px-margin-desktop pb-12 max-w-5xl mx-auto space-y-10">
+        <section className="px-8 py-10 max-w-4xl mx-auto space-y-12">
           
           {/* Upload Area */}
           <div 
@@ -218,131 +206,116 @@ export default function UploadPage() {
             onDragLeave={preventDefaults}
             onDrop={handleDrop}
             onClick={() => fileInputRef.current?.click()}
-            className="relative overflow-hidden glass-panel rounded-xl p-12 flex flex-col items-center justify-center border-4 border-dashed border-primary-container/40 transition-all duration-300 group cursor-pointer hover:border-primary/50"
+            className="relative overflow-hidden bg-white rounded-3xl p-12 flex flex-col items-center justify-center border-2 border-dashed border-slate-200 transition-all duration-300 group cursor-pointer hover:border-blue-300 hover:shadow-xl hover:shadow-blue-900/5"
           >
             <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" accept=".pdf,.txt,.md" />
             
-            <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
-            
             <div className="relative w-24 h-24 mb-6 flex items-center justify-center">
               {isUploading ? (
-                <div className="w-20 h-20 bg-white shadow-xl shadow-primary/10 rounded-full flex items-center justify-center">
-                  <span className="material-symbols-outlined text-4xl text-primary animate-spin">refresh</span>
+                <div className="w-20 h-20 bg-blue-50 border border-blue-100 shadow-xl shadow-blue-500/10 rounded-full flex items-center justify-center">
+                  <RefreshCw className="w-8 h-8 text-blue-600 animate-spin" />
                 </div>
               ) : (
                 <>
-                  <div className="absolute inset-0 bg-primary-container/20 rounded-full animate-ping opacity-25"></div>
-                  <div className="relative w-20 h-20 bg-white shadow-xl shadow-primary/10 rounded-full flex items-center justify-center">
-                    <span className="material-symbols-outlined text-5xl text-primary animate-bounce" data-icon="upload_file">upload_file</span>
+                  <div className="absolute inset-0 bg-blue-100 rounded-full animate-ping opacity-25" />
+                  <div className="relative w-20 h-20 bg-white border border-slate-100 shadow-xl shadow-slate-200 rounded-full flex items-center justify-center group-hover:scale-105 transition-transform">
+                    <FileUp className="w-8 h-8 text-blue-500" />
                   </div>
                 </>
               )}
             </div>
             
             <div className="text-center space-y-2 z-10">
-              <h3 className="font-headline-md text-headline-md text-on-surface">
-                {isUploading ? `Uploading ${uploadProgress}%...` : 'Drag & Drop PDF Reports'}
+              <h3 className="text-2xl font-light text-slate-900 tracking-tight">
+                {isUploading ? `Uploading ${uploadProgress}%...` : 'Drag & Drop PDFs'}
               </h3>
-              <p className="font-body-md text-on-surface-variant max-w-sm mx-auto">Upload blood work, symptom logs, or wellness PDFs. Cura will analyze them with you.</p>
+              <p className="text-slate-500 font-light max-w-sm mx-auto text-sm">Upload context documents, reports, or logs. Cura will analyze them intelligently.</p>
             </div>
             
-            <div className="mt-8 flex gap-4 z-10">
-              <button disabled={isUploading} className="px-6 py-3 bg-primary text-white rounded-full font-label-md hover:shadow-lg active:scale-95 transition-all disabled:opacity-50">
+            <div className="mt-8 z-10">
+              <button disabled={isUploading} className="px-8 py-3 bg-blue-600 text-white rounded-full text-sm font-medium uppercase tracking-wider hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition-all disabled:opacity-50">
                 Browse Files
               </button>
             </div>
-            <p className="mt-6 text-label-sm text-on-tertiary-fixed-variant">Maximum file size: 25MB • Supported format: .PDF</p>
+            <p className="mt-6 text-xs text-slate-400 font-medium uppercase tracking-widest">Max 25MB • PDF, TXT</p>
           </div>
           
           {/* Recently Uploaded */}
           <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h4 className="font-headline-md text-headline-md text-primary">Recent Analysis</h4>
-              <button className="text-label-md text-primary hover:underline">View All</button>
+            <div className="flex items-center justify-between px-2">
+              <h4 className="text-lg font-medium text-slate-900">Recent Analysis</h4>
+              <button className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors">View All &rarr;</button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {recentDocs.length === 0 ? (
-                <div className="border-2 border-dashed border-outline-variant/30 rounded-lg p-5 flex items-center justify-center gap-3 text-on-surface-variant">
-                  <span className="font-label-md">No documents uploaded yet</span>
+                <div className="col-span-2 border border-slate-200 bg-white rounded-2xl p-8 flex flex-col items-center justify-center text-slate-400">
+                  <FileText className="w-8 h-8 mb-3 opacity-50" />
+                  <span className="text-sm font-medium">No documents uploaded yet</span>
                 </div>
               ) : (
                 recentDocs.map((doc, idx) => (
-                  <div key={idx} className="glass-panel rounded-lg p-5 flex items-start gap-4 hover:shadow-xl transition-all border border-transparent hover:border-primary-container/50">
-                    <div className="w-12 h-12 bg-surface-container-highest rounded-xl flex items-center justify-center shrink-0">
-                      <span className="material-symbols-outlined text-primary">picture_as_pdf</span>
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.1 }}
+                    key={doc.id} 
+                    className="bg-white rounded-2xl p-5 flex items-start gap-4 border border-slate-200 hover:border-blue-300 hover:shadow-md transition-all group"
+                  >
+                    <div className="w-12 h-12 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center shrink-0">
+                      <FileCheck2 className="w-5 h-5 text-blue-500" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-start mb-1 gap-2">
-                        <h5 className="font-label-md text-on-surface truncate flex-1">{doc.file_name}</h5>
+                        <h5 className="text-sm font-medium text-slate-800 truncate flex-1" title={doc.file_name}>{doc.file_name}</h5>
                         <button 
                           onClick={() => handleDeleteDocument(doc.id, doc.storage_path)}
-                          className="text-red-500 hover:bg-red-500/10 p-1.5 rounded-full transition-colors flex-shrink-0 flex items-center justify-center"
-                          title="Delete Document"
+                          className="text-slate-300 hover:text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors shrink-0"
                         >
-                          <span className="material-symbols-outlined text-sm">delete</span>
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
-                      <p className="text-label-sm text-on-tertiary-fixed-variant mb-3">{(doc.file_size_bytes / 1024 / 1024).toFixed(2)} MB</p>
+                      <p className="text-xs text-slate-400 mb-3">{(doc.file_size_bytes / 1024 / 1024).toFixed(2)} MB</p>
                       
-                      <div className="flex items-center gap-2 py-1 px-3 bg-primary-container/30 w-fit rounded-full">
-                        <span className="material-symbols-outlined text-sm text-on-primary-container" style={{fontVariationSettings: "'FILL' 1"}}>check_circle</span>
-                        <span className="text-[11px] font-bold text-on-primary-container uppercase">Ready</span>
+                      <div className="flex items-center gap-1.5 py-1 px-2.5 bg-emerald-50 border border-emerald-100 w-fit rounded-lg">
+                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                        <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">Ready</span>
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 ))
               )}
-              
-              <div onClick={() => fileInputRef.current?.click()} className="border-2 border-dashed border-outline-variant/30 rounded-lg p-5 flex items-center justify-center gap-3 text-on-surface-variant hover:border-primary-container transition-colors cursor-pointer group">
-                <span className="material-symbols-outlined text-3xl group-hover:scale-110 transition-transform">add_circle</span>
-                <span className="font-label-md">Upload more for history</span>
-              </div>
             </div>
           </div>
           
           {/* Educational Tip */}
-          <div className="p-8 rounded-xl bg-gradient-to-br from-primary-container/40 to-secondary-container/20 flex flex-col md:flex-row items-center gap-8 relative overflow-hidden">
-            <div className="absolute -right-12 -bottom-12 w-48 h-48 bg-white/20 rounded-full blur-3xl"></div>
-            <div className="w-24 h-24 shrink-0 rounded-full bg-white flex items-center justify-center shadow-lg">
-              <span className="material-symbols-outlined text-4xl text-primary" style={{fontVariationSettings: "'FILL' 1"}}>lock</span>
+          <div className="p-8 rounded-3xl bg-slate-900 text-white flex flex-col md:flex-row items-center gap-8 relative overflow-hidden shadow-xl shadow-slate-900/10">
+            <div className="absolute -right-12 -bottom-12 w-48 h-48 bg-blue-500/20 rounded-full blur-3xl" />
+            <div className="w-20 h-20 shrink-0 rounded-2xl bg-white/10 flex items-center justify-center border border-white/20 backdrop-blur-md">
+              <ShieldCheck className="w-8 h-8 text-blue-400" />
             </div>
-            <div className="space-y-2">
-              <h4 className="font-headline-md text-headline-md text-primary">Your Privacy First</h4>
-              <p className="font-body-md text-on-primary-container">All uploaded documents are encrypted and only accessible to you. Cura uses local-first processing for sensitive medical metadata to ensure your data never leaves the secure environment without your consent.</p>
+            <div className="space-y-3 z-10">
+              <h4 className="text-xl font-medium tracking-tight">Enterprise-Grade Security</h4>
+              <p className="text-slate-300 text-sm font-light leading-relaxed max-w-xl">
+                All uploaded documents are encrypted and accessible exclusively within your private workspace. Cura uses localized vector processing to ensure your intellectual property never leaves our secure environment.
+              </p>
             </div>
           </div>
         </section>
-        
-        {/* Footer */}
-        <footer className="w-full py-12 px-margin-desktop mt-auto flex flex-col items-center gap-4 bg-surface-container-highest rounded-t-xl">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-              <span className="material-symbols-outlined text-primary text-sm" data-icon="clinical_notes">clinical_notes</span>
-            </div>
-            <span className="font-headline-md text-primary">Cura AI</span>
-          </div>
-          <nav className="flex gap-8">
-            <a className="font-label-sm text-on-tertiary-fixed-variant hover:text-primary transition-colors" href="#">Privacy Policy</a>
-            <a className="font-label-sm text-on-tertiary-fixed-variant hover:text-primary transition-colors" href="#">Terms of Service</a>
-            <a className="font-label-sm text-on-tertiary-fixed-variant hover:text-primary transition-colors" href="#">Contact Us</a>
-          </nav>
-          <p className="font-label-sm text-on-tertiary-fixed-variant opacity-70">© 2024 Cura AI. Made with empathy.</p>
-        </footer>
       </main>
       
       {/* Mobile Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-xl border-t border-primary-container/20 flex items-center justify-around px-4 z-50">
-        <Link href="/workspace" className="flex flex-col items-center gap-1 text-on-surface-variant">
-          <span className="material-symbols-outlined">chat_bubble</span>
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-xl border-t border-slate-200 flex items-center justify-around px-4 z-50">
+        <Link href="/workspace" className="flex flex-col items-center gap-1 text-slate-500">
+          <MessageSquare className="w-5 h-5" />
           <span className="text-[10px] font-bold">Chat</span>
         </Link>
-        <Link href="/dashboard" className="flex flex-col items-center gap-1 text-on-surface-variant">
-          <span className="material-symbols-outlined">dashboard</span>
+        <Link href="/dashboard" className="flex flex-col items-center gap-1 text-slate-500">
+          <LayoutDashboard className="w-5 h-5" />
           <span className="text-[10px] font-bold">Dash</span>
         </Link>
-        <Link href="/upload-pro" className="flex flex-col items-center gap-1 text-primary">
-          <span className="material-symbols-outlined" style={{fontVariationSettings: "'FILL' 1"}}>auto_stories</span>
+        <Link href="/upload-pro" className="flex flex-col items-center gap-1 text-blue-600">
+          <Database className="w-5 h-5" />
           <span className="text-[10px] font-bold">Docs</span>
         </Link>
       </nav>

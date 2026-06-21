@@ -1,8 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { useEffect, useRef } from "react";
+import { motion, useScroll, useTransform, useInView } from "framer-motion";
+
+function FadeInWhenVisible({ children, delay = 0 }: { children: React.ReactNode, delay?: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 50 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-100px" }}
+      transition={{ duration: 0.8, delay, ease: [0.16, 1, 0.3, 1] }}
+    >
+      {children}
+    </motion.div>
+  );
+}
 
 export default function Home() {
   const { scrollYProgress } = useScroll();
@@ -10,17 +23,16 @@ export default function Home() {
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
 
   useEffect(() => {
-    // Simple scroll interaction for the navbar
     const handleScroll = () => {
       const nav = document.getElementById('top-nav');
       if (nav) {
         if (window.scrollY > 20) {
-          nav.classList.add('bg-black', 'shadow-md', 'border-gray-800');
-          nav.classList.remove('bg-black', 'border-transparent', 'py-6', 'mx-0', 'w-full', 'top-0', 'rounded-none');
+          nav.classList.add('bg-white/80', 'backdrop-blur-xl', 'shadow-sm', 'border-slate-200');
+          nav.classList.remove('bg-transparent', 'border-transparent', 'py-6', 'mx-0', 'w-full', 'top-0', 'rounded-none');
           nav.classList.add('py-4', 'mx-4', 'w-[calc(100%-2rem)]', 'top-4', 'rounded-full');
         } else {
-          nav.classList.add('bg-black', 'border-transparent', 'py-6', 'mx-0', 'w-full', 'top-0', 'rounded-none');
-          nav.classList.remove('shadow-md', 'py-4', 'border-gray-800', 'mx-4', 'w-[calc(100%-2rem)]', 'top-4', 'rounded-full');
+          nav.classList.add('bg-transparent', 'border-transparent', 'py-6', 'mx-0', 'w-full', 'top-0', 'rounded-none');
+          nav.classList.remove('bg-white/80', 'backdrop-blur-xl', 'shadow-sm', 'border-slate-200', 'py-4', 'mx-4', 'w-[calc(100%-2rem)]', 'top-4', 'rounded-full');
         }
       }
     };
@@ -29,196 +41,198 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="bg-white text-black font-sans selection:bg-black selection:text-white min-h-screen">
+    <div className="bg-slate-50 text-slate-900 font-sans selection:bg-blue-100 selection:text-blue-900 min-h-screen">
       {/* Top Navigation */}
       <nav 
         id="top-nav"
-        className="fixed top-0 w-full z-50 flex justify-between items-center px-8 md:px-16 transition-all duration-300 bg-black py-6 border border-transparent text-white"
+        className="fixed top-0 w-full z-50 flex justify-between items-center px-8 md:px-16 transition-all duration-500 bg-transparent py-6 border border-transparent text-slate-800"
       >
         <div className="flex items-center gap-4">
-          <Link href="/" className="flex items-center gap-3">
-            <img src="/bot.jpg" alt="Cura Logo" className="w-10 h-10 rounded-full object-cover border-2 border-white/20" />
-            <span className="font-bold text-2xl tracking-tighter text-white uppercase">
+          <Link href="/" className="flex items-center gap-3 group">
+            <img src="/bot.jpg" alt="Cura Logo" className="w-10 h-10 rounded-full object-cover border-2 border-white/50 shadow-sm group-hover:scale-105 transition-transform" />
+            <span className="font-light text-2xl tracking-tighter text-slate-900 uppercase">
               Cura
             </span>
           </Link>
         </div>
         <div className="hidden md:flex items-center gap-10">
-          <Link href="#features" className="text-sm font-semibold tracking-wide uppercase hover:text-gray-300 transition-colors">Platform</Link>
-          <Link href="/science" className="text-sm font-semibold tracking-wide uppercase hover:text-gray-300 transition-colors">Science</Link>
-          <Link href="/pricing" className="text-sm font-semibold tracking-wide uppercase hover:text-gray-300 transition-colors">Pricing</Link>
-          <Link href="/dashboard" className="text-sm font-semibold tracking-wide uppercase hover:text-gray-300 transition-colors">Dashboard</Link>
+          <Link href="#history" className="text-sm font-medium tracking-wide uppercase hover:text-blue-600 transition-colors">History of RAG</Link>
+          <Link href="/science" className="text-sm font-medium tracking-wide uppercase hover:text-blue-600 transition-colors">Science</Link>
+          <Link href="/pricing" className="text-sm font-medium tracking-wide uppercase hover:text-blue-600 transition-colors">Pricing</Link>
+          <Link href="/dashboard" className="text-sm font-medium tracking-wide uppercase hover:text-blue-600 transition-colors">Dashboard</Link>
         </div>
         <div className="flex items-center gap-4">
-          <Link href="/login" className="px-6 py-3 bg-white text-black text-sm font-bold uppercase tracking-wider hover:bg-gray-200 transition-colors rounded-full">
+          <Link href="/login" className="px-6 py-3 bg-blue-600 text-white text-sm font-medium uppercase tracking-wider hover:bg-blue-700 shadow-lg shadow-blue-500/30 hover:shadow-blue-600/40 hover:-translate-y-0.5 transition-all rounded-full duration-300">
             Sign In &rarr;
           </Link>
         </div>
       </nav>
 
       <main>
-        {/* Hero Section */}
-        <section className="relative h-screen flex flex-col justify-end overflow-hidden pt-32 pb-16 px-8 md:px-16">
+        {/* Hero Section with Centered Text and Video Background */}
+        <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+          
+          {/* Background Video (Lottie iframe mimicking video) */}
           <motion.div 
             style={{ y, opacity }}
-            className="absolute inset-0 z-0"
+            className="absolute inset-0 z-0 w-full h-full pointer-events-none flex items-center justify-center scale-150 md:scale-125 lg:scale-110"
           >
-            <div className="absolute inset-0 bg-black/20 z-10" />
-            <img 
-              src="/bot.jpg" 
-              alt="Cura Bot Companion" 
-              className="w-full h-full object-cover object-center grayscale brightness-75 contrast-125"
+            <iframe 
+              src="https://lottie.host/embed/84120371-29eb-4a16-bd0e-117565bc93cd/Zc9h6Jg11t.json" 
+              className="w-full h-full min-w-[100vw] min-h-[100vh] border-none"
+              title="Background Robot"
             />
           </motion.div>
 
-          <div className="relative z-10 flex flex-col justify-end h-full max-w-5xl">
+          {/* Frosted Glass Overlay to ensure text readability */}
+          <div className="absolute inset-0 z-0 bg-white/70 backdrop-blur-[2px]" />
+          <div className="absolute inset-0 z-0 bg-gradient-to-b from-white/90 via-transparent to-white" />
+
+          {/* Centered Content */}
+          <div className="relative z-10 w-full px-8 flex flex-col items-center text-center max-w-4xl pt-20">
             <motion.h1 
-              initial={{ opacity: 0, y: 50 }}
+              initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-              className="text-[12vw] md:text-[8vw] leading-[0.9] font-bold tracking-tighter text-white mb-6 uppercase"
+              transition={{ duration: 1, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+              className="text-6xl md:text-8xl lg:text-9xl leading-[0.95] font-bold tracking-tighter text-slate-900 mb-8"
             >
-              Rethink<br/>Companionship.
+              Rethink <br/>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">
+                Companionship
+              </span>
             </motion.h1>
+            
             <motion.p 
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              className="text-lg md:text-2xl text-white/90 max-w-2xl mb-10 font-medium"
+              transition={{ duration: 1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              className="text-lg md:text-2xl text-slate-600 max-w-2xl mb-12 font-light leading-relaxed"
             >
-              Meet Cura, an intelligent companion engineered to listen, understand, and evolve with you. Deep clinical insight meets raw technological power.
+              Meet CURA, an intelligent companion engineered to listen, understand, and evolve with your professional workspace.
             </motion.p>
+            
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="flex flex-col sm:flex-row items-center gap-6"
             >
-              <Link href="/login" className="inline-flex items-center px-8 py-4 bg-white text-black text-lg font-bold uppercase tracking-wider hover:bg-gray-200 transition-colors group rounded-full">
+              <Link href="/login" className="inline-flex items-center justify-center px-10 py-5 bg-slate-900 text-white text-sm font-medium uppercase tracking-wider hover:bg-slate-800 shadow-2xl shadow-slate-900/20 transition-all hover:-translate-y-1 group rounded-full w-full sm:w-auto">
                 Start Your Journey
                 <span className="ml-4 transform group-hover:translate-x-2 transition-transform">&rarr;</span>
+              </Link>
+              <Link href="/science" className="inline-flex items-center justify-center px-10 py-5 bg-white/50 backdrop-blur-md text-slate-800 border border-slate-200 text-sm font-medium uppercase tracking-wider hover:border-slate-300 hover:bg-white transition-all rounded-full w-full sm:w-auto">
+                Read the Science
               </Link>
             </motion.div>
           </div>
         </section>
 
-        {/* Massive Text Reveal Section */}
-        <section className="py-32 md:py-48 px-8 md:px-16 bg-black text-white">
-          <div className="max-w-7xl mx-auto">
-            <motion.div 
-              initial={{ opacity: 0, y: 100 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter leading-tight mb-12">
-                TECHNOLOGY THAT FEELS HUMAN.<br/>
-                BUILT WITH CLINICAL RIGOR.<br/>
-                ENGINEERED FOR EMPATHY.
-              </h2>
-              <div className="h-px w-full bg-white/20 mb-12"></div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-                <div>
-                  <h3 className="text-xl font-bold uppercase tracking-wider mb-4">Deep Empathy Engine</h3>
-                  <p className="text-white/70 text-lg leading-relaxed">
-                    Fine-tuned on therapeutic principles, our architecture recognizes emotional nuances to provide precisely targeted, comforting responses.
-                  </p>
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold uppercase tracking-wider mb-4">Zero-Knowledge Privacy</h3>
-                  <p className="text-white/70 text-lg leading-relaxed">
-                    Your mental health data is strictly yours. End-to-end encrypted infrastructure ensures absolute confidentiality.
-                  </p>
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold uppercase tracking-wider mb-4">Adaptive Intelligence</h3>
-                  <p className="text-white/70 text-lg leading-relaxed">
-                    Cura learns from your interaction patterns, tailoring cognitive exercises and breathing techniques specifically for your physiological state.
-                  </p>
-                </div>
+        {/* History of RAG Section with Smart Animations */}
+        <section id="history" className="py-40 px-8 md:px-16 bg-slate-50 text-slate-800 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-full h-[500px] bg-gradient-to-b from-white to-transparent pointer-events-none" />
+          
+          <FadeInWhenVisible>
+            <div className="max-w-4xl mx-auto text-center mb-24 relative z-10">
+              <h2 className="text-sm font-medium tracking-widest text-blue-600 uppercase mb-4">The Evolution of Intelligence</h2>
+              <h3 className="text-5xl md:text-6xl lg:text-7xl font-light tracking-tighter text-slate-900 mb-8">
+                A Brief Human History of RAG
+              </h3>
+              <div className="h-1.5 w-24 bg-gradient-to-r from-blue-600 to-indigo-600 mx-auto rounded-full"></div>
+            </div>
+          </FadeInWhenVisible>
+
+          <div className="max-w-4xl mx-auto space-y-12 relative z-10">
+            <FadeInWhenVisible delay={0.1}>
+              <div className="bg-white p-10 md:p-14 rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 hover:shadow-2xl hover:shadow-blue-900/5 transition-shadow duration-500">
+                <h4 className="text-2xl font-medium text-slate-900 mb-4 flex items-center gap-4">
+                  <span className="flex items-center justify-center w-10 h-10 rounded-full bg-slate-100 text-slate-500 font-medium text-lg">1</span>
+                  The Early Days: Memory Without Context
+                </h4>
+                <p className="text-lg text-slate-600 leading-relaxed mb-6">
+                  When Artificial Intelligence first began generating text, it was like a brilliant student trapped in a closed room. It had read millions of books during its training, but once the test started, it couldn't look anything up. If you asked it a question about a book published yesterday, it would confidently guess the answer—and often guess wrong. This guessing is what we call a "hallucination." It wasn't lying; it just didn't know what it didn't know.
+                </p>
               </div>
-            </motion.div>
-          </div>
-        </section>
+            </FadeInWhenVisible>
 
-        {/* Feature Bento Grid */}
-        <section id="features" className="py-32 px-8 md:px-16 bg-gray-100 text-black">
-          <div className="max-w-7xl mx-auto">
-            <div className="mb-20">
-              <h2 className="text-5xl md:text-7xl font-bold tracking-tighter uppercase mb-6">Designed to adapt.</h2>
-              <p className="text-xl md:text-2xl text-gray-600 max-w-3xl">Whether you need immediate crisis intervention or long-term cognitive tracking, Cura provides an unparalleled support ecosystem.</p>
-            </div>
+            <FadeInWhenVisible delay={0.2}>
+              <div className="bg-white p-10 md:p-14 rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 hover:shadow-2xl hover:shadow-indigo-900/5 transition-shadow duration-500">
+                <h4 className="text-2xl font-medium text-slate-900 mb-4 flex items-center gap-4">
+                  <span className="flex items-center justify-center w-10 h-10 rounded-full bg-indigo-50 text-indigo-600 font-medium text-lg">2</span>
+                  The Breakthrough: Giving AI a Library Card
+                </h4>
+                <p className="text-lg text-slate-600 leading-relaxed mb-6">
+                  Then came the breakthrough: <strong>Retrieval-Augmented Generation (RAG)</strong>. Imagine taking that brilliant student out of the closed room and giving them an open-book test in the world's largest library.
+                </p>
+                <p className="text-lg text-slate-600 leading-relaxed">
+                  Before answering your question, the AI first acts as a lightning-fast researcher (the <em>Retrieval</em> part). It scans through your private documents, finds the exact paragraphs that contain the answer, and brings them back. Only then does it read those specific paragraphs to construct a human-like, accurate response (the <em>Generation</em> part). It transformed AI from a confident guesser into a meticulous researcher.
+                </p>
+              </div>
+            </FadeInWhenVisible>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6 }}
-                className="bg-white p-12 flex flex-col justify-between aspect-square"
-              >
-                <div>
-                  <span className="inline-block px-3 py-1 bg-black text-white text-xs font-bold uppercase tracking-widest mb-6">Always On</span>
-                  <h3 className="text-4xl font-bold tracking-tight mb-4">Instant 24/7 Availability.</h3>
-                  <p className="text-gray-600 text-lg">No waiting rooms. No appointments. Expert-level guidance available at the exact moment you need it.</p>
-                </div>
-                <div className="mt-8 flex justify-end">
-                  <div className="w-16 h-16 rounded-full bg-black flex items-center justify-center text-white">
-                    <span className="material-symbols-outlined text-[32px]">schedule</span>
-                  </div>
-                </div>
-              </motion.div>
-
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.1 }}
-                className="bg-black text-white p-12 flex flex-col justify-between aspect-square"
-              >
-                <div>
-                  <span className="inline-block px-3 py-1 bg-white text-black text-xs font-bold uppercase tracking-widest mb-6">Science Backed</span>
-                  <h3 className="text-4xl font-bold tracking-tight mb-4">Clinical Foundations.</h3>
-                  <p className="text-gray-400 text-lg">Built alongside leading psychologists. Grounded in CBT, DBT, and mindfulness practices.</p>
-                </div>
-                <div className="mt-8 flex justify-end">
-                  <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center text-black">
-                    <span className="material-symbols-outlined text-[32px]">science</span>
-                  </div>
-                </div>
-              </motion.div>
-            </div>
+            <FadeInWhenVisible delay={0.3}>
+              <div className="bg-white p-10 md:p-14 rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 hover:shadow-2xl hover:shadow-purple-900/5 transition-shadow duration-500">
+                <h4 className="text-2xl font-medium text-slate-900 mb-4 flex items-center gap-4">
+                  <span className="flex items-center justify-center w-10 h-10 rounded-full bg-purple-50 text-purple-600 font-medium text-lg">3</span>
+                  The Present: CURA and the Future of Work
+                </h4>
+                <p className="text-lg text-slate-600 leading-relaxed mb-6">
+                  Today, RAG isn't just about searching for keywords. At CURA, we've built a system that deeply understands the <em>meaning</em> of your documents. When you upload a PDF, CURA doesn't just read the words; it builds a map of concepts, relationships, and ideas.
+                </p>
+                <p className="text-lg text-slate-600 leading-relaxed">
+                  It's like having a dedicated colleague who has memorized every file, email, and report your team has ever produced, ready to give you the perfect answer—always cited, always verifiable, and always strictly private. That's the power of humanized, enterprise-grade RAG.
+                </p>
+              </div>
+            </FadeInWhenVisible>
           </div>
         </section>
         
         {/* Call to Action */}
-        <section className="py-32 px-8 md:px-16 bg-white text-black text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            className="max-w-4xl mx-auto"
-          >
-            <h2 className="text-5xl md:text-8xl font-bold tracking-tighter uppercase mb-12">Take Control.</h2>
-            <Link href="/login" className="inline-flex items-center px-12 py-6 bg-black text-white text-xl font-bold uppercase tracking-widest hover:bg-neutral-800 transition-colors group rounded-full">
-              Join Cura Today
-              <span className="ml-4 transform group-hover:translate-x-2 transition-transform">&rarr;</span>
-            </Link>
-          </motion.div>
+        <section className="py-40 px-8 md:px-16 bg-blue-600 text-white text-center relative overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.15)_0%,transparent_100%)]" />
+          <div className="absolute top-0 w-full h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+          <FadeInWhenVisible>
+            <div className="max-w-4xl mx-auto relative z-10">
+              <h2 className="text-5xl md:text-7xl lg:text-8xl font-light tracking-tighter mb-10">Experience the difference.</h2>
+              <Link href="/login" className="inline-flex items-center px-10 py-5 bg-white text-blue-600 text-lg font-medium uppercase tracking-widest hover:bg-blue-50 transition-all hover:scale-105 shadow-2xl rounded-full">
+                Get Started for Free
+                <span className="ml-4">&rarr;</span>
+              </Link>
+            </div>
+          </FadeInWhenVisible>
         </section>
       </main>
 
       {/* Footer */}
-      <footer className="bg-black text-white py-12 px-8 md:px-16 border-t border-white/10">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="text-2xl font-bold tracking-tighter uppercase">CURA</div>
-          <div className="flex gap-8 text-sm font-medium uppercase tracking-wider text-gray-400">
-            <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
-            <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
-            <Link href="/contact" className="hover:text-white transition-colors">Contact</Link>
+      <footer className="bg-white text-slate-600 py-16 px-8 md:px-16 border-t border-slate-200">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+          <div className="col-span-1 md:col-span-2">
+            <div className="text-3xl font-light tracking-tighter uppercase mb-6 text-slate-900">CURA</div>
+            <p className="text-slate-500 max-w-md leading-relaxed font-light">The professional AI knowledge engine and document intelligence platform designed for the modern enterprise. Built with empathy, engineered with rigor.</p>
           </div>
-          <div className="text-gray-500 text-sm">
-            &copy; {new Date().getFullYear()} Cura Technologies. All rights reserved.
+          <div>
+            <h4 className="font-medium uppercase tracking-wider mb-4 text-slate-900 text-xs">Legal & Compliance</h4>
+            <div className="flex flex-col gap-3 text-sm font-normal text-slate-500">
+              <Link href="/terms" className="hover:text-blue-600 transition-colors">Terms of Service</Link>
+              <Link href="/privacy" className="hover:text-blue-600 transition-colors">Privacy Policy</Link>
+              <Link href="/cookie-policy" className="hover:text-blue-600 transition-colors">Cookie Policy</Link>
+              <Link href="/aup" className="hover:text-blue-600 transition-colors">Acceptable Use Policy</Link>
+            </div>
+          </div>
+          <div>
+            <h4 className="font-medium uppercase tracking-wider mb-4 text-slate-900 text-xs">Trust & Support</h4>
+            <div className="flex flex-col gap-3 text-sm font-normal text-slate-500">
+              <Link href="/security" className="hover:text-blue-600 transition-colors">Security & Trust Center</Link>
+              <Link href="/ai-transparency" className="hover:text-blue-600 transition-colors">AI Transparency Policy</Link>
+              <Link href="/dmca" className="hover:text-blue-600 transition-colors">Copyright / DMCA</Link>
+              <Link href="/dpa" className="hover:text-blue-600 transition-colors">Enterprise DPA</Link>
+              <Link href="/contact" className="hover:text-blue-600 transition-colors">Contact & Support</Link>
+            </div>
+          </div>
+        </div>
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 pt-8 border-t border-slate-200">
+          <div className="text-slate-400 text-sm">
+            &copy; {new Date().getFullYear()} CURA Technologies. All rights reserved.
           </div>
         </div>
       </footer>

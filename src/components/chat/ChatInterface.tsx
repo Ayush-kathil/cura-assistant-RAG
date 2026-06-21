@@ -186,6 +186,35 @@ export function ChatInterface(props: ChatInterfaceProps) {
         <div className="flex-1 overflow-y-auto p-4 md:p-8" ref={scrollRef}>
           <div className="max-w-4xl mx-auto flex flex-col gap-8 pb-32">
           
+          {messages.length === 0 && (
+            <div className="flex flex-col items-center justify-center pt-20 pb-10 text-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
+              <div className="w-24 h-24 mb-8 relative">
+                <div className="absolute inset-0 bg-gradient-to-tr from-blue-400 to-purple-500 rounded-3xl blur-xl opacity-40 animate-pulse" />
+                <div className="w-full h-full bg-white rounded-3xl shadow-xl border border-slate-100 flex items-center justify-center relative z-10">
+                  <Bot className="w-10 h-10 text-blue-600" />
+                </div>
+              </div>
+              <h2 className="text-4xl font-light text-slate-800 tracking-tight mb-4">
+                How can I help you today?
+              </h2>
+              <p className="text-slate-500 font-light mb-12 max-w-lg">
+                I am your intelligent companion. Mention a specific document with @ or ask me anything to search your entire workspace.
+              </p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-2xl">
+                {["Summarize the latest quarterly report", "Extract key entities from the legal contract", "Explain the RAG architecture", "Find references to 'Project Apollo'"].map((suggestion, i) => (
+                  <button 
+                    key={i}
+                    onClick={() => setInputValue(suggestion)}
+                    className="p-4 bg-white border border-slate-200 rounded-2xl text-sm text-slate-600 text-left hover:border-blue-300 hover:shadow-md transition-all font-medium"
+                  >
+                    {suggestion}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           <AnimatePresence initial={false}>
             {messages.map((msg) => (
               <motion.div 
@@ -315,10 +344,11 @@ export function ChatInterface(props: ChatInterfaceProps) {
             )}
           </AnimatePresence>
 
-          <form 
-            onSubmit={handleSubmit}
-            className="relative bg-white border border-slate-300 shadow-xl shadow-slate-200/50 rounded-2xl overflow-hidden focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10 transition-all"
-          >
+          <div className="relative p-[2px] rounded-[1.25rem] bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-[length:200%_auto] animate-[gradient_3s_linear_infinite] shadow-lg shadow-purple-500/20 transition-all focus-within:shadow-xl focus-within:shadow-purple-500/40">
+            <form 
+              onSubmit={handleSubmit}
+              className="relative bg-white rounded-2xl overflow-hidden"
+            >
             <textarea
               value={inputValue}
               onChange={handleInputChange}
@@ -360,7 +390,8 @@ export function ChatInterface(props: ChatInterfaceProps) {
               )}
             </div>
           </form>
-          <div className="text-center mt-2 flex justify-between">
+          </div>
+          <div className="text-center mt-3 flex justify-between">
             <span className="text-xs text-slate-400">Target Document: {selectedDocumentName || 'All Documents'}</span>
             <span className="text-xs text-slate-400">Agentic Platform | Engine Connected</span>
           </div>

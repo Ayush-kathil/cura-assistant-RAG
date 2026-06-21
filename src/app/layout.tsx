@@ -1,14 +1,12 @@
 import type { Metadata } from "next";
-import { Outfit, Geist_Mono } from "next/font/google";
+import { Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import QueryProvider from "@/components/providers/QueryProvider";
 import { WorkspaceProvider } from "@/contexts/WorkspaceContext";
-
-const outfit = Outfit({
-  variable: "--font-outfit",
-  subsets: ["latin"],
-});
+import { Toaster } from "sonner";
+import LoadingScreen from "@/components/LoadingScreen";
+import CookieBanner from "@/components/CookieBanner";
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
@@ -16,9 +14,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Curio | AI Assistant",
-  description: "Premium RAG Chatbot Application",
-  manifest: "/manifest.json"
+  title: "CURA | Professional AI Knowledge Engine",
+  description: "The enterprise-grade RAG and document intelligence platform.",
+  manifest: "/manifest.json",
+  icons: {
+    icon: "/bot.jpg",
+  },
 };
 
 export default function RootLayout({
@@ -45,13 +46,16 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${outfit.variable} ${geistMono.variable} antialiased font-sans`}
-        style={{ fontFamily: "'Google Sans', 'Samsung Sans', var(--font-outfit), sans-serif" }}
+        className={`${geistMono.variable} antialiased font-sans`}
+        style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"' }}
       >
         <ThemeProvider>
           <QueryProvider>
             <WorkspaceProvider>
+              <LoadingScreen />
               {children}
+              <CookieBanner />
+              <Toaster position="top-right" />
             </WorkspaceProvider>
           </QueryProvider>
         </ThemeProvider>

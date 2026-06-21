@@ -1,96 +1,154 @@
+"use client";
+
 import Link from "next/link";
+import { motion } from "framer-motion";
+import { ArrowDown, Database, FileUp, Webhook, ListTree, FileText, Blocks, BrainCircuit, Share2, CheckCircle2 } from "lucide-react";
+
+const FlowNode = ({ icon: Icon, title, delay }: { icon: any, title: string, delay: number }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true, margin: "-50px" }}
+    transition={{ duration: 0.6, delay }}
+    className="flex flex-col items-center group relative z-10"
+  >
+    <div className="w-48 py-4 px-4 bg-white/80 backdrop-blur-md border border-slate-200 rounded-2xl shadow-lg shadow-slate-200/50 flex flex-col items-center justify-center gap-3 hover:shadow-xl hover:border-blue-300 transition-all">
+      <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+        <Icon className="w-5 h-5" />
+      </div>
+      <span className="text-sm font-medium text-slate-700 text-center">{title}</span>
+    </div>
+  </motion.div>
+);
+
+const FlowArrow = ({ delay }: { delay: number }) => (
+  <motion.div
+    initial={{ opacity: 0, height: 0 }}
+    whileInView={{ opacity: 1, height: "40px" }}
+    viewport={{ once: true }}
+    transition={{ duration: 0.4, delay }}
+    className="w-px bg-blue-300 flex items-end justify-center relative my-2 z-0"
+  >
+    <ArrowDown className="w-4 h-4 text-blue-400 absolute -bottom-3" />
+  </motion.div>
+);
 
 export default function SciencePage() {
   return (
-    <div className="min-h-screen bg-white text-black font-sans">
-      <nav className="fixed top-0 w-full z-50 flex items-center px-8 md:px-16 bg-black py-4">
-        <Link href="/" className="flex items-center gap-3">
-          <img src="/bot.jpg" alt="Cura Logo" className="w-8 h-8 rounded-full object-cover border-2 border-white/20" />
-          <span className="font-bold text-xl tracking-tighter text-white uppercase">Cura</span>
-        </Link>
+    <div className="bg-slate-50 min-h-screen text-slate-800 font-sans pb-32 overflow-hidden">
+      {/* Navigation */}
+      <nav className="border-b border-slate-200 py-4 px-8 flex justify-between items-center bg-white/80 backdrop-blur-md sticky top-0 z-50">
+        <Link href="/" className="font-light text-2xl uppercase tracking-tighter text-slate-900">CURA</Link>
+        <Link href="/" className="text-sm font-medium uppercase tracking-wider text-slate-500 hover:text-blue-600 transition-colors">Return Home &rarr;</Link>
       </nav>
+      
+      {/* Header */}
+      <header className="max-w-4xl mx-auto pt-24 px-8 text-center mb-16">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-100 text-indigo-700 rounded-full text-xs font-medium tracking-widest uppercase mb-6"
+        >
+          <BrainCircuit className="w-4 h-4" /> The Science
+        </motion.div>
+        <motion.h1 
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.1 }}
+          className="text-5xl md:text-7xl font-light tracking-tighter text-slate-900 mb-6"
+        >
+          CURA Architecture
+        </motion.h1>
+        <motion.p 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="text-lg text-slate-500 font-light max-w-2xl mx-auto leading-relaxed"
+        >
+          Explore the exact data pipeline that powers our robust document intelligence. 
+          Every uploaded file undergoes an intricate transformation process before it's ready for semantic search.
+        </motion.p>
+      </header>
 
-      <main className="pt-32 pb-24 px-8 md:px-16 max-w-5xl mx-auto">
-        <h1 className="text-5xl md:text-7xl font-bold tracking-tighter uppercase mb-6">The Science Behind Cura</h1>
-        <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mb-16">
-          Understanding our Retrieval-Augmented Generation (RAG) Architecture and how it processes your cognitive data to deliver unparalleled emotional support.
-        </p>
+      {/* Architectural Diagram */}
+      <main className="max-w-5xl mx-auto px-8 relative">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(200,210,255,0.2)_0%,transparent_70%)] pointer-events-none" />
+        
+        <div className="flex flex-col items-center py-12 relative z-10">
+          
+          <FlowNode icon={FileUp} title="File Upload UI" delay={0.1} />
+          <FlowArrow delay={0.2} />
+          
+          <FlowNode icon={Database} title="Supabase Storage" delay={0.3} />
+          <FlowArrow delay={0.4} />
 
-        <section className="mb-20">
-          <h2 className="text-3xl font-bold uppercase tracking-wider mb-8 border-b border-black pb-2">The Architecture</h2>
-          <p className="text-lg text-gray-800 leading-relaxed mb-8">
-            Cura utilizes an advanced Retrieval-Augmented Generation (RAG) pipeline to ingest clinical literature and user context. 
-            This ensures that our AI doesn't hallucinate responses, but instead draws upon verified, embedded knowledge stored securely in our database.
-          </p>
+          <FlowNode icon={Webhook} title="API Trigger / Validation" delay={0.5} />
+          <FlowArrow delay={0.6} />
 
-          <div className="bg-gray-50 p-8 border border-gray-200 rounded-lg shadow-sm overflow-x-auto">
-            {/* Using a pre-rendered SVG/HTML for Mermaid to avoid needing client-side rendering libraries if not installed, or using standard text representation */}
-            <pre className="mermaid font-mono text-sm leading-tight text-center">
-{`graph TD
-    %% Define Styles
-    classDef user fill:#000,stroke:#000,stroke-width:2px,color:#fff,rx:8px,ry:8px
-    classDef process fill:#f3f3f3,stroke:#000,stroke-width:2px,color:#000,rx:8px,ry:8px
-    classDef database fill:#fff,stroke:#000,stroke-width:2px,stroke-dasharray: 5 5,color:#000,rx:8px,ry:8px
-    
-    A[User Uploads PDF / Chat Context]:::user -->|Raw Data| B(Text Extraction Engine):::process
-    B -->|Cleaned Text| C(Chunking Module):::process
-    C -->|Text Chunks| D{Embedding Model}:::process
-    D -->|Vector Embeddings| E[(Supabase Vector DB)]:::database
-    
-    F[User Query]:::user -->|Query Text| G{Query Embedder}:::process
-    G -->|Query Vector| E
-    E -->|Similarity Search| H(Context Retrieval):::process
-    H -->|Top-K Context + Query| I[Large Language Model]:::process
-    I -->|Synthesized Clinical Response| J[User Interface]:::user`}
-            </pre>
-            <p className="text-sm text-gray-500 mt-6 text-center italic">Figure 1: Cura's RAG Architecture Pipeline</p>
+          <FlowNode icon={ListTree} title="Inngest Queue" delay={0.7} />
+          <FlowArrow delay={0.8} />
+
+          <FlowNode icon={FileText} title="Parsing Worker" delay={0.9} />
+          <FlowArrow delay={1.0} />
+
+          <FlowNode icon={Blocks} title="Chunking Worker" delay={1.1} />
+
+          {/* Split Path */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 1.2 }}
+            className="flex w-64 justify-between relative h-10 mt-2"
+          >
+            {/* Horizontal connection line */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[240px] h-px bg-blue-300" />
+            {/* Vertical drop lines */}
+            <div className="absolute top-0 left-[20px] w-px h-10 bg-blue-300"><ArrowDown className="w-4 h-4 text-blue-400 absolute -bottom-3 -left-[7px]" /></div>
+            <div className="absolute top-0 right-[20px] w-px h-10 bg-blue-300"><ArrowDown className="w-4 h-4 text-blue-400 absolute -bottom-3 -left-[7px]" /></div>
+            <div className="absolute top-0 left-1/2 w-px h-full bg-blue-300 -translate-x-1/2 -mt-2" />
+          </motion.div>
+
+          {/* Parallel Nodes */}
+          <div className="flex gap-12 mt-4">
+            <div className="flex flex-col items-center">
+              <FlowNode icon={Share2} title="Entity Extraction Worker" delay={1.3} />
+              <FlowArrow delay={1.4} />
+              <FlowNode icon={Database} title="Postgres: Entities/Edges" delay={1.5} />
+            </div>
+            <div className="flex flex-col items-center">
+              <FlowNode icon={BrainCircuit} title="Embedding Worker" delay={1.3} />
+              <FlowArrow delay={1.4} />
+              <FlowNode icon={Database} title="Postgres: pgvector" delay={1.5} />
+            </div>
           </div>
-        </section>
 
-        <section className="mb-20">
-          <h2 className="text-3xl font-bold uppercase tracking-wider mb-8 border-b border-black pb-2">Step-by-Step Execution</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-            <div>
-              <h3 className="text-xl font-bold uppercase tracking-wider mb-2">1. Data Ingestion</h3>
-              <p className="text-gray-700 leading-relaxed">
-                When cognitive behavioral therapy (CBT) manuals or user diaries are uploaded, the Text Extraction Engine parses the raw data into clean text, stripping out noise and formatting.
-              </p>
-            </div>
-            <div>
-              <h3 className="text-xl font-bold uppercase tracking-wider mb-2">2. Chunking & Embedding</h3>
-              <p className="text-gray-700 leading-relaxed">
-                The text is split into semantic chunks. These chunks are passed through an Embedding Model which translates human language into dense mathematical vectors representing the underlying semantic meaning.
-              </p>
-            </div>
-            <div>
-              <h3 className="text-xl font-bold uppercase tracking-wider mb-2">3. Vector Storage</h3>
-              <p className="text-gray-700 leading-relaxed">
-                We store these vectors in Supabase pgvector. This allows for lightning-fast similarity searches across millions of tokens of psychological literature in milliseconds.
-              </p>
-            </div>
-            <div>
-              <h3 className="text-xl font-bold uppercase tracking-wider mb-2">4. Contextual Generation</h3>
-              <p className="text-gray-700 leading-relaxed">
-                When a user asks a question, their query is embedded and matched against the database. The most relevant chunks are injected into the LLM's prompt, ensuring the final response is highly accurate and clinically sound.
-              </p>
-            </div>
-          </div>
-        </section>
+          {/* Merge Path */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 1.6 }}
+            className="flex w-64 justify-between relative h-10 mt-2 mb-4"
+          >
+            {/* Horizontal connection line */}
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[240px] h-px bg-blue-300" />
+            {/* Vertical drop lines from nodes */}
+            <div className="absolute top-0 left-[20px] w-px h-10 bg-blue-300" />
+            <div className="absolute top-0 right-[20px] w-px h-10 bg-blue-300" />
+            {/* Vertical drop line to final node */}
+            <div className="absolute bottom-[-16px] left-1/2 w-px h-4 bg-blue-300 -translate-x-1/2"><ArrowDown className="w-4 h-4 text-blue-400 absolute bottom-[-10px] -left-[7px]" /></div>
+          </motion.div>
 
-        <div className="text-center mt-16">
-          <Link href="/login" className="px-10 py-5 bg-black text-white text-lg font-bold uppercase tracking-widest hover:bg-neutral-800 transition-colors rounded-full">
-            Experience the Engine
-          </Link>
+          <FlowNode icon={CheckCircle2} title="Status: Completed" delay={1.7} />
+
         </div>
       </main>
-
-      {/* Script to load Mermaid.js dynamically */}
-      <script type="module" dangerouslySetInnerHTML={{
-        __html: `
-          import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
-          mermaid.initialize({ startOnLoad: true, theme: 'base', themeVariables: { primaryColor: '#ffffff', primaryTextColor: '#000000', primaryBorderColor: '#000000', lineColor: '#000000' } });
-        `
-      }} />
+      
+      <footer className="mt-24 py-8 text-center text-sm font-medium text-slate-400">
+        &copy; {new Date().getFullYear()} CURA Technologies. All rights reserved.
+      </footer>
     </div>
   );
 }

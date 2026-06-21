@@ -1,26 +1,50 @@
-import Link from 'next/link';
+"use client";
+
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { Compass, ArrowLeft } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-[#020617] flex flex-col items-center justify-center text-center p-4">
-      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-blue-900/20 rounded-full blur-[100px]"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] bg-cyan-900/10 rounded-full blur-[80px]"></div>
-      </div>
+    <div className="bg-slate-50 min-h-screen flex flex-col items-center justify-center text-slate-800 font-sans selection:bg-blue-100 selection:text-blue-900 relative overflow-hidden">
       
-      <div className="relative z-10 glass-card bg-white/5 border border-white/10 rounded-3xl p-12 max-w-lg shadow-2xl backdrop-blur-xl">
-        <span className="material-symbols-outlined text-[80px] text-blue-400 mb-6 block">explore_off</span>
-        <h1 className="font-display-lg text-6xl text-white font-bold mb-4 font-sans tracking-tight">404</h1>
-        <h2 className="text-2xl text-blue-100 font-semibold mb-4 font-sans">Page Not Found</h2>
-        <p className="text-blue-200/60 mb-8 font-sans">
-          The page you are looking for doesn't exist or has been moved. Let's get you back to your workspace.
+      {/* Animated Background */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-1/4 left-1/3 w-[600px] h-[600px] bg-blue-100/40 rounded-full blur-3xl mix-blend-multiply animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/3 w-[500px] h-[500px] bg-indigo-100/40 rounded-full blur-3xl mix-blend-multiply animate-pulse" style={{ animationDelay: '2s' }} />
+      </div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+        className="relative z-10 flex flex-col items-center text-center px-8"
+      >
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.8, delay: 0.2, type: "spring", stiffness: 100 }}
+          className="w-24 h-24 bg-white shadow-xl shadow-blue-900/10 rounded-3xl flex items-center justify-center mb-8 border border-slate-100"
+        >
+          <Compass className="w-12 h-12 text-blue-500 animate-[spin_4s_linear_infinite]" />
+        </motion.div>
+        
+        <h1 className="text-8xl md:text-9xl font-light tracking-tighter text-slate-900 mb-4">404</h1>
+        
+        <h2 className="text-2xl md:text-3xl font-medium text-slate-700 mb-6">Page Not Found</h2>
+        
+        <p className="text-lg text-slate-500 max-w-md mb-12 font-light leading-relaxed">
+          The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.
         </p>
         
-        <Link href="/workspace" className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-[0_0_15px_rgba(37,99,235,0.3)]">
-          <span className="material-symbols-outlined text-sm">home</span>
-          Back to Workspace
+        <Link 
+          href="/" 
+          className="inline-flex items-center justify-center px-8 py-4 bg-slate-900 text-white text-sm font-medium uppercase tracking-wider hover:bg-slate-800 shadow-xl shadow-slate-900/20 transition-all hover:-translate-y-1 group rounded-full"
+        >
+          <ArrowLeft className="w-4 h-4 mr-3 transform group-hover:-translate-x-1 transition-transform" />
+          Return Home
         </Link>
-      </div>
+      </motion.div>
     </div>
   );
 }
