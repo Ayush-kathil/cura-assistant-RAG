@@ -11,11 +11,13 @@ import { agentEventBus } from '@/lib/events/AgentEventBus';
 import { useWorkspace } from '@/contexts/WorkspaceContext';
 import { Send, Bot, User, Loader2, StopCircle, FileText } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import { SplitPaneViewer } from '../pdf/SplitPaneViewer';
 
 interface ChatMessage {
   id: string;
   role: 'user' | 'assistant';
   content: string;
+  verificationResult?: any[];
 }
 
 interface ChatInterfaceProps {
@@ -42,10 +44,14 @@ export function ChatInterface(props: ChatInterfaceProps) {
   const [mentionQuery, setMentionQuery] = useState('');
   const [targetDocumentId, setTargetDocumentId] = useState<string | null>(null);
   const [selectedDocumentName, setSelectedDocumentName] = useState<string | null>(null);
+  const [researchMode, setResearchMode] = useState(false);
 
   // Citation State
   const [isCitationOpen, setIsCitationOpen] = useState(false);
   const [activeCitation, setActiveCitation] = useState<CitationData | null>(null);
+  
+  const [viewerDocumentId, setViewerDocumentId] = useState<string | null>(null);
+  const [viewerCitationText, setViewerCitationText] = useState<string>("");
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -73,6 +79,19 @@ export function ChatInterface(props: ChatInterfaceProps) {
             newMessages[lastIndex] = {
               ...newMessages[lastIndex],
               content: event.payload!.text!
+            };
+            return newMessages;
+          }
+          return prev;
+        });
+      } else if (event.type === 'verification_completed' && event.payload?.verificationResult) {
+        setMessages((prev: any) => {
+          const newMessages = [...prev];
+          const lastIndex = newMessages.length - 1;
+          if (lastIndex >= 0 && newMessages[lastIndex].role === 'assistant') {
+            newMessages[lastIndex] = {
+              ...newMessages[lastIndex],
+              verificationResult: event.payload!.verificationResult
             };
             return newMessages;
           }
@@ -128,7 +147,7 @@ export function ChatInterface(props: ChatInterfaceProps) {
     }
 
     // Call Real SSE Streaming Hook
-    await submitQuery(queryText, activeWorkspace?.id || 'default-workspace', currentTargetId);
+    await submitQuery(queryText, activeWorkspace?.id || 'default-workspace', currentTargetId, researchMode);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -154,10 +173,18 @@ export function ChatInterface(props: ChatInterfaceProps) {
 
   const filteredDocs = documents.filter(doc => doc.file_name.toLowerCase().includes(mentionQuery));
 
+  const handleCitationClick = (citationMatch: string) => {
+    // Attempt to extract the chunk ID, but for now we just show a placeholder doc ID "123" 
+    // since we don't have the full chunk metadata in the UI yet.
+    setViewerDocumentId("simulated-pdf-doc-123");
+    setViewerCitationText(`Citation Reference: ${citationMatch}`);
+  };
+
   return (
-    <div className="flex flex-col h-full bg-white relative">
-      <div className="flex-1 overflow-y-auto p-4 md:p-8" ref={scrollRef}>
-        <div className="max-w-4xl mx-auto flex flex-col gap-8 pb-32">
+    <div className="flex h-full w-full">
+      <div className="flex flex-col h-full bg-white relative flex-1 min-w-0">
+        <div className="flex-1 overflow-y-auto p-4 md:p-8" ref={scrollRef}>
+          <div className="max-w-4xl mx-auto flex flex-col gap-8 pb-32">
           
           <AnimatePresence initial={false}>
             {messages.map((msg) => (
@@ -187,9 +214,44 @@ export function ChatInterface(props: ChatInterfaceProps) {
                            <Loader2 className="w-4 h-4 animate-spin" /> Thinking...
                         </div>
                       ) : (
-                        <ReactMarkdown>
+                        <ReactMarkdown
+                          components={{
+                            a: ({ node, ...props }) => {
+                              if (props.href === 'citation') {
+                                return (
+                                  <a 
+                                    href="#"
+                                    onClick={(e) => { e.preventDefault(); handleCitationClick(props.children?.toString() || ""); }}
+                                    className="inline-flex items-center justify-center px-1.5 py-0.5 ml-1 text-[10px] font-bold bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors cursor-pointer"
+                                  >
+                                    {props.children}
+                                  </a>
+                                );
+                              }
+                              return <a {...props} />;
+                            }
+                          }}
+                        >
                           {msg.content.replace(/\[(\d+)\]/g, '[$1](citation)')}
                         </ReactMarkdown>
+                      )}
+                      
+                      {msg.verificationResult && (
+                        <div className="mt-4 pt-4 border-t border-slate-200">
+                          <p className="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wider">Citation Verification</p>
+                          <ul className="text-xs space-y-1">
+                            {msg.verificationResult.map((v: any, i: number) => (
+                              <li key={i} className="flex flex-col mb-1">
+                                <span className={`px-2 py-0.5 rounded font-bold self-start mb-1 ${
+                                  v.status === 'Verified' ? 'bg-green-100 text-green-800' :
+                                  v.status === 'Unsupported' ? 'bg-red-100 text-red-800' :
+                                  'bg-yellow-100 text-yellow-800'
+                                }`}>{v.status}</span>
+                                <span className="text-slate-600 italic">"{v.sentence}"</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
                       )}
                     </div>
                   ) : (
@@ -272,6 +334,14 @@ export function ChatInterface(props: ChatInterfaceProps) {
             />
             
             <div className="absolute right-2 bottom-2 flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setResearchMode(!researchMode)}
+                className={`text-xs px-2 py-1.5 rounded-lg font-bold transition-colors ${researchMode ? 'bg-indigo-100 text-indigo-700 border border-indigo-200' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+                title="Enable deep research multi-hop reasoning"
+              >
+                {researchMode ? 'Research: ON' : 'Research: OFF'}
+              </button>
               {isStreaming ? (
                 <button
                   type="button"
@@ -296,6 +366,11 @@ export function ChatInterface(props: ChatInterfaceProps) {
           </div>
         </div>
       </div>
+      <SplitPaneViewer 
+        documentId={viewerDocumentId} 
+        citationText={viewerCitationText} 
+        onClose={() => setViewerDocumentId(null)} 
+      />
     </div>
   );
 }

@@ -6,7 +6,7 @@ export function useAgentStream() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const submitQueryMock = useCallback(async (query: string, workspaceId: string, targetDocumentId?: string | null) => {
+  const submitQueryMock = useCallback(async (query: string, workspaceId: string, targetDocumentId?: string | null, researchMode: boolean = false) => {
     setIsStreaming(true);
     setError(null);
     chatStateMachine.transition('SUBMITTING');
@@ -26,7 +26,7 @@ export function useAgentStream() {
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query, workspaceId, targetDocumentId }),
+        body: JSON.stringify({ query, workspaceId, targetDocumentId, researchMode }),
       });
 
       if (!response.ok) {
@@ -75,7 +75,8 @@ export function useAgentStream() {
                   chatStateMachine.transition('VERIFYING');
                   emit({ type: 'verification_started' });
                 } else if (data.node === 'verify') {
-                  emit({ type: 'verification_completed' });
+                  const payload = data.payload?.verificationResult;
+                  emit({ type: 'verification_completed', payload: { verificationResult: payload } });
                 }
               } catch(err) {
                 console.error("Failed to parse SSE event", err);

@@ -1,37 +1,68 @@
-import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
+import { appGraph } from "@/lib/rag/agent/graph";
+import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 
-export async function POST(req: NextRequest) {
-  try {
-    const { query, faithfulness_score, relevance_score, context_precision, recall, total_latency, token_usage } = await req.json();
+export async function POST(req: Request) {
+  const { dataset, workspaceId } = await req.json();
 
-    const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const { data, error } = await supabase
-      .from("rag_evaluations")
-      .insert({
-        user_id: user.id,
-        query,
-        faithfulness_score,
-        relevance_score,
-        context_precision,
-        recall,
-        total_latency,
-        token_usage
-      })
-      .select()
-      .single();
-
-    if (error) throw error;
-
-    return NextResponse.json({ success: true, data });
-  } catch (error: any) {
-    console.error("Evaluation error:", error);
-    return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
+  if (!dataset || !workspaceId) {
+    return new Response(JSON.stringify({ error: "Missing dataset or workspaceId" }), { status: 400 });
   }
+
+  const results = [];
+  const verifierLlm = new ChatGoogleGenerativeAI({ model: "gemini-3.1-flash-lite", temperature: 0, apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || "dummy" });
+
+  for (const item of dataset) {
+    try {
+      const initialState = {
+        query: item.query,
+        workspaceId,
+        targetDocumentId: null,
+        queryEmbedding: [],
+        retrievedChunks: [],
+        generation: "",
+        hallucinated: false,
+        verificationResult: null,
+        researchMode: false,
+        startTime: Date.now(),
+        loopCount: 0
+      };
+
+      const finalState = await appGraph.invoke(initialState, { configurable: { thread_id: "eval-thread" } });
+      
+      const generation = finalState.generation;
+      const chunks = finalState.retrievedChunks;
+      const contextStr = chunks.map((c: any) => c.content).join("\n");
+
+      // Faithfulness Eval
+      const prompt = `Evaluate the Faithfulness of the following generation against the context. Is the generation fully supported by the context without hallucinating external facts? Answer ONLY '1' for fully faithful, or '0' for unfaithful.
+      Context: ${contextStr}
+      Generation: ${generation}`;
+      
+      const evalRes = await verifierLlm.invoke(prompt);
+      const faithfulnessScore = parseInt(evalRes.content.toString().trim(), 10) === 1 ? 1 : 0;
+      
+      // Basic Recall - mock checking if the chunk id matches item.expected_chunk_ids
+      let recallScore = 0;
+      if (item.expected_chunk_ids && item.expected_chunk_ids.length > 0) {
+        const retrievedIds = chunks.map((c: any) => c.id);
+        const hits = item.expected_chunk_ids.filter((id: string) => retrievedIds.includes(id)).length;
+        recallScore = hits / item.expected_chunk_ids.length;
+      }
+
+      results.push({
+        query: item.query,
+        generation,
+        faithfulness: faithfulnessScore,
+        recall: recallScore,
+        latencyMs: Date.now() - finalState.startTime
+      });
+
+    } catch (e: any) {
+      results.push({ query: item.query, error: e.message });
+    }
+  }
+
+  return new Response(JSON.stringify({ results }), {
+    headers: { "Content-Type": "application/json" },
+  });
 }
