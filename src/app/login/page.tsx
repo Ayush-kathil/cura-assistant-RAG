@@ -7,7 +7,7 @@ import { Turnstile } from '@marsidev/react-turnstile';
 import Link from "next/link";
 
 export default function LoginPage() {
-  const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login');
+  const [activeTab, setActiveTab] = useState<'login' | 'signup' | 'forgot_password'>('login');
   
   // Form states
   const [email, setEmail] = useState("");
@@ -118,6 +118,28 @@ export default function LoginPage() {
     }
   };
 
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) return;
+
+    setLoading(true);
+    setError(null);
+    setSuccessMsg(null);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/update-password`,
+        captchaToken: captchaToken || undefined
+      });
+      if (error) throw error;
+      setSuccessMsg("Check your email for the password reset link.");
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleOAuth = async (provider: 'google' | 'github') => {
     await supabase.auth.signInWithOAuth({
       provider,
@@ -187,7 +209,8 @@ export default function LoginPage() {
           </div>
 
           {/* Tab Switcher */}
-          <div className="flex bg-surface-container-low p-1 rounded-full mb-8 w-fit mx-auto md:mx-0 bg-gray-100">
+          {activeTab !== 'forgot_password' && (
+            <div className="flex bg-surface-container-low p-1 rounded-full mb-8 w-fit mx-auto md:mx-0 bg-gray-100">
             <button 
               className={`px-8 py-2.5 rounded-full text-label-md transition-all duration-300 ${activeTab === 'login' ? 'bg-white text-primary shadow-sm' : 'text-on-surface-variant hover:text-primary text-gray-500'}`}
               onClick={() => { setActiveTab('login'); setError(null); setSuccessMsg(null); }}
@@ -201,6 +224,7 @@ export default function LoginPage() {
                 Sign Up
             </button>
           </div>
+          )}
 
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm font-medium text-center mb-4">
@@ -235,7 +259,7 @@ export default function LoginPage() {
                 <div className="space-y-2">
                   <div className="flex justify-between items-center px-4">
                     <label className="text-label-sm font-label-sm text-on-surface-variant text-gray-600">Password</label>
-                    <Link className="text-label-sm font-label-sm text-primary hover:underline" href="/auth/forgot-password">Forgot?</Link>
+                    <button type="button" onClick={() => { setActiveTab('forgot_password'); setError(null); setSuccessMsg(null); }} className="text-label-sm font-label-sm text-primary hover:underline">Forgot?</button>
                   </div>
                   <input 
                     type="password"
@@ -343,11 +367,53 @@ export default function LoginPage() {
             </div>
           )}
 
-          <div className="relative my-8">
-            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-200"></div></div>
-            <div className="relative flex justify-center text-label-sm uppercase"><span className="bg-white px-4 text-gray-400">Or continue with</span></div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
+          {/* Forgot Password Form */}
+          {activeTab === 'forgot_password' && (
+            <div className="animate-in fade-in duration-300">
+              <header className="mb-8">
+                <button type="button" onClick={() => { setActiveTab('login'); setError(null); setSuccessMsg(null); }} className="text-label-sm font-label-sm text-primary hover:underline mb-4 inline-block">&larr; Back to Login</button>
+                <h2 className="font-headline-md text-headline-md text-on-background mb-2">Reset Password</h2>
+                <p className="text-on-surface-variant text-gray-500">Enter your email and we'll send you a link to reset your password.</p>
+              </header>
+              <form className="space-y-5" onSubmit={handleResetPassword}>
+                <div className="space-y-2">
+                  <label className="text-label-sm font-label-sm text-on-surface-variant ml-4 text-gray-600">Email Address</label>
+                  <input 
+                    type="email" 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="w-full px-6 py-4 rounded-full bg-surface border-none ring-1 ring-outline-variant/30 focus:ring-2 focus:ring-primary-container outline-none transition-all shadow-[inset_0_2px_4px_rgba(12,103,128,0.03)] bg-gray-50" 
+                    placeholder="hello@cura.ai" 
+                  />
+                </div>
+                
+                {/* Cloudflare Turnstile */}
+                <div className="flex justify-center mt-2">
+                  <Turnstile
+                    siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA"}
+                    onSuccess={(token) => setCaptchaToken(token)}
+                  />
+                </div>
+
+                <button 
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-4 rounded-full bg-primary text-white font-label-md shadow-lg shadow-primary/20 hover:bg-on-primary-container hover:scale-[1.01] active:scale-95 transition-all mt-4 disabled:opacity-50"
+                >
+                    {loading ? "..." : "Send Reset Link"}
+                </button>
+              </form>
+            </div>
+          )}
+
+          {activeTab !== 'forgot_password' && (
+            <>
+              <div className="relative my-8">
+                <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-200"></div></div>
+                <div className="relative flex justify-center text-label-sm uppercase"><span className="bg-white px-4 text-gray-400">Or continue with</span></div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
             <button 
               onClick={() => handleOAuth('google')}
               className="flex items-center justify-center gap-3 py-3 px-4 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors"
@@ -363,6 +429,8 @@ export default function LoginPage() {
               <span className="text-label-sm font-bold text-gray-600">GitHub</span>
             </button>
           </div>
+          </>
+          )}
 
         </div>
       </main>
