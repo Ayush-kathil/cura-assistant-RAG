@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { useEffect } from "react";
-import { motion } from "framer-motion";
-import { ScrollRevealText } from "@/components/ScrollRevealText";
+import { motion, useScroll, useTransform } from "framer-motion";
 
 export default function Home() {
+  const { scrollYProgress } = useScroll();
+  const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
+  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
 
   useEffect(() => {
     // Simple scroll interaction for the navbar
@@ -13,11 +15,12 @@ export default function Home() {
       const nav = document.getElementById('top-nav');
       if (nav) {
         if (window.scrollY > 20) {
-          nav.classList.add('shadow-xl');
-          nav.classList.remove('shadow-[0_20px_20px_rgba(12,103,128,0.05)]');
+          nav.classList.add('bg-white', 'shadow-md');
+          nav.classList.remove('bg-transparent', 'py-6');
+          nav.classList.add('py-4');
         } else {
-          nav.classList.remove('shadow-xl');
-          nav.classList.add('shadow-[0_20px_20px_rgba(12,103,128,0.05)]');
+          nav.classList.add('bg-transparent', 'py-6');
+          nav.classList.remove('bg-white', 'shadow-md', 'py-4');
         }
       }
     };
@@ -26,225 +29,195 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="bg-background text-on-surface">
-      {/* TopNavBar */}
+    <div className="bg-white text-black font-sans selection:bg-black selection:text-white min-h-screen">
+      {/* Top Navigation */}
       <nav 
         id="top-nav"
-        className="sticky top-4 z-50 flex justify-between items-center px-8 py-3 rounded-full mt-4 mx-auto w-[90%] max-w-container-max bg-white/70 backdrop-blur-xl border border-white/10 shadow-[0_20px_20px_rgba(12,103,128,0.05)] transition-all"
+        className="fixed top-0 w-full z-50 flex justify-between items-center px-8 md:px-16 transition-all duration-300 bg-transparent py-6"
       >
         <div className="flex items-center gap-2">
-          <span className="font-headline-md text-headline-md font-bold text-primary">Cura</span>
+          <Link href="/" className="font-bold text-2xl tracking-tighter text-black uppercase">
+            Cura
+          </Link>
         </div>
-        <div className="hidden md:flex items-center gap-8">
-          <Link href="#features" className="font-label-md text-label-md text-gray-500 hover:text-primary transition-colors">Features</Link>
-          <Link href="/science" className="font-label-md text-label-md text-gray-500 hover:text-primary transition-colors">Science</Link>
-          <Link href="/pricing" className="font-label-md text-label-md text-gray-500 hover:text-primary transition-colors">Pricing</Link>
-          <Link href="/dashboard" className="font-label-md text-label-md text-gray-500 hover:text-primary transition-colors">Dashboard</Link>
+        <div className="hidden md:flex items-center gap-10">
+          <Link href="#features" className="text-sm font-semibold tracking-wide uppercase hover:underline underline-offset-4">Platform</Link>
+          <Link href="/science" className="text-sm font-semibold tracking-wide uppercase hover:underline underline-offset-4">Science</Link>
+          <Link href="/pricing" className="text-sm font-semibold tracking-wide uppercase hover:underline underline-offset-4">Pricing</Link>
+          <Link href="/dashboard" className="text-sm font-semibold tracking-wide uppercase hover:underline underline-offset-4">Dashboard</Link>
         </div>
         <div className="flex items-center gap-4">
-          <Link href="/login" className="active:scale-95 transition-transform px-6 py-2 rounded-full bg-primary text-white font-label-md text-label-md hover:scale-105 shadow-lg shadow-primary/20">
-            Get Started
+          <Link href="/login" className="px-6 py-3 bg-black text-white text-sm font-bold uppercase tracking-wider hover:bg-neutral-800 transition-colors">
+            Sign In &rarr;
           </Link>
         </div>
       </nav>
 
       <main>
         {/* Hero Section */}
-        <section className="relative flex items-center pt-12 md:pt-24 pb-20 overflow-hidden">
-          <div className="container mx-auto px-4 md:px-10 max-w-container-max relative z-10">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-              <div className="space-y-8 text-center lg:text-left">
-                <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm">
-                  <span className="material-symbols-outlined text-[18px] mr-2">sparkles</span>
-                  Meet your new AI mental health companion
-                </div>
-                <h1 className="font-headline-lg text-headline-lg md:text-[64px] md:leading-[72px] text-primary">
-                  Conversations that <br/><span className="text-primary-container drop-shadow-sm">truly understand you.</span>
-                </h1>
-                <p className="font-body-lg text-body-lg text-gray-600 max-w-xl mx-auto lg:mx-0">
-                  Cura is an AI-driven companion designed to provide emotional support, guidance, and a safe space for your thoughts. Always here, always listening.
-                </p>
-                <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
-                  <Link href="/login" className="w-full sm:w-auto px-10 py-4 rounded-full bg-primary text-white font-headline-md text-headline-md shadow-lg shadow-primary/20 transition-all hover:-translate-y-1 active:scale-95 text-center">
-                    Get Started
-                  </Link>
-                  <Link href="#features" className="w-full sm:w-auto px-10 py-4 rounded-full bg-[#d8e3fa] text-primary font-headline-md text-headline-md transition-all hover:bg-[#dee8ff] active:scale-95 text-center">
-                    Learn More
-                  </Link>
-                </div>
-              </div>
-              <div className="relative flex justify-center items-center">
-                <div className="absolute w-[80%] h-[80%] bg-primary-container/30 rounded-full blur-[100px] animate-pulse"></div>
-                <div className="relative w-full max-w-md" style={{animation: 'floating 3s ease-in-out infinite'}}>
-                  <img 
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuDVg6OQrMsnNd4NM0FPVZ9kVrOfqYGk5nqIxx-m8X09GZBg3FpJ4x_uoJqJW5n5KBuUJLQ_E2g9pYyw9WWsiHIIdaC3XLoLlFlyTIVBxZjZXCZ0YZAMtYON8HD4E72JdMPTojnsGGo2B9eawB64g-jW1OEWBsfRdmyKsOT23w_KuCTIQOd4iyoWSHg-_qU9y6Qy-QKHLauYWDThTOi-DCJCbbz4KXDixcTOce_PaKZg_yoaMj2GHzL7FgFwZUiL0hhKPx4XeQMNLAvS" 
-                    alt="Cura Mascot" 
-                    className="w-full h-auto drop-shadow-2xl" 
-                  />
-                </div>
-              </div>
-            </div>
+        <section className="relative h-screen flex flex-col justify-end overflow-hidden pt-32 pb-16 px-8 md:px-16">
+          <motion.div 
+            style={{ y, opacity }}
+            className="absolute inset-0 z-0"
+          >
+            <div className="absolute inset-0 bg-black/20 z-10" />
+            <img 
+              src="/bot.jpg" 
+              alt="Cura Bot Companion" 
+              className="w-full h-full object-cover object-center grayscale brightness-75 contrast-125"
+            />
+          </motion.div>
+
+          <div className="relative z-10 flex flex-col justify-end h-full max-w-5xl">
+            <motion.h1 
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+              className="text-[12vw] md:text-[8vw] leading-[0.9] font-bold tracking-tighter text-white mb-6 uppercase"
+            >
+              Rethink<br/>Companionship.
+            </motion.h1>
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              className="text-lg md:text-2xl text-white/90 max-w-2xl mb-10 font-medium"
+            >
+              Meet Cura, an intelligent companion engineered to listen, understand, and evolve with you. Deep clinical insight meets raw technological power.
+            </motion.p>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <Link href="/login" className="inline-flex items-center px-8 py-4 bg-white text-black text-lg font-bold uppercase tracking-wider hover:bg-gray-200 transition-colors group">
+                Start Your Journey
+                <span className="ml-4 transform group-hover:translate-x-2 transition-transform">&rarr;</span>
+              </Link>
+            </motion.div>
           </div>
         </section>
 
-        {/* Features Section */}
-        <section id="features" className="py-24 bg-white relative">
-          <div className="container mx-auto px-4 md:px-10 max-w-container-max">
-            <div className="text-center mb-16 space-y-4 max-w-4xl mx-auto flex justify-center">
-              <ScrollRevealText 
-                text="Thoughtfully Crafted Support. Technology that feels human. We've built Cura with professional empathy at its core to ensure you feel heard, never judged."
-                className="font-headline-lg text-headline-lg md:text-[48px] md:leading-[60px] tracking-tight text-center"
-              />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Feature 1 */}
-              <motion.div 
-                initial={{ opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-100px" }}
-                transition={{ duration: 0.5, delay: 0.1 }}
-                className="glass-card p-8 rounded-lg border border-gray-200 transition-all hover:border-primary/50 group"
-              >
-                <div className="w-16 h-16 rounded-xl bg-primary-container/30 flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform">
-                  <span className="material-symbols-outlined text-[32px]">favorite</span>
+        {/* Massive Text Reveal Section */}
+        <section className="py-32 md:py-48 px-8 md:px-16 bg-black text-white">
+          <div className="max-w-7xl mx-auto">
+            <motion.div 
+              initial={{ opacity: 0, y: 100 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter leading-tight mb-12">
+                TECHNOLOGY THAT FEELS HUMAN.<br/>
+                BUILT WITH CLINICAL RIGOR.<br/>
+                ENGINEERED FOR EMPATHY.
+              </h2>
+              <div className="h-px w-full bg-white/20 mb-12"></div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+                <div>
+                  <h3 className="text-xl font-bold uppercase tracking-wider mb-4">Deep Empathy Engine</h3>
+                  <p className="text-white/70 text-lg leading-relaxed">
+                    Fine-tuned on therapeutic principles, our architecture recognizes emotional nuances to provide precisely targeted, comforting responses.
+                  </p>
                 </div>
-                <h3 className="font-headline-md text-headline-md text-primary mb-4">Deep Empathy</h3>
-                <p className="font-body-md text-body-md text-gray-600">
-                  Our LLM is fine-tuned on therapeutic principles to recognize emotional nuances and provide comforting, relevant responses.
-                </p>
-              </motion.div>
-              {/* Feature 2 */}
-              <motion.div 
-                initial={{ opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-100px" }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="glass-card p-8 rounded-lg border border-gray-200 transition-all hover:border-primary/50 group"
-              >
-                <div className="w-16 h-16 rounded-xl bg-secondary-container/30 flex items-center justify-center text-secondary mb-6 group-hover:scale-110 transition-transform">
-                  <span className="material-symbols-outlined text-[32px]">lock</span>
+                <div>
+                  <h3 className="text-xl font-bold uppercase tracking-wider mb-4">Zero-Knowledge Privacy</h3>
+                  <p className="text-white/70 text-lg leading-relaxed">
+                    Your mental health data is strictly yours. End-to-end encrypted infrastructure ensures absolute confidentiality.
+                  </p>
                 </div>
-                <h3 className="font-headline-md text-headline-md text-primary mb-4">Privacy First</h3>
-                <p className="font-body-md text-body-md text-gray-600">
-                  Your conversations are encrypted and private. We believe your mental health journey should be for your eyes only.
-                </p>
-              </motion.div>
-              {/* Feature 3 */}
-              <motion.div 
-                initial={{ opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-100px" }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-                className="glass-card p-8 rounded-lg border border-gray-200 transition-all hover:border-primary/50 group"
-              >
-                <div className="w-16 h-16 rounded-xl bg-tertiary-container/30 flex items-center justify-center text-tertiary mb-6 group-hover:scale-110 transition-transform">
-                  <span className="material-symbols-outlined text-[32px]">mood</span>
+                <div>
+                  <h3 className="text-xl font-bold uppercase tracking-wider mb-4">Adaptive Intelligence</h3>
+                  <p className="text-white/70 text-lg leading-relaxed">
+                    Cura learns from your interaction patterns, tailoring cognitive exercises and breathing techniques specifically for your physiological state.
+                  </p>
                 </div>
-                <h3 className="font-headline-md text-headline-md text-primary mb-4">Daily Mood Log</h3>
-                <p className="font-body-md text-body-md text-gray-600">
-                  Track your emotional trends over time with visual insights that help you understand your triggers and triumphs.
-                </p>
-              </motion.div>
-            </div>
+              </div>
+            </motion.div>
           </div>
         </section>
 
-        {/* Interactive Bento Grid Section */}
-        <section className="py-24 bg-[#f0f3ff]">
-          <div className="container mx-auto px-4 md:px-10 max-w-container-max">
-            <div className="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-6 h-auto md:h-[600px]">
+        {/* Feature Bento Grid */}
+        <section id="features" className="py-32 px-8 md:px-16 bg-gray-100 text-black">
+          <div className="max-w-7xl mx-auto">
+            <div className="mb-20">
+              <h2 className="text-5xl md:text-7xl font-bold tracking-tighter uppercase mb-6">Designed to adapt.</h2>
+              <p className="text-xl md:text-2xl text-gray-600 max-w-3xl">Whether you need immediate crisis intervention or long-term cognitive tracking, Cura provides an unparalleled support ecosystem.</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <motion.div 
                 initial={{ opacity: 0, scale: 0.95 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.5 }}
-                className="md:col-span-2 md:row-span-2 rounded-xl bg-white p-10 flex flex-col justify-between overflow-hidden relative shadow-sm"
-              >
-                <div className="relative z-10">
-                  <h2 className="font-headline-lg text-headline-lg text-primary mb-6">Designed for your peace of mind.</h2>
-                  <p className="font-body-lg text-body-lg text-gray-600 mb-8">
-                    Whether it's a late-night thought or a mid-day stressor, Cura is just a tap away with instant, calming interactions.
-                  </p>
-                  <ul className="space-y-4">
-                    <li className="flex items-center gap-3 font-label-md text-label-md text-gray-800">
-                      <span className="material-symbols-outlined text-primary">check_circle</span>
-                      Instant 24/7 Availability
-                    </li>
-                    <li className="flex items-center gap-3 font-label-md text-label-md text-gray-800">
-                      <span className="material-symbols-outlined text-primary">check_circle</span>
-                      Personalized Coping Strategies
-                    </li>
-                    <li className="flex items-center gap-3 font-label-md text-label-md text-gray-800">
-                      <span className="material-symbols-outlined text-primary">check_circle</span>
-                      Guided Breathing Exercises
-                    </li>
-                  </ul>
-                </div>
-              </motion.div>
-              <motion.div 
-                initial={{ opacity: 0, x: 50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="md:col-span-2 rounded-xl bg-primary-container p-8 flex items-center justify-between shadow-sm group cursor-pointer overflow-hidden"
+                transition={{ duration: 0.6 }}
+                className="bg-white p-12 flex flex-col justify-between aspect-square"
               >
                 <div>
-                  <h3 className="font-headline-md text-headline-md text-[#005870] mb-2">Scientific Basis</h3>
-                  <p className="font-body-md text-body-md text-[#005870]/80">Developed with clinical advisors for effective emotional support.</p>
+                  <span className="inline-block px-3 py-1 bg-black text-white text-xs font-bold uppercase tracking-widest mb-6">Always On</span>
+                  <h3 className="text-4xl font-bold tracking-tight mb-4">Instant 24/7 Availability.</h3>
+                  <p className="text-gray-600 text-lg">No waiting rooms. No appointments. Expert-level guidance available at the exact moment you need it.</p>
                 </div>
-                <span className="material-symbols-outlined text-[48px] text-[#005870] opacity-50 group-hover:scale-125 transition-transform">menu_book</span>
+                <div className="mt-8 flex justify-end">
+                  <div className="w-16 h-16 rounded-full bg-black flex items-center justify-center text-white">
+                    <span className="material-symbols-outlined text-[32px]">schedule</span>
+                  </div>
+                </div>
               </motion.div>
+
               <motion.div 
-                initial={{ opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-                className="rounded-xl bg-secondary-container p-8 shadow-sm flex flex-col justify-center items-center text-center"
+                transition={{ duration: 0.6, delay: 0.1 }}
+                className="bg-black text-white p-12 flex flex-col justify-between aspect-square"
               >
-                <div className="text-headline-lg font-headline-lg text-[#3b6a6f]">98%</div>
-                <div className="text-label-sm font-label-sm text-[#3b6a6f]/70">User Satisfaction</div>
-              </motion.div>
-              <motion.div 
-                initial={{ opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.4 }}
-                className="rounded-xl bg-white p-8 shadow-sm flex flex-col justify-center items-center text-center border border-gray-200"
-              >
-                <span className="material-symbols-outlined text-[40px] text-primary mb-2">rocket_launch</span>
-                <div className="text-label-md font-label-md text-primary">Fast & Responsive</div>
+                <div>
+                  <span className="inline-block px-3 py-1 bg-white text-black text-xs font-bold uppercase tracking-widest mb-6">Science Backed</span>
+                  <h3 className="text-4xl font-bold tracking-tight mb-4">Clinical Foundations.</h3>
+                  <p className="text-gray-400 text-lg">Built alongside leading psychologists. Grounded in CBT, DBT, and mindfulness practices.</p>
+                </div>
+                <div className="mt-8 flex justify-end">
+                  <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center text-black">
+                    <span className="material-symbols-outlined text-[32px]">science</span>
+                  </div>
+                </div>
               </motion.div>
             </div>
           </div>
         </section>
-
-        {/* CTA Section */}
-        <section className="py-24 px-4 md:px-10">
-          <div className="max-w-container-max mx-auto bg-primary rounded-xl p-12 md:p-20 text-center relative overflow-hidden shadow-2xl">
-            <div className="relative z-10 space-y-8">
-              <h2 className="font-headline-lg text-headline-lg text-white md:text-[48px]">Ready to feel heard?</h2>
-              <p className="font-body-lg text-body-lg text-white/80 max-w-xl mx-auto">
-                Join thousands of people who use Cura to navigate their mental health journey with ease and compassion.
-              </p>
-              <Link href="/login" className="inline-block px-12 py-5 rounded-full bg-white text-primary font-headline-md text-headline-md hover:scale-105 transition-all shadow-lg">
-                Start Your First Chat
-              </Link>
-            </div>
-          </div>
+        
+        {/* Call to Action */}
+        <section className="py-32 px-8 md:px-16 bg-white text-black text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="max-w-4xl mx-auto"
+          >
+            <h2 className="text-5xl md:text-8xl font-bold tracking-tighter uppercase mb-12">Take Control.</h2>
+            <Link href="/login" className="inline-flex items-center px-12 py-6 bg-black text-white text-xl font-bold uppercase tracking-widest hover:bg-neutral-800 transition-colors group">
+              Join Cura Today
+              <span className="ml-4 transform group-hover:translate-x-2 transition-transform">&rarr;</span>
+            </Link>
+          </motion.div>
         </section>
       </main>
 
       {/* Footer */}
-      <footer className="w-full py-12 px-10 mt-auto flex flex-col items-center gap-4 bg-[#d8e3fa] rounded-t-xl">
-        <div className="flex items-center gap-2 mb-4">
-          <span className="font-headline-md text-headline-md text-primary font-bold">Cura AI</span>
+      <footer className="bg-black text-white py-12 px-8 md:px-16 border-t border-white/10">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="text-2xl font-bold tracking-tighter uppercase">CURA</div>
+          <div className="flex gap-8 text-sm font-medium uppercase tracking-wider text-gray-400">
+            <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
+            <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
+            <Link href="/contact" className="hover:text-white transition-colors">Contact</Link>
+          </div>
+          <div className="text-gray-500 text-sm">
+            &copy; {new Date().getFullYear()} Cura Technologies. All rights reserved.
+          </div>
         </div>
-        <div className="flex gap-8 mb-6">
-          <a className="font-label-sm text-label-sm text-gray-600 hover:text-primary transition-colors" href="#">Privacy Policy</a>
-          <a className="font-label-sm text-label-sm text-gray-600 hover:text-primary transition-colors" href="#">Terms of Service</a>
-          <a className="font-label-sm text-label-sm text-gray-600 hover:text-primary transition-colors" href="#">Contact Us</a>
-        </div>
-        <p className="font-label-sm text-label-sm text-gray-600">© 2024 Cura AI. Made with empathy.</p>
       </footer>
     </div>
   );
