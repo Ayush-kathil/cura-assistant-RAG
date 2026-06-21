@@ -225,23 +225,23 @@ export function ChatInterface(props: ChatInterfaceProps) {
                 className={`flex gap-4 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 {msg.role === 'assistant' && (
-                  <div className="w-8 h-8 shrink-0 rounded-full bg-blue-100 flex items-center justify-center border border-blue-200 mt-1">
-                    <Bot className="w-5 h-5 text-blue-700" />
+                  <div className="w-10 h-10 shrink-0 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-md shadow-blue-500/20 mt-1 border border-white/20">
+                    <Bot className="w-5 h-5 text-white" />
                   </div>
                 )}
                 
                 <div className={`
-                  max-w-[85%] md:max-w-[75%] rounded-2xl px-5 py-3.5 
+                  max-w-[90%] md:max-w-[85%] rounded-3xl px-6 py-5
                   ${msg.role === 'user' 
-                    ? 'bg-blue-600 text-white shadow-md' 
-                    : 'bg-slate-50 border border-slate-200 text-slate-800 shadow-sm'
+                    ? 'bg-blue-600 text-white shadow-md ml-auto' 
+                    : 'bg-white border border-slate-100 text-slate-800 shadow-sm shadow-slate-200/50'
                   }
                 `}>
                   {msg.role === 'assistant' ? (
-                    <div className="prose prose-slate prose-sm max-w-none">
+                    <div className="prose prose-slate max-w-none prose-p:leading-relaxed prose-headings:font-semibold prose-headings:tracking-tight prose-headings:text-slate-900 prose-strong:text-slate-900 prose-a:text-blue-600 hover:prose-a:text-blue-700 prose-li:marker:text-blue-400 prose-blockquote:border-l-blue-500 prose-blockquote:bg-blue-50/50 prose-blockquote:px-4 prose-blockquote:py-1 prose-blockquote:rounded-r-lg prose-blockquote:not-italic prose-blockquote:text-slate-700">
                       {msg.content === '' && chatState !== 'COMPLETED' ? (
-                        <div className="flex items-center gap-2 text-slate-400">
-                           <Loader2 className="w-4 h-4 animate-spin" /> Thinking...
+                        <div className="flex items-center gap-3 text-slate-400 font-medium">
+                           <Loader2 className="w-5 h-5 animate-spin text-blue-500" /> Thinking...
                         </div>
                       ) : (
                         <ReactMarkdown
@@ -252,9 +252,9 @@ export function ChatInterface(props: ChatInterfaceProps) {
                                   <a 
                                     href="#"
                                     onClick={(e) => { e.preventDefault(); handleCitationClick(props.children?.toString() || ""); }}
-                                    className="inline-flex items-center justify-center px-1.5 py-0.5 ml-1 text-[10px] font-bold bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors cursor-pointer"
+                                    className="inline-flex items-center justify-center px-2 py-0.5 ml-1 text-xs font-bold bg-blue-50 text-blue-700 rounded-md border border-blue-100 hover:bg-blue-100 hover:border-blue-200 hover:shadow-sm transition-all cursor-pointer transform hover:-translate-y-0.5"
                                   >
-                                    {props.children}
+                                    [{props.children}]
                                   </a>
                                 );
                               }
