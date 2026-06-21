@@ -7,7 +7,7 @@ import { Turnstile } from '@marsidev/react-turnstile';
 import Link from "next/link";
 
 export default function LoginPage() {
-  const [activeTab, setActiveTab] = useState<'login' | 'signup' | 'forgot_password'>('login');
+  const [activeTab, setActiveTab] = useState<'login' | 'signup' | 'forgot_password' | 'update_password'>('login');
   
   // Form states
   const [email, setEmail] = useState("");
@@ -22,6 +22,15 @@ export default function LoginPage() {
   
   const router = useRouter();
   const supabase = createClient();
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('mode') === 'update_password') {
+        setActiveTab('update_password');
+      }
+    }
+  }, []);
 
   useEffect(() => {
     // Background floating bubbles animation
@@ -128,11 +137,33 @@ export default function LoginPage() {
 
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/update-password`,
+        redirectTo: `${window.location.origin}/auth/callback?next=/login?mode=update_password`,
         captchaToken: captchaToken || undefined
       });
       if (error) throw error;
       setSuccessMsg("Check your email for the password reset link.");
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!password) return;
+
+    setLoading(true);
+    setError(null);
+    setSuccessMsg(null);
+
+    try {
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) throw error;
+      setSuccessMsg("Password updated successfully! You can now log in.");
+      setActiveTab('login');
+      setPassword('');
+      window.history.replaceState({}, '', '/login');
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -209,7 +240,7 @@ export default function LoginPage() {
           </div>
 
           {/* Tab Switcher */}
-          {activeTab !== 'forgot_password' && (
+          {activeTab !== 'forgot_password' && activeTab !== 'update_password' && (
             <div className="flex bg-surface-container-low p-1 rounded-full mb-8 w-fit mx-auto md:mx-0 bg-gray-100">
             <button 
               className={`px-8 py-2.5 rounded-full text-label-md transition-all duration-300 ${activeTab === 'login' ? 'bg-white text-primary shadow-sm' : 'text-on-surface-variant hover:text-primary text-gray-500'}`}
@@ -407,7 +438,39 @@ export default function LoginPage() {
             </div>
           )}
 
-          {activeTab !== 'forgot_password' && (
+          {/* Update Password Form */}
+          {activeTab === 'update_password' && (
+            <div className="animate-in fade-in duration-300">
+              <header className="mb-8">
+                <h2 className="font-headline-md text-headline-md text-on-background mb-2">Set New Password</h2>
+                <p className="text-on-surface-variant text-gray-500">Please enter your new password.</p>
+              </header>
+              <form className="space-y-5" onSubmit={handleUpdatePassword}>
+                <div className="space-y-2">
+                  <label className="text-label-sm font-label-sm text-on-surface-variant ml-4 text-gray-600">New Password</label>
+                  <input 
+                    type="password" 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    minLength={6}
+                    className="w-full px-6 py-4 rounded-full bg-surface border-none ring-1 ring-outline-variant/30 focus:ring-2 focus:ring-primary-container outline-none transition-all shadow-[inset_0_2px_4px_rgba(12,103,128,0.03)] bg-gray-50" 
+                    placeholder="Min. 6 characters" 
+                  />
+                </div>
+                
+                <button 
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-4 rounded-full bg-primary text-white font-label-md shadow-lg shadow-primary/20 hover:bg-on-primary-container hover:scale-[1.01] active:scale-95 transition-all mt-4 disabled:opacity-50"
+                >
+                    {loading ? "..." : "Update Password"}
+                </button>
+              </form>
+            </div>
+          )}
+
+          {activeTab !== 'forgot_password' && activeTab !== 'update_password' && (
             <>
               <div className="relative my-8">
                 <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-200"></div></div>
