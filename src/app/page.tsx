@@ -17,6 +17,54 @@ function FadeInWhenVisible({ children, delay = 0 }: { children: React.ReactNode,
   );
 }
 
+function AnimatedWord({ word, progress, start, end }: { word: string, progress: any, start: number, end: number }) {
+  const filter = useTransform(progress, [start, end], ["contrast(20%) brightness(60%) opacity(30%)", "contrast(100%) brightness(100%) opacity(100%)"]);
+  return (
+    <motion.span style={{ filter }} className="drop-shadow-2xl inline-block">
+      {word}
+    </motion.span>
+  );
+}
+
+function CtaSection() {
+  const ref = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end end"]
+  });
+
+  const borderRadius = useTransform(scrollYProgress, [0, 0.6, 1], ["0%", "0%", "50%"]);
+  const scale = useTransform(scrollYProgress, [0, 0.6, 1], [0.9, 0.9, 1]);
+
+  return (
+    <motion.section 
+      ref={ref}
+      style={{ borderTopLeftRadius: borderRadius, borderTopRightRadius: borderRadius }}
+      className="py-40 px-8 md:px-16 bg-blue-600 text-white text-center relative overflow-hidden flex flex-col items-center"
+    >
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.15)_0%,transparent_100%)] pointer-events-none" />
+      <div className="absolute top-0 w-full h-px bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
+      <motion.div style={{ scale }} className="max-w-4xl mx-auto relative z-10 w-full flex flex-col items-center">
+        <h2 className="text-5xl md:text-7xl lg:text-8xl font-light tracking-tighter mb-10 flex justify-center gap-x-4 gap-y-2 flex-wrap text-white">
+          {"Experience the difference.".split(" ").map((word, i) => (
+            <AnimatedWord 
+              key={i} 
+              word={word} 
+              progress={scrollYProgress} 
+              start={0.6 + (i * 0.12)} 
+              end={0.6 + (i * 0.12) + 0.12} 
+            />
+          ))}
+        </h2>
+        <Link href="/login" className="inline-flex items-center px-10 py-5 bg-white text-blue-600 text-lg font-medium uppercase tracking-widest hover:bg-blue-50 transition-all hover:scale-105 shadow-2xl rounded-full">
+          Get Started for Free
+          <span className="ml-4">&rarr;</span>
+        </Link>
+      </motion.div>
+    </motion.section>
+  );
+}
+
 export default function Home() {
   const { scrollYProgress } = useScroll();
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
@@ -133,20 +181,10 @@ export default function Home() {
 
         <RotatingWheel />
         
-        {/* Call to Action */}
-        <section className="py-40 px-8 md:px-16 bg-blue-600 text-white text-center relative overflow-hidden rounded-t-[50%] mt-20">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.15)_0%,transparent_100%)]" />
-          <div className="absolute top-0 w-full h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
-          <FadeInWhenVisible>
-            <div className="max-w-4xl mx-auto relative z-10">
-              <h2 className="text-5xl md:text-7xl lg:text-8xl font-light tracking-tighter mb-10">Experience the difference.</h2>
-              <Link href="/login" className="inline-flex items-center px-10 py-5 bg-white text-blue-600 text-lg font-medium uppercase tracking-widest hover:bg-blue-50 transition-all hover:scale-105 shadow-2xl rounded-full">
-                Get Started for Free
-                <span className="ml-4">&rarr;</span>
-              </Link>
-            </div>
-          </FadeInWhenVisible>
-        </section>
+        {/* Call to Action Wrapper to merge background color seamlessly */}
+        <div className="bg-slate-900 pb-0">
+          <CtaSection />
+        </div>
       </main>
 
       {/* Footer */}

@@ -90,7 +90,7 @@ export function RotatingWheel() {
                 <div className="absolute bottom-[-30px] right-[10%] w-[100px] h-[100px] bg-purple-500/20 rounded-full blur-xl"></div>
                 
                 {/* Main Cloud Body */}
-                <div className="bg-white/10 backdrop-blur-2xl border-t border-l border-white/30 p-10 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5),inset_0_0_20px_rgba(255,255,255,0.1)] w-full relative rounded-[3rem]">
+                <div style={{ borderRadius: '60% 40% 50% 50% / 50% 50% 60% 40%' }} className="bg-white/10 backdrop-blur-2xl border-t border-l border-white/30 p-10 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5),inset_0_0_20px_rgba(255,255,255,0.1)] w-full relative">
                   <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center mb-6 shadow-lg shadow-blue-500/30 border border-white/20">
                     <Database className="text-white w-7 h-7" />
                   </div>
@@ -114,7 +114,7 @@ export function RotatingWheel() {
                 <div className="absolute bottom-[-40px] left-[10%] w-[110px] h-[110px] bg-sky-500/20 rounded-full blur-xl"></div>
                 
                 {/* Main Cloud Body */}
-                <div className="bg-white/10 backdrop-blur-2xl border-t border-l border-white/30 p-10 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5),inset_0_0_20px_rgba(255,255,255,0.1)] w-full relative rounded-[3rem]">
+                <div style={{ borderRadius: '40% 60% 60% 40% / 50% 40% 60% 50%' }} className="bg-white/10 backdrop-blur-2xl border-t border-l border-white/30 p-10 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5),inset_0_0_20px_rgba(255,255,255,0.1)] w-full relative">
                   <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-400 to-indigo-600 flex items-center justify-center mb-6 shadow-lg shadow-indigo-500/30 border border-white/20">
                     <Network className="text-white w-7 h-7" />
                   </div>
@@ -138,7 +138,7 @@ export function RotatingWheel() {
                 <div className="absolute bottom-[-30px] left-[20%] w-[130px] h-[130px] bg-indigo-500/20 rounded-full blur-xl"></div>
                 
                 {/* Main Cloud Body */}
-                <div className="bg-white/10 backdrop-blur-2xl border-t border-l border-white/30 p-10 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5),inset_0_0_20px_rgba(255,255,255,0.1)] w-full relative rounded-[3rem]">
+                <div style={{ borderRadius: '50% 50% 40% 60% / 60% 50% 40% 50%' }} className="bg-white/10 backdrop-blur-2xl border-t border-l border-white/30 p-10 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5),inset_0_0_20px_rgba(255,255,255,0.1)] w-full relative">
                   <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center mb-6 shadow-lg shadow-purple-500/30 border border-white/20">
                     <Cpu className="text-white w-7 h-7" />
                   </div>

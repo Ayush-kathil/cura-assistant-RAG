@@ -3,6 +3,7 @@ import { createClient } from "@/utils/supabase/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 
+export const maxDuration = 60; // Set max duration to 60 seconds (Vercel max for Hobby)
 
 // Environment variable config (Server-side ONLY)
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;

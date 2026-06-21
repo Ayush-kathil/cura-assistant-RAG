@@ -182,9 +182,9 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="bg-slate-950 text-slate-300 font-sans min-h-screen flex items-center justify-center p-4 md:p-10 relative overflow-hidden"
+    <div className="bg-slate-50 text-slate-800 font-sans min-h-screen flex items-center justify-center p-4 md:p-10 relative overflow-hidden"
          style={{
-           backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(59, 130, 246, 0.15) 1px, transparent 0)',
+           backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(59, 130, 246, 0.05) 1px, transparent 0)',
            backgroundSize: '40px 40px'
          }}>
       
@@ -195,24 +195,24 @@ export default function LoginPage() {
       <main className="relative z-10 w-full max-w-[1100px] grid md:grid-cols-2 gap-8 items-stretch min-h-[680px]">
         
         {/* Left Side: Illustrative & Branding */}
-        <div className="hidden md:flex flex-col justify-between p-12 bg-slate-900/50 backdrop-blur-md rounded-3xl border border-slate-800 shadow-2xl relative overflow-hidden">
+        <div className="hidden md:flex flex-col justify-between p-12 bg-white/80 backdrop-blur-md rounded-3xl border border-slate-200 shadow-xl relative overflow-hidden">
           <div className="relative z-10">
             <div className="flex items-center gap-3 mb-12">
               <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center shadow-[0_0_20px_rgba(37,99,235,0.4)]">
                 <span className="material-symbols-outlined text-white" style={{fontVariationSettings: "'FILL' 1"}}>psychology</span>
               </div>
-              <span className="text-2xl font-medium tracking-tight text-white">Cura</span>
+              <span className="text-2xl font-medium tracking-tight text-slate-900">Cura</span>
             </div>
             
-            <h1 className="text-5xl font-light tracking-tight text-white mb-6 leading-tight">
-                Your journey to <br/><span className="text-blue-400 font-normal">mental clarity</span> starts here.
+            <h1 className="text-5xl font-light tracking-tight text-slate-900 mb-6 leading-tight">
+                Your journey to <br/><span className="text-blue-600 font-normal">mental clarity</span> starts here.
             </h1>
-            <p className="text-lg text-slate-400 max-w-[320px] font-light leading-relaxed">
+            <p className="text-lg text-slate-500 max-w-[320px] font-light leading-relaxed">
                 Experience a companion that listens, understands, and grows with you through every mood.
             </p>
           </div>
           
-          <div className="relative z-10 mt-12 bg-white/5 backdrop-blur-sm p-6 rounded-2xl border border-white/10">
+          <div className="relative z-10 mt-12 bg-slate-50 backdrop-blur-sm p-6 rounded-2xl border border-slate-200">
             <div className="flex gap-2 mb-4">
               <span className="material-symbols-outlined text-blue-400" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
               <span className="material-symbols-outlined text-blue-400" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
@@ -220,36 +220,36 @@ export default function LoginPage() {
               <span className="material-symbols-outlined text-blue-400" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
               <span className="material-symbols-outlined text-blue-400" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
             </div>
-            <p className="italic text-slate-300 text-sm mb-3">"Cura has helped me navigate through my most stressful weeks with grace and empathy."</p>
+            <p className="italic text-slate-700 text-sm mb-3">"Cura has helped me navigate through my most stressful weeks with grace and empathy."</p>
             <span className="text-xs font-medium text-slate-500">— Sarah J., Member since 2023</span>
           </div>
 
-          <div className="absolute bottom-[-10%] right-[-10%] w-[300px] h-[300px] bg-blue-600/20 rounded-full blur-[80px]"></div>
+          <div className="absolute bottom-[-10%] right-[-10%] w-[300px] h-[300px] bg-blue-600/10 rounded-full blur-[80px]"></div>
           <div className="absolute top-[20%] right-[-5%] w-[150px] h-[150px] bg-indigo-500/10 rounded-full blur-[40px]"></div>
         </div>
 
         {/* Right Side: Interaction (Forms) */}
-        <div className="bg-slate-900 rounded-3xl shadow-2xl p-8 md:p-12 flex flex-col justify-center border border-slate-800 relative z-10">
+        <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 flex flex-col justify-center border border-slate-200 relative z-10">
           
           {/* Mobile Brand Logo */}
           <div className="md:hidden flex items-center justify-center gap-2 mb-8">
             <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
               <span className="material-symbols-outlined text-white text-[20px]" style={{fontVariationSettings: "'FILL' 1"}}>psychology</span>
             </div>
-            <span className="text-xl font-medium tracking-tight text-white">Cura</span>
+            <span className="text-xl font-medium tracking-tight text-slate-900">Cura</span>
           </div>
 
           {/* Tab Switcher */}
           {activeTab !== 'forgot_password' && activeTab !== 'update_password' && (
-            <div className="flex bg-slate-800/50 p-1 rounded-full mb-8 w-fit mx-auto md:mx-0">
+            <div className="flex bg-slate-100 p-1 rounded-full mb-8 w-fit mx-auto md:mx-0">
             <button 
-              className={`px-8 py-2.5 rounded-full text-sm font-medium transition-all duration-300 ${activeTab === 'login' ? 'bg-slate-700 text-white shadow-sm' : 'text-slate-400 hover:text-white'}`}
+              className={`px-8 py-2.5 rounded-full text-sm font-medium transition-all duration-300 ${activeTab === 'login' ? 'bg-white text-slate-900 shadow-sm border border-slate-200' : 'text-slate-500 hover:text-slate-800'}`}
               onClick={() => { setActiveTab('login'); setError(null); setSuccessMsg(null); }}
             >
                 Login
             </button>
             <button 
-              className={`px-8 py-2.5 rounded-full text-sm font-medium transition-all duration-300 ${activeTab === 'signup' ? 'bg-slate-700 text-white shadow-sm' : 'text-slate-400 hover:text-white'}`}
+              className={`px-8 py-2.5 rounded-full text-sm font-medium transition-all duration-300 ${activeTab === 'signup' ? 'bg-white text-slate-900 shadow-sm border border-slate-200' : 'text-slate-500 hover:text-slate-800'}`}
               onClick={() => { setActiveTab('signup'); setError(null); setSuccessMsg(null); }}
             >
                 Sign Up
@@ -272,32 +272,32 @@ export default function LoginPage() {
           {activeTab === 'login' && (
             <div className="animate-in fade-in duration-300">
               <header className="mb-8">
-                <h2 className="text-2xl font-light text-white tracking-tight mb-2">Welcome Back</h2>
-                <p className="text-slate-400 font-light">Please enter your details to continue your session.</p>
+                <h2 className="text-2xl font-light text-slate-900 tracking-tight mb-2">Welcome Back</h2>
+                <p className="text-slate-500 font-light">Please enter your details to continue your session.</p>
               </header>
               <form className="space-y-5" onSubmit={handleLogin}>
                 <div className="space-y-2">
-                  <label className="text-xs font-medium text-slate-400 ml-4 uppercase tracking-wider">Email Address</label>
+                  <label className="text-xs font-medium text-slate-500 ml-4 uppercase tracking-wider">Email Address</label>
                   <input 
                     type="email" 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="w-full px-6 py-4 rounded-full bg-slate-950/50 border border-slate-800 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" 
+                    className="w-full px-6 py-4 rounded-full bg-slate-50 border border-slate-200 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder-slate-400" 
                     placeholder="hello@cura.ai" 
                   />
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between items-center px-4">
-                    <label className="text-xs font-medium text-slate-400 uppercase tracking-wider">Password</label>
-                    <button type="button" onClick={() => { setActiveTab('forgot_password'); setError(null); setSuccessMsg(null); }} className="text-xs font-medium text-blue-400 hover:text-blue-300">Forgot?</button>
+                    <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Password</label>
+                    <button type="button" onClick={() => { setActiveTab('forgot_password'); setError(null); setSuccessMsg(null); }} className="text-xs font-medium text-blue-600 hover:text-blue-500">Forgot?</button>
                   </div>
                   <input 
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="w-full px-6 py-4 rounded-full bg-slate-950/50 border border-slate-800 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" 
+                    className="w-full px-6 py-4 rounded-full bg-slate-50 border border-slate-200 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder-slate-400" 
                     placeholder="••••••••" 
                   />
                 </div>
@@ -316,10 +316,10 @@ export default function LoginPage() {
                     id="terms-login" 
                     checked={termsAccepted}
                     onChange={(e) => setTermsAccepted(e.target.checked)}
-                    className="mt-1 h-4 w-4 rounded border-slate-700 bg-slate-800 text-blue-500 focus:ring-blue-500 focus:ring-offset-slate-900"
+                    className="mt-1 h-4 w-4 rounded border-slate-300 bg-white text-blue-600 focus:ring-blue-500 focus:ring-offset-white"
                   />
-                  <label htmlFor="terms-login" className="text-sm text-slate-400 leading-tight">
-                    I agree to the <Link href="/terms" className="text-slate-200 font-medium hover:text-white">Terms & Conditions</Link> and <Link href="/terms" className="text-slate-200 font-medium hover:text-white">Privacy Policy</Link>.
+                  <label htmlFor="terms-login" className="text-sm text-slate-500 leading-tight">
+                    I agree to the <Link href="/terms" className="text-slate-800 font-medium hover:text-blue-600">Terms & Conditions</Link> and <Link href="/terms" className="text-slate-800 font-medium hover:text-blue-600">Privacy Policy</Link>.
                   </label>
                 </div>
                 <button 
@@ -337,53 +337,53 @@ export default function LoginPage() {
           {activeTab === 'signup' && (
             <div className="animate-in fade-in duration-300">
               <header className="mb-8">
-                <h2 className="text-2xl font-light text-white tracking-tight mb-2">Create Account</h2>
-                <p className="text-slate-400 font-light">Start your personal wellness journey today.</p>
+                <h2 className="text-2xl font-light text-slate-900 tracking-tight mb-2">Create Account</h2>
+                <p className="text-slate-500 font-light">Start your personal wellness journey today.</p>
               </header>
               <form className="space-y-4" onSubmit={handleSignup}>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="text-xs font-medium text-slate-400 ml-4 uppercase tracking-wider">First Name</label>
+                    <label className="text-xs font-medium text-slate-500 ml-4 uppercase tracking-wider">First Name</label>
                     <input 
                       type="text" 
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
                       required
-                      className="w-full px-6 py-3 rounded-full bg-slate-950/50 border border-slate-800 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" 
+                      className="w-full px-6 py-3 rounded-full bg-slate-50 border border-slate-200 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder-slate-400" 
                       placeholder="Sarah" 
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-xs font-medium text-slate-400 ml-4 uppercase tracking-wider">Last Name</label>
+                    <label className="text-xs font-medium text-slate-500 ml-4 uppercase tracking-wider">Last Name</label>
                     <input 
                       type="text" 
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
                       required
-                      className="w-full px-6 py-3 rounded-full bg-slate-950/50 border border-slate-800 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" 
+                      className="w-full px-6 py-3 rounded-full bg-slate-50 border border-slate-200 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder-slate-400" 
                       placeholder="Jones" 
                     />
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-slate-400 ml-4 uppercase tracking-wider">Email Address</label>
+                  <label className="text-xs font-medium text-slate-500 ml-4 uppercase tracking-wider">Email Address</label>
                   <input 
                     type="email" 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="w-full px-6 py-3 rounded-full bg-slate-950/50 border border-slate-800 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" 
+                    className="w-full px-6 py-3 rounded-full bg-slate-50 border border-slate-200 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder-slate-400" 
                     placeholder="sarah@example.com" 
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-slate-400 ml-4 uppercase tracking-wider">Choose Password</label>
+                  <label className="text-xs font-medium text-slate-500 ml-4 uppercase tracking-wider">Choose Password</label>
                   <input 
                     type="password" 
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="w-full px-6 py-3 rounded-full bg-slate-950/50 border border-slate-800 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" 
+                    className="w-full px-6 py-3 rounded-full bg-slate-50 border border-slate-200 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder-slate-400" 
                     placeholder="Min. 8 characters" 
                   />
                 </div>
@@ -397,7 +397,7 @@ export default function LoginPage() {
                 </div>
 
                 <p className="text-xs text-slate-500 px-4 leading-relaxed">
-                    By clicking sign up, you agree to our <Link className="text-blue-400 hover:text-blue-300" href="/privacy">Privacy Policy</Link> and <Link className="text-blue-400 hover:text-blue-300" href="/terms">Terms of Service</Link>.
+                    By clicking sign up, you agree to our <Link className="text-blue-600 hover:text-blue-700" href="/privacy">Privacy Policy</Link> and <Link className="text-blue-600 hover:text-blue-700" href="/terms">Terms of Service</Link>.
                 </p>
                 <div className="flex items-start gap-3 mt-6 mb-6">
                   <input 
@@ -405,10 +405,10 @@ export default function LoginPage() {
                     id="terms-signup" 
                     checked={termsAccepted}
                     onChange={(e) => setTermsAccepted(e.target.checked)}
-                    className="mt-1 h-4 w-4 rounded border-slate-700 bg-slate-800 text-blue-500 focus:ring-blue-500 focus:ring-offset-slate-900"
+                    className="mt-1 h-4 w-4 rounded border-slate-300 bg-white text-blue-600 focus:ring-blue-500 focus:ring-offset-white"
                   />
-                  <label htmlFor="terms-signup" className="text-sm text-slate-400 leading-tight">
-                    I agree to the <Link href="/terms" className="text-slate-200 font-medium hover:text-white">Terms & Conditions</Link> and <Link href="/terms" className="text-slate-200 font-medium hover:text-white">Privacy Policy</Link>.
+                  <label htmlFor="terms-signup" className="text-sm text-slate-500 leading-tight">
+                    I agree to the <Link href="/terms" className="text-slate-800 font-medium hover:text-blue-600">Terms & Conditions</Link> and <Link href="/terms" className="text-slate-800 font-medium hover:text-blue-600">Privacy Policy</Link>.
                   </label>
                 </div>
                 <button 
@@ -426,19 +426,19 @@ export default function LoginPage() {
           {activeTab === 'forgot_password' && (
             <div className="animate-in fade-in duration-300">
               <header className="mb-8">
-                <button type="button" onClick={() => { setActiveTab('login'); setError(null); setSuccessMsg(null); }} className="text-label-sm font-label-sm text-primary hover:underline mb-4 inline-block">&larr; Back to Login</button>
-                <h2 className="font-headline-md text-headline-md text-on-background mb-2">Reset Password</h2>
-                <p className="text-on-surface-variant text-gray-500">Enter your email and we'll send you a link to reset your password.</p>
+                <button type="button" onClick={() => { setActiveTab('login'); setError(null); setSuccessMsg(null); }} className="text-xs font-medium text-blue-600 hover:underline mb-4 inline-block">&larr; Back to Login</button>
+                <h2 className="text-2xl font-light text-slate-900 tracking-tight mb-2">Reset Password</h2>
+                <p className="text-slate-500 font-light">Enter your email and we'll send you a link to reset your password.</p>
               </header>
               <form className="space-y-5" onSubmit={handleResetPassword}>
                 <div className="space-y-2">
-                  <label className="text-label-sm font-label-sm text-on-surface-variant ml-4 text-gray-600">Email Address</label>
+                  <label className="text-xs font-medium text-slate-500 ml-4 uppercase tracking-wider">Email Address</label>
                   <input 
                     type="email" 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="w-full px-6 py-4 rounded-full bg-surface border-none ring-1 ring-outline-variant/30 focus:ring-2 focus:ring-primary-container outline-none transition-all shadow-[inset_0_2px_4px_rgba(12,103,128,0.03)] bg-gray-50" 
+                    className="w-full px-6 py-4 rounded-full bg-slate-50 border border-slate-200 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder-slate-400" 
                     placeholder="hello@cura.ai" 
                   />
                 </div>
@@ -466,19 +466,19 @@ export default function LoginPage() {
           {activeTab === 'update_password' && (
             <div className="animate-in fade-in duration-300">
               <header className="mb-8">
-                <h2 className="font-headline-md text-headline-md text-on-background mb-2">Set New Password</h2>
-                <p className="text-on-surface-variant text-gray-500">Please enter your new password.</p>
+                <h2 className="text-2xl font-light text-slate-900 tracking-tight mb-2">Set New Password</h2>
+                <p className="text-slate-500 font-light">Please enter your new password.</p>
               </header>
               <form className="space-y-5" onSubmit={handleUpdatePassword}>
                 <div className="space-y-2">
-                  <label className="text-label-sm font-label-sm text-on-surface-variant ml-4 text-gray-600">New Password</label>
+                  <label className="text-xs font-medium text-slate-500 ml-4 uppercase tracking-wider">New Password</label>
                   <input 
                     type="password" 
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     minLength={6}
-                    className="w-full px-6 py-4 rounded-full bg-surface border-none ring-1 ring-outline-variant/30 focus:ring-2 focus:ring-primary-container outline-none transition-all shadow-[inset_0_2px_4px_rgba(12,103,128,0.03)] bg-gray-50" 
+                    className="w-full px-6 py-4 rounded-full bg-slate-50 border border-slate-200 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder-slate-400" 
                     placeholder="Min. 6 characters" 
                   />
                 </div>
@@ -496,23 +496,23 @@ export default function LoginPage() {
           {activeTab !== 'forgot_password' && activeTab !== 'update_password' && (
             <>
               <div className="relative my-8">
-                <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-800"></div></div>
-                <div className="relative flex justify-center text-xs uppercase tracking-wider"><span className="bg-slate-900 px-4 text-slate-500">Or continue with</span></div>
+                <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200"></div></div>
+                <div className="relative flex justify-center text-xs uppercase tracking-wider"><span className="bg-white px-4 text-slate-400">Or continue with</span></div>
               </div>
               <div className="grid grid-cols-2 gap-4">
             <button 
               onClick={() => handleOAuth('google')}
-              className="flex items-center justify-center gap-3 py-3 px-4 rounded-full border border-slate-700 bg-slate-800/50 hover:bg-slate-800 transition-colors"
+              className="flex items-center justify-center gap-3 py-3 px-4 rounded-full border border-slate-200 bg-slate-50 hover:bg-slate-100 transition-colors"
             >
               <img alt="Google" className="w-4 h-4" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDlhLQDXd8w65k6DcdG8b8ZJJieVQKUQT1LSGAkTDu9JArZZmlye3AOIu62GcEtsOu_g42OP93baM9XJ5gb7NaqChIZKcBhGLiRIqLE9FGSyhjHG2sZ-yOFLQSbB27-8BrBuXsGOZkbkQowZoE7tQzcYHAWVZuCoN0gLRkWo-QV77KKBINWNVnD10FuJEOWrfIBHFiOYyGb2vfrbz0iWBgpVz8tMGzS2Ugckax7vdIduLY2SE2-6rjOsDt_7USzOxU3xUKgeEsEIMCD"/>
-              <span className="text-sm font-medium text-slate-300">Google</span>
+              <span className="text-sm font-medium text-slate-700">Google</span>
             </button>
             <button 
               onClick={() => handleOAuth('github')}
-              className="flex items-center justify-center gap-3 py-3 px-4 rounded-full border border-slate-700 bg-slate-800/50 hover:bg-slate-800 transition-colors"
+              className="flex items-center justify-center gap-3 py-3 px-4 rounded-full border border-slate-200 bg-slate-50 hover:bg-slate-100 transition-colors"
             >
-              <img alt="GitHub" className="w-4 h-4" src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" style={{ filter: 'invert(1)' }} />
-              <span className="text-sm font-medium text-slate-300">GitHub</span>
+              <img alt="GitHub" className="w-4 h-4" src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" />
+              <span className="text-sm font-medium text-slate-700">GitHub</span>
             </button>
           </div>
           </>

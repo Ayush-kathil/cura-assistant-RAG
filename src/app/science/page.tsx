@@ -1,154 +1,198 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { ArrowDown, Database, FileUp, Webhook, ListTree, FileText, Blocks, BrainCircuit, Share2, CheckCircle2 } from "lucide-react";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Database, FileUp, Webhook, ListTree, FileText, Blocks, BrainCircuit, Share2, CheckCircle2, X } from "lucide-react";
 
-const FlowNode = ({ icon: Icon, title, delay, shape = "rounded-2xl w-48 py-4 px-4" }: { icon: any, title: string, delay: number, shape?: string }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true, margin: "-50px" }}
-    transition={{ duration: 0.6, delay }}
-    className="flex flex-col items-center group relative z-10"
-  >
-    <div className={`${shape} bg-white/80 backdrop-blur-md border border-slate-200 shadow-lg shadow-slate-200/50 flex flex-col items-center justify-center gap-3 hover:shadow-xl hover:border-blue-300 transition-all`}>
-      <div className="w-10 h-10 shrink-0 rounded-full bg-slate-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-        <Icon className="w-5 h-5" />
-      </div>
-      <span className="text-sm font-medium text-slate-700 text-center leading-tight">{title}</span>
-    </div>
-  </motion.div>
-);
+// Node Data Structure
+const nodes = [
+  { id: 'upload', title: 'Upload UI', x: 150, y: 150, icon: FileUp, desc: 'The journey begins when a user uploads a document. The UI instantly hands off the raw binary data to our secure edge network, ensuring encrypted transit.' },
+  { id: 'storage', title: 'Supabase Storage', x: 400, y: 150, icon: Database, desc: 'Raw files are deposited into a secure Supabase storage bucket. A database trigger immediately registers the file metadata in Postgres, queueing it for processing.' },
+  { id: 'trigger', title: 'API Trigger', x: 650, y: 150, icon: Webhook, desc: 'A secure webhook is fired to the Next.js backend. We validate the mime-type, user quota, and file integrity before dispatching the heavy lifting.' },
+  { id: 'queue', title: 'Inngest Queue', x: 900, y: 150, icon: ListTree, desc: 'The job is enqueued in Inngest, our robust serverless queueing system. This ensures that no matter how many users upload files simultaneously, the system scales smoothly.' },
+  { id: 'parsing', title: 'Parsing Worker', x: 900, y: 350, icon: FileText, desc: 'A dedicated serverless worker downloads the file and parses it. Whether it is a PDF, DOCX, or CSV, the parser extracts raw text, preserving formatting.' },
+  { id: 'chunking', title: 'Chunking Worker', x: 650, y: 350, icon: Blocks, desc: 'The raw text is sliced into semantically meaningful chunks. We use recursive character splitting with overlap to ensure context isnt lost.' },
+  { id: 'ai_extract', title: 'Entity Extraction', x: 400, y: 260, icon: Share2, desc: 'One stream extracts structured entities (people, organizations, concepts) using LLMs to build a knowledge graph.' },
+  { id: 'ai_embed', title: 'Embedding Worker', x: 400, y: 440, icon: BrainCircuit, desc: 'The other stream generates dense vector embeddings for semantic similarity search.' },
+  { id: 'db_pg', title: 'Postgres DB', x: 150, y: 350, icon: Database, desc: 'The results converge back into Postgres. Embeddings in pgvector, entities in relational tables forming a powerful knowledge graph.' },
+  { id: 'ready', title: 'Status: Ready', x: 150, y: 550, icon: CheckCircle2, desc: 'The document is fully ingested. The user can now query the document using our hybrid RAG system.' },
+];
 
-const FlowArrow = ({ delay }: { delay: number }) => (
-  <motion.div
-    initial={{ opacity: 0, height: 0 }}
-    whileInView={{ opacity: 1, height: "40px" }}
-    viewport={{ once: true }}
-    transition={{ duration: 0.4, delay }}
-    className="w-px bg-blue-300 flex items-end justify-center relative my-2 z-0"
-  >
-    <ArrowDown className="w-4 h-4 text-blue-400 absolute -bottom-3" />
-  </motion.div>
-);
+// SVG Connection Paths (Orthogonal routing)
+const connections = [
+  "M 150 150 L 400 150",
+  "M 400 150 L 650 150",
+  "M 650 150 L 900 150",
+  "M 900 150 L 900 350",
+  "M 900 350 L 650 350",
+  "M 650 350 L 650 260 L 400 260", 
+  "M 650 350 L 650 440 L 400 440", 
+  "M 400 260 L 150 260 L 150 350", 
+  "M 400 440 L 150 440 L 150 350", 
+  "M 150 350 L 150 550", 
+];
 
 export default function SciencePage() {
+  const [activeNodeId, setActiveNodeId] = useState<string | null>(null);
+  const activeNode = nodes.find(n => n.id === activeNodeId);
+
   return (
-    <div className="bg-slate-50 min-h-screen text-slate-800 font-sans pb-32 overflow-hidden">
+    <div className="bg-slate-50 min-h-screen text-slate-800 font-sans selection:bg-blue-200 selection:text-blue-900 overflow-hidden flex flex-col">
+      
       {/* Navigation */}
-      <nav className="border-b border-slate-200 py-4 px-8 flex justify-between items-center bg-white/80 backdrop-blur-md sticky top-0 z-50">
+      <nav className="w-full z-50 border-b border-slate-200 py-4 px-8 flex justify-between items-center bg-white/80 backdrop-blur-md shadow-sm">
         <Link href="/" className="font-light text-2xl uppercase tracking-tighter text-slate-900">CURA</Link>
+        <span className="text-sm font-medium tracking-widest text-slate-400 uppercase">Architecture Map</span>
         <Link href="/" className="text-sm font-medium uppercase tracking-wider text-slate-500 hover:text-blue-600 transition-colors">Return Home &rarr;</Link>
       </nav>
       
-      {/* Header */}
-      <header className="max-w-4xl mx-auto pt-24 px-8 text-center mb-16">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-100 text-indigo-700 rounded-full text-xs font-medium tracking-widest uppercase mb-6"
-        >
-          <BrainCircuit className="w-4 h-4" /> The Science
-        </motion.div>
-        <motion.h1 
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.1 }}
-          className="text-5xl md:text-7xl font-light tracking-tighter text-slate-900 mb-6"
-        >
-          CURA Architecture
-        </motion.h1>
-        <motion.p 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="text-lg text-slate-500 font-light max-w-2xl mx-auto leading-relaxed"
-        >
-          Explore the exact data pipeline that powers our robust document intelligence. 
-          Every uploaded file undergoes an intricate transformation process before it's ready for semantic search.
-        </motion.p>
-      </header>
-
-      {/* Architectural Diagram */}
-      <main className="max-w-5xl mx-auto px-8 relative">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(200,210,255,0.2)_0%,transparent_70%)] pointer-events-none" />
+      {/* Main Interactive Canvas Area */}
+      <main className="flex-grow relative w-full flex flex-col items-center justify-center overflow-x-auto overflow-y-hidden custom-scrollbar py-12">
         
-        <div className="flex flex-col items-center py-12 relative z-10">
-          
-          <FlowNode icon={FileUp} title="File Upload UI" delay={0.1} shape="rounded-[40px_10px_40px_10px] w-48 py-5 px-4" />
-          <FlowArrow delay={0.2} />
-          
-          <FlowNode icon={Database} title="Supabase Storage" delay={0.3} shape="rounded-full w-40 h-40 p-4" />
-          <FlowArrow delay={0.4} />
+        <div className="text-center mb-8">
+            <h1 className="text-4xl md:text-5xl font-light tracking-tighter text-slate-900 mb-4">
+              Interactive Architecture
+            </h1>
+            <p className="text-slate-500 max-w-lg mx-auto">
+                Explore the flow of data across our intelligent infrastructure. Click on any module to inspect its underlying function.
+            </p>
+        </div>
 
-          <FlowNode icon={Webhook} title="API Trigger / Validation" delay={0.5} shape="rounded-[10px_40px_10px_40px] w-48 py-5 px-4" />
-          <FlowArrow delay={0.6} />
+        {/* The 1200x800 Canvas Blueprint */}
+        <div 
+          className="relative w-[1100px] h-[700px] shrink-0 border border-slate-200 rounded-[3rem] overflow-hidden bg-white shadow-2xl shadow-slate-200/50"
+          style={{
+            backgroundImage: 'radial-gradient(circle, #cbd5e1 1.5px, transparent 1.5px)',
+            backgroundSize: '30px 30px'
+          }}
+        >
+          {/* SVG Connection Lines */}
+          <svg className="absolute inset-0 w-full h-full pointer-events-none z-0">
+            {/* Base faded lines */}
+            {connections.map((d, i) => (
+              <path key={`base-${i}`} d={d} fill="none" stroke="#e2e8f0" strokeWidth="3" strokeLinejoin="round" />
+            ))}
+            {/* Animated flowing data lines */}
+            {connections.map((d, i) => (
+              <path 
+                key={`anim-${i}`} 
+                d={d} 
+                fill="none" 
+                stroke="#3b82f6" 
+                strokeWidth="3" 
+                strokeLinejoin="round"
+                strokeDasharray="12 12"
+                className="animate-[flow_20s_linear_infinite]"
+                style={{ opacity: 0.8 }}
+              />
+            ))}
+          </svg>
 
-          <FlowNode icon={ListTree} title="Inngest Queue" delay={0.7} shape="rounded-none w-48 py-5 px-4" />
-          <FlowArrow delay={0.8} />
+          <style jsx>{`
+            @keyframes flow {
+              from { stroke-dashoffset: 1000; }
+              to { stroke-dashoffset: 0; }
+            }
+            .custom-scrollbar::-webkit-scrollbar {
+              height: 8px;
+            }
+            .custom-scrollbar::-webkit-scrollbar-track {
+              background: #f1f5f9; 
+            }
+            .custom-scrollbar::-webkit-scrollbar-thumb {
+              background: #cbd5e1; 
+              border-radius: 4px;
+            }
+            .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+              background: #94a3b8; 
+            }
+          `}</style>
 
-          <FlowNode icon={FileText} title="Parsing Worker" delay={0.9} shape="rounded-[30%_70%_70%_30%/30%_30%_70%_70%] w-48 py-6 px-4" />
-          <FlowArrow delay={1.0} />
-
-          <FlowNode icon={Blocks} title="Chunking Worker" delay={1.1} shape="rounded-[50%_50%_10px_10px] w-48 py-6 px-4" />
-
-          {/* Split Path */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 1.2 }}
-            className="flex w-64 justify-between relative h-10 mt-2"
-          >
-            {/* Horizontal connection line */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[240px] h-px bg-blue-300" />
-            {/* Vertical drop lines */}
-            <div className="absolute top-0 left-[20px] w-px h-10 bg-blue-300"><ArrowDown className="w-4 h-4 text-blue-400 absolute -bottom-3 -left-[7px]" /></div>
-            <div className="absolute top-0 right-[20px] w-px h-10 bg-blue-300"><ArrowDown className="w-4 h-4 text-blue-400 absolute -bottom-3 -left-[7px]" /></div>
-            <div className="absolute top-0 left-1/2 w-px h-full bg-blue-300 -translate-x-1/2 -mt-2" />
-          </motion.div>
-
-          {/* Parallel Nodes */}
-          <div className="flex gap-12 mt-4">
-            <div className="flex flex-col items-center">
-              <FlowNode icon={Share2} title="Entity Extraction Worker" delay={1.3} shape="rounded-[20px] w-48 py-5 px-4 rotate-2 hover:rotate-0" />
-              <FlowArrow delay={1.4} />
-              <FlowNode icon={Database} title="Postgres: Entities/Edges" delay={1.5} shape="rounded-[10px_10px_40px_40px] w-48 py-6 px-4" />
-            </div>
-            <div className="flex flex-col items-center">
-              <FlowNode icon={BrainCircuit} title="Embedding Worker" delay={1.3} shape="rounded-[20px] w-48 py-5 px-4 -rotate-2 hover:rotate-0" />
-              <FlowArrow delay={1.4} />
-              <FlowNode icon={Database} title="Postgres: pgvector" delay={1.5} shape="rounded-[10px_10px_40px_40px] w-48 py-6 px-4" />
-            </div>
-          </div>
-
-          {/* Merge Path */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 1.6 }}
-            className="flex w-64 justify-between relative h-10 mt-2 mb-4"
-          >
-            {/* Horizontal connection line */}
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[240px] h-px bg-blue-300" />
-            {/* Vertical drop lines from nodes */}
-            <div className="absolute top-0 left-[20px] w-px h-10 bg-blue-300" />
-            <div className="absolute top-0 right-[20px] w-px h-10 bg-blue-300" />
-            {/* Vertical drop line to final node */}
-            <div className="absolute bottom-[-16px] left-1/2 w-px h-4 bg-blue-300 -translate-x-1/2"><ArrowDown className="w-4 h-4 text-blue-400 absolute bottom-[-10px] -left-[7px]" /></div>
-          </motion.div>
-
-          <FlowNode icon={CheckCircle2} title="Status: Completed" delay={1.7} shape="rounded-[50px] border-emerald-300 shadow-emerald-200/50 w-48 py-5 px-4" />
-
+          {/* Render Nodes */}
+          {nodes.map(node => {
+            const isActive = activeNodeId === node.id;
+            return (
+              <button
+                key={node.id}
+                onClick={() => setActiveNodeId(node.id)}
+                className={`absolute w-[180px] h-[80px] -ml-[90px] -mt-[40px] rounded-2xl flex items-center gap-3 px-4 transition-all duration-300 z-10 focus:outline-none focus:ring-4 focus:ring-blue-100 ${
+                  isActive 
+                    ? 'bg-blue-600 border-2 border-blue-500 shadow-[0_10px_30px_rgba(37,99,235,0.3)] scale-105' 
+                    : 'bg-white border border-slate-200 shadow-md hover:shadow-xl hover:border-blue-300 hover:-translate-y-1'
+                }`}
+                style={{ left: `${(node.x / 1100) * 100}%`, top: `${(node.y / 700) * 100}%` }}
+              >
+                <div className={`w-10 h-10 shrink-0 rounded-xl flex items-center justify-center transition-colors ${isActive ? 'bg-white/20 text-white' : 'bg-slate-50 text-blue-600'}`}>
+                  <node.icon className="w-5 h-5" />
+                </div>
+                <div className="text-left">
+                  <p className={`text-[10px] font-bold uppercase tracking-widest ${isActive ? 'text-blue-200' : 'text-slate-400'}`}>Node</p>
+                  <p className={`text-sm font-medium leading-tight ${isActive ? 'text-white' : 'text-slate-800'}`}>{node.title}</p>
+                </div>
+              </button>
+            );
+          })}
         </div>
       </main>
+
+      {/* Details Slide-out Panel */}
+      <AnimatePresence>
+        {activeNode && (
+          <motion.div 
+            initial={{ x: "100%", opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: "100%", opacity: 0 }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="fixed top-0 right-0 w-[400px] max-w-full h-full bg-white/95 backdrop-blur-3xl border-l border-slate-200 shadow-[-20px_0_50px_rgba(0,0,0,0.1)] z-50 flex flex-col"
+          >
+            <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100 shadow-sm">
+                  <activeNode.icon className="w-6 h-6" />
+                </div>
+                <h3 className="text-2xl font-light text-slate-900 tracking-tight">{activeNode.title}</h3>
+              </div>
+              <button 
+                onClick={() => setActiveNodeId(null)}
+                className="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:text-slate-800 hover:bg-slate-200 flex items-center justify-center transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="p-8">
+              <div className="inline-block px-3 py-1 bg-blue-50 text-blue-600 text-[10px] font-bold tracking-widest uppercase rounded-full border border-blue-100 mb-6">
+                Architecture Detail
+              </div>
+              <p className="text-slate-600 leading-relaxed text-lg font-light">
+                {activeNode.desc}
+              </p>
+              
+              <div className="mt-10 p-6 rounded-2xl bg-slate-50 border border-slate-100 shadow-sm">
+                <p className="text-xs text-slate-400 uppercase tracking-widest mb-2 font-bold">Status</p>
+                <div className="flex items-center gap-2 text-emerald-600 text-sm font-medium">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)] animate-pulse"></span>
+                  System Operational
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       
-      <footer className="mt-24 py-8 text-center text-sm font-medium text-slate-400">
-        &copy; {new Date().getFullYear()} CURA Technologies. All rights reserved.
-      </footer>
+      {/* Backdrop overlay when panel is open */}
+      <AnimatePresence>
+        {activeNode && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setActiveNodeId(null)}
+            className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-40 md:hidden cursor-pointer"
+          />
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }

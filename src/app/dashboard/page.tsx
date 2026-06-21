@@ -17,12 +17,14 @@ export default function DashboardPage() {
   const [profilePhotoUrl, setProfilePhotoUrl] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   const { activeWorkspace } = useWorkspace();
 
   useEffect(() => {
     const fetchStats = async () => {
       const { data } = await supabase.auth.getUser();
       setUser(data.user);
+      setIsLoadingAuth(false);
       
       if (activeWorkspace) {
         const { count } = await supabase.from("documents").select("id", { count: "exact" }).eq("workspace_id", activeWorkspace.id);
@@ -87,6 +89,14 @@ export default function DashboardPage() {
   };
 
   const firstName = user?.user_metadata?.first_name || user?.email?.split('@')[0] || 'Guest';
+
+  if (isLoadingAuth) {
+    return (
+      <div className="bg-slate-50 min-h-screen flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-blue-500/30 border-t-blue-600 rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-slate-50 min-h-screen text-slate-800 font-sans selection:bg-blue-100 selection:text-blue-900 flex overflow-hidden">

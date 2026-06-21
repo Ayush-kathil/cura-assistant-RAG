@@ -320,24 +320,28 @@ export function ChatInterface(props: ChatInterfaceProps) {
           <AnimatePresence>
             {showMentionMenu && filteredDocs.length > 0 && (
               <motion.div 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
-                className="absolute bottom-full mb-2 left-0 w-64 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden z-50"
+                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                transition={{ type: "spring", damping: 20, stiffness: 300 }}
+                className="absolute bottom-full mb-3 left-0 w-72 bg-white/80 backdrop-blur-2xl border border-blue-100/50 rounded-2xl shadow-[0_10px_40px_rgba(37,99,235,0.15)] overflow-hidden z-50"
               >
-                <div className="p-2 bg-slate-50 text-xs font-semibold text-slate-500 border-b border-slate-100">
-                  Select Document Context
+                <div className="px-4 py-3 bg-white/50 border-b border-blue-50/50 flex items-center justify-between">
+                  <span className="text-xs font-bold tracking-widest text-slate-500 uppercase">Select Context</span>
+                  <span className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)] animate-pulse" />
                 </div>
-                <div className="max-h-48 overflow-y-auto py-1">
+                <div className="max-h-56 overflow-y-auto py-2 px-1 custom-scrollbar">
                   {filteredDocs.map(doc => (
                     <button
                       key={doc.id}
                       type="button"
                       onClick={() => handleDocumentSelect(doc.id, doc.file_name)}
-                      className="w-full text-left px-3 py-2 text-sm hover:bg-slate-100 flex items-center gap-2 text-slate-700 transition-colors"
+                      className="w-full text-left px-3 py-2.5 my-0.5 rounded-xl text-sm hover:bg-blue-50/80 flex items-center gap-3 text-slate-700 transition-all hover:translate-x-1 group"
                     >
-                      <FileText className="w-4 h-4 text-blue-500 shrink-0" />
-                      <span className="truncate">{doc.file_name}</span>
+                      <div className="p-1.5 rounded-lg bg-blue-100/50 text-blue-500 group-hover:bg-blue-500 group-hover:text-white transition-colors">
+                        <FileText className="w-4 h-4 shrink-0" />
+                      </div>
+                      <span className="truncate font-medium group-hover:text-blue-700 transition-colors">{doc.file_name}</span>
                     </button>
                   ))}
                 </div>

@@ -52,6 +52,12 @@ export const DocumentManager = ({ onDocumentsProcessed, onDocumentDeleted, isPro
       return;
     }
 
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+    if (activeFile.size > MAX_FILE_SIZE) {
+      alert("File is too large. Maximum size is 10MB.");
+      return;
+    }
+
     if (storageUsed + activeFile.size > currentLimit) {
       setShowUpsell(true);
       return;
