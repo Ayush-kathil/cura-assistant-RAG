@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { motion, useScroll, useTransform, useInView } from "framer-motion";
-import { ScrollRevealText } from "@/components/ScrollRevealText";
+import { RotatingWheel } from "@/components/animations/RotatingWheel";
 function FadeInWhenVisible({ children, delay = 0 }: { children: React.ReactNode, delay?: number }) {
   return (
     <motion.div
@@ -131,105 +131,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Scroll Reveal Section */}
-        <section className="py-32 px-8 bg-white relative">
-          <div className="absolute inset-0 bg-grid-slate-100/[0.04] bg-[size:40px_40px]"></div>
-          <ScrollRevealText text="Intelligence is not just about storing information. It is about understanding the context, mapping the relationships between ideas, and retrieving exactly what you need at the precise moment you need it. This is the future of human-computer interaction." />
-        </section>
-
-        {/* History of RAG Section with Smart Animations (Timeline Version) */}
-        <section id="history" className="py-40 px-8 md:px-16 bg-slate-50 text-slate-800 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-full h-[500px] bg-gradient-to-b from-white to-transparent pointer-events-none" />
-          
-          <FadeInWhenVisible>
-            <div className="max-w-4xl mx-auto text-center mb-32 relative z-10">
-              <h2 className="text-sm font-bold tracking-widest text-blue-600 uppercase mb-4">The Evolution of Intelligence</h2>
-              <h3 className="text-5xl md:text-6xl lg:text-7xl font-light tracking-tighter text-slate-900 mb-8">
-                A Brief Human History of RAG
-              </h3>
-              <div className="h-1.5 w-24 bg-gradient-to-r from-blue-600 to-indigo-600 mx-auto rounded-full"></div>
-            </div>
-          </FadeInWhenVisible>
-
-          <div className="max-w-6xl mx-auto relative z-10">
-            {/* Center Timeline Line */}
-            <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-100 via-indigo-200 to-purple-100 -translate-x-1/2 rounded-full"></div>
-
-            <div className="space-y-24">
-              {/* Item 1 - Left */}
-              <div className="relative flex items-center justify-center w-full">
-                <div className="hidden md:block absolute left-1/2 w-4 h-4 bg-blue-600 rounded-full -translate-x-1/2 ring-8 ring-blue-50 shadow-lg z-20"></div>
-                <motion.div 
-                  initial={{ opacity: 0, x: -100 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true, margin: "-100px" }}
-                  transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                  className="w-full md:w-[45%] md:mr-auto bg-white p-10 md:p-14 rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 relative group"
-                >
-                  {/* Arrow pointing right */}
-                  <div className="hidden md:block absolute right-[-14px] top-1/2 -translate-y-1/2 w-4 h-4 rotate-45 bg-white border-t border-r border-slate-100"></div>
-                  
-                  <h4 className="text-2xl font-medium text-slate-900 mb-4 flex items-center gap-4">
-                    <span className="flex items-center justify-center w-10 h-10 rounded-full bg-slate-100 text-slate-500 font-medium text-lg">1</span>
-                    Memory Without Context
-                  </h4>
-                  <p className="text-lg text-slate-600 leading-relaxed">
-                    When AI first began generating text, it was like a brilliant student trapped in a closed room. It had read millions of books during its training, but couldn't look anything up. If asked a specific query, it would confidently guess—often wrongly, hallucinating facts without realizing it.
-                  </p>
-                </motion.div>
-              </div>
-
-              {/* Item 2 - Right */}
-              <div className="relative flex items-center justify-center w-full">
-                <div className="hidden md:block absolute left-1/2 w-4 h-4 bg-indigo-600 rounded-full -translate-x-1/2 ring-8 ring-indigo-50 shadow-lg z-20"></div>
-                <motion.div 
-                  initial={{ opacity: 0, x: 100 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true, margin: "-100px" }}
-                  transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                  className="w-full md:w-[45%] md:ml-auto bg-white p-10 md:p-14 rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 relative group"
-                >
-                  {/* Arrow pointing left */}
-                  <div className="hidden md:block absolute left-[-14px] top-1/2 -translate-y-1/2 w-4 h-4 -rotate-135 bg-white border-t border-r border-slate-100"></div>
-                  
-                  <h4 className="text-2xl font-medium text-slate-900 mb-4 flex items-center gap-4">
-                    <span className="flex items-center justify-center w-10 h-10 rounded-full bg-indigo-50 text-indigo-600 font-medium text-lg">2</span>
-                    The Library Card
-                  </h4>
-                  <p className="text-lg text-slate-600 leading-relaxed mb-6">
-                    Then came the breakthrough: <strong>Retrieval-Augmented Generation (RAG)</strong>. We gave the AI an open-book test in the world's largest library.
-                  </p>
-                  <p className="text-lg text-slate-600 leading-relaxed">
-                    Before answering, it acts as a lightning-fast researcher, scanning private documents to find exact paragraphs. Only then does it read to construct an accurate response.
-                  </p>
-                </motion.div>
-              </div>
-
-              {/* Item 3 - Left */}
-              <div className="relative flex items-center justify-center w-full">
-                <div className="hidden md:block absolute left-1/2 w-4 h-4 bg-purple-600 rounded-full -translate-x-1/2 ring-8 ring-purple-50 shadow-lg z-20"></div>
-                <motion.div 
-                  initial={{ opacity: 0, x: -100 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true, margin: "-100px" }}
-                  transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                  className="w-full md:w-[45%] md:mr-auto bg-white p-10 md:p-14 rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 relative group"
-                >
-                  {/* Arrow pointing right */}
-                  <div className="hidden md:block absolute right-[-14px] top-1/2 -translate-y-1/2 w-4 h-4 rotate-45 bg-white border-t border-r border-slate-100"></div>
-                  
-                  <h4 className="text-2xl font-medium text-slate-900 mb-4 flex items-center gap-4">
-                    <span className="flex items-center justify-center w-10 h-10 rounded-full bg-purple-50 text-purple-600 font-medium text-lg">3</span>
-                    The Future of Work
-                  </h4>
-                  <p className="text-lg text-slate-600 leading-relaxed">
-                    Today, RAG isn't just searching for keywords. At CURA, we've built a system that deeply understands the <em>meaning</em> of your documents. It builds a map of concepts, relationships, and ideas. That's the power of humanized, enterprise-grade RAG.
-                  </p>
-                </motion.div>
-              </div>
-            </div>
-          </div>
-        </section>
+        <RotatingWheel />
         
         {/* Call to Action */}
         <section className="py-40 px-8 md:px-16 bg-blue-600 text-white text-center relative overflow-hidden">
