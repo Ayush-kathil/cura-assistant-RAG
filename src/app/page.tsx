@@ -15,12 +15,12 @@ export default function Home() {
       const nav = document.getElementById('top-nav');
       if (nav) {
         if (window.scrollY > 20) {
-          nav.classList.add('bg-white', 'shadow-md');
-          nav.classList.remove('bg-transparent', 'py-6');
-          nav.classList.add('py-4');
+          nav.classList.add('bg-black', 'shadow-md', 'border-gray-800');
+          nav.classList.remove('bg-black', 'border-transparent', 'py-6', 'mx-0', 'w-full', 'top-0', 'rounded-none');
+          nav.classList.add('py-4', 'mx-4', 'w-[calc(100%-2rem)]', 'top-4', 'rounded-full');
         } else {
-          nav.classList.add('bg-transparent', 'py-6');
-          nav.classList.remove('bg-white', 'shadow-md', 'py-4');
+          nav.classList.add('bg-black', 'border-transparent', 'py-6', 'mx-0', 'w-full', 'top-0', 'rounded-none');
+          nav.classList.remove('shadow-md', 'py-4', 'border-gray-800', 'mx-4', 'w-[calc(100%-2rem)]', 'top-4', 'rounded-full');
         }
       }
     };
@@ -33,21 +33,24 @@ export default function Home() {
       {/* Top Navigation */}
       <nav 
         id="top-nav"
-        className="fixed top-0 w-full z-50 flex justify-between items-center px-8 md:px-16 transition-all duration-300 bg-transparent py-6"
+        className="fixed top-0 w-full z-50 flex justify-between items-center px-8 md:px-16 transition-all duration-300 bg-black py-6 border border-transparent text-white"
       >
-        <div className="flex items-center gap-2">
-          <Link href="/" className="font-bold text-2xl tracking-tighter text-black uppercase">
-            Cura
+        <div className="flex items-center gap-4">
+          <Link href="/" className="flex items-center gap-3">
+            <img src="/bot.jpg" alt="Cura Logo" className="w-10 h-10 rounded-full object-cover border-2 border-white/20" />
+            <span className="font-bold text-2xl tracking-tighter text-white uppercase">
+              Cura
+            </span>
           </Link>
         </div>
         <div className="hidden md:flex items-center gap-10">
-          <Link href="#features" className="text-sm font-semibold tracking-wide uppercase hover:underline underline-offset-4">Platform</Link>
-          <Link href="/science" className="text-sm font-semibold tracking-wide uppercase hover:underline underline-offset-4">Science</Link>
-          <Link href="/pricing" className="text-sm font-semibold tracking-wide uppercase hover:underline underline-offset-4">Pricing</Link>
-          <Link href="/dashboard" className="text-sm font-semibold tracking-wide uppercase hover:underline underline-offset-4">Dashboard</Link>
+          <Link href="#features" className="text-sm font-semibold tracking-wide uppercase hover:text-gray-300 transition-colors">Platform</Link>
+          <Link href="/science" className="text-sm font-semibold tracking-wide uppercase hover:text-gray-300 transition-colors">Science</Link>
+          <Link href="/pricing" className="text-sm font-semibold tracking-wide uppercase hover:text-gray-300 transition-colors">Pricing</Link>
+          <Link href="/dashboard" className="text-sm font-semibold tracking-wide uppercase hover:text-gray-300 transition-colors">Dashboard</Link>
         </div>
         <div className="flex items-center gap-4">
-          <Link href="/login" className="px-6 py-3 bg-black text-white text-sm font-bold uppercase tracking-wider hover:bg-neutral-800 transition-colors">
+          <Link href="/login" className="px-6 py-3 bg-white text-black text-sm font-bold uppercase tracking-wider hover:bg-gray-200 transition-colors rounded-full">
             Sign In &rarr;
           </Link>
         </div>
@@ -90,7 +93,7 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
             >
-              <Link href="/login" className="inline-flex items-center px-8 py-4 bg-white text-black text-lg font-bold uppercase tracking-wider hover:bg-gray-200 transition-colors group">
+              <Link href="/login" className="inline-flex items-center px-8 py-4 bg-white text-black text-lg font-bold uppercase tracking-wider hover:bg-gray-200 transition-colors group rounded-full">
                 Start Your Journey
                 <span className="ml-4 transform group-hover:translate-x-2 transition-transform">&rarr;</span>
               </Link>
@@ -197,7 +200,7 @@ export default function Home() {
             className="max-w-4xl mx-auto"
           >
             <h2 className="text-5xl md:text-8xl font-bold tracking-tighter uppercase mb-12">Take Control.</h2>
-            <Link href="/login" className="inline-flex items-center px-12 py-6 bg-black text-white text-xl font-bold uppercase tracking-widest hover:bg-neutral-800 transition-colors group">
+            <Link href="/login" className="inline-flex items-center px-12 py-6 bg-black text-white text-xl font-bold uppercase tracking-widest hover:bg-neutral-800 transition-colors group rounded-full">
               Join Cura Today
               <span className="ml-4 transform group-hover:translate-x-2 transition-transform">&rarr;</span>
             </Link>

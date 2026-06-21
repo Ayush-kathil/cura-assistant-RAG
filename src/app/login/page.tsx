@@ -19,6 +19,7 @@ export default function LoginPage() {
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   
   const router = useRouter();
   const supabase = createClient();
@@ -310,10 +311,22 @@ export default function LoginPage() {
                   />
                 </div>
 
+                <div className="flex items-start gap-3 mt-6 mb-6">
+                  <input 
+                    type="checkbox" 
+                    id="terms-login" 
+                    checked={termsAccepted}
+                    onChange={(e) => setTermsAccepted(e.target.checked)}
+                    className="mt-1 h-4 w-4 rounded border-gray-300 text-black focus:ring-black"
+                  />
+                  <label htmlFor="terms-login" className="text-sm text-gray-600 leading-tight">
+                    I agree to the <Link href="/terms" className="text-black font-semibold hover:underline">Terms & Conditions</Link> and <Link href="/terms" className="text-black font-semibold hover:underline">Privacy Policy</Link>.
+                  </label>
+                </div>
                 <button 
                   type="submit"
-                  disabled={loading}
-                  className="w-full py-4 rounded-full bg-primary text-white font-label-md shadow-lg shadow-primary/20 hover:bg-on-primary-container hover:scale-[1.01] active:scale-95 transition-all mt-4 disabled:opacity-50"
+                  disabled={loading || !termsAccepted}
+                  className="w-full py-4 rounded-full bg-black text-white font-bold shadow-lg shadow-black/20 hover:bg-neutral-800 hover:scale-[1.01] active:scale-95 transition-all mt-4 disabled:opacity-50"
                 >
                     {loading ? "..." : "Login to Account"}
                 </button>
@@ -387,10 +400,22 @@ export default function LoginPage() {
                 <p className="text-[12px] text-on-tertiary-fixed-variant px-4 leading-relaxed text-gray-500">
                     By clicking sign up, you agree to our <a className="text-primary underline" href="#">Privacy Policy</a> and <a className="text-primary underline" href="#">Terms of Service</a>.
                 </p>
+                <div className="flex items-start gap-3 mt-6 mb-6">
+                  <input 
+                    type="checkbox" 
+                    id="terms-signup" 
+                    checked={termsAccepted}
+                    onChange={(e) => setTermsAccepted(e.target.checked)}
+                    className="mt-1 h-4 w-4 rounded border-gray-300 text-black focus:ring-black"
+                  />
+                  <label htmlFor="terms-signup" className="text-sm text-gray-600 leading-tight">
+                    I agree to the <Link href="/terms" className="text-black font-semibold hover:underline">Terms & Conditions</Link> and <Link href="/terms" className="text-black font-semibold hover:underline">Privacy Policy</Link>.
+                  </label>
+                </div>
                 <button 
                   type="submit"
-                  disabled={loading}
-                  className="w-full py-4 rounded-full bg-primary text-white font-label-md shadow-lg shadow-primary/20 hover:bg-on-primary-container hover:scale-[1.01] active:scale-95 transition-all mt-4 disabled:opacity-50"
+                  disabled={loading || !termsAccepted}
+                  className="w-full py-4 rounded-full bg-black text-white font-bold shadow-lg shadow-black/20 hover:bg-neutral-800 hover:scale-[1.01] active:scale-95 transition-all mt-4 disabled:opacity-50"
                 >
                     {loading ? "..." : "Get Started Free"}
                 </button>
@@ -458,7 +483,6 @@ export default function LoginPage() {
                     placeholder="Min. 6 characters" 
                   />
                 </div>
-                
                 <button 
                   type="submit"
                   disabled={loading}
