@@ -238,7 +238,7 @@ export function ChatInterface(props: ChatInterfaceProps) {
                   }
                 `}>
                   {msg.role === 'assistant' ? (
-                    <div className="text-justify prose prose-slate max-w-none prose-p:leading-relaxed prose-p:mb-4 prose-headings:font-semibold prose-headings:tracking-tight prose-headings:text-slate-900 prose-headings:mt-6 prose-headings:mb-3 prose-strong:text-slate-900 prose-a:text-blue-600 hover:prose-a:text-blue-700 prose-li:marker:text-blue-400 prose-ul:mb-4 prose-ol:mb-4 prose-li:mb-1 prose-blockquote:border-l-blue-500 prose-blockquote:bg-blue-50/50 prose-blockquote:px-4 prose-blockquote:py-1 prose-blockquote:rounded-r-lg prose-blockquote:not-italic prose-blockquote:text-slate-700">
+                    <div className="max-w-none w-full">
                       {msg.content === '' && chatState !== 'COMPLETED' ? (
                         <div className="flex items-center gap-3 text-slate-400 font-medium">
                            <Loader2 className="w-5 h-5 animate-spin text-blue-500" /> Thinking...
@@ -246,19 +246,37 @@ export function ChatInterface(props: ChatInterfaceProps) {
                       ) : (
                         <ReactMarkdown
                           components={{
+                            h1: ({ node, ...props }) => <h1 className="text-2xl font-bold text-slate-900 mt-8 mb-4 tracking-tight border-b border-slate-100 pb-2" {...props} />,
+                            h2: ({ node, ...props }) => <h2 className="text-xl font-bold text-slate-800 mt-6 mb-3 tracking-tight" {...props} />,
+                            h3: ({ node, ...props }) => <h3 className="text-lg font-semibold text-slate-800 mt-5 mb-2" {...props} />,
+                            p: ({ node, ...props }) => <p className="text-slate-600 leading-[1.75] mb-5 text-justify" {...props} />,
+                            strong: ({ node, ...props }) => <strong className="font-semibold text-slate-900" {...props} />,
+                            ul: ({ node, ...props }) => <ul className="list-none space-y-2.5 mb-6 mt-2" {...props} />,
+                            ol: ({ node, ...props }) => <ol className="list-decimal list-outside ml-4 space-y-2.5 mb-6 mt-2 text-slate-600" {...props} />,
+                            li: ({ node, className, children, ...props }) => {
+                              // If it's inside a ul, we add the custom bullet. If inside an ol, the native decimal is used.
+                              const isUnordered = !className?.includes('list-decimal');
+                              return (
+                                <li className={`${isUnordered ? 'relative pl-6 text-slate-600 before:content-[""] before:absolute before:left-1.5 before:top-2.5 before:w-1.5 before:h-1.5 before:bg-blue-400 before:rounded-full before:shadow-sm' : 'pl-2'}`} {...props}>
+                                  {children}
+                                </li>
+                              );
+                            },
+                            blockquote: ({ node, ...props }) => <blockquote className="border-l-4 border-blue-500 bg-gradient-to-r from-blue-50/50 to-transparent text-slate-700 px-5 py-3 rounded-r-xl mb-6 italic" {...props} />,
+                            code: ({ node, ...props }) => <code className="bg-slate-100 text-slate-800 px-1.5 py-0.5 rounded-md font-mono text-[13px] border border-slate-200/60" {...props} />,
                             a: ({ node, ...props }) => {
                               if (props.href === 'citation') {
                                 return (
                                   <a 
                                     href="#"
                                     onClick={(e) => { e.preventDefault(); handleCitationClick(props.children?.toString() || ""); }}
-                                    className="inline-flex items-center justify-center px-2 py-0.5 ml-1 text-xs font-bold bg-blue-50 text-blue-700 rounded-md border border-blue-100 hover:bg-blue-100 hover:border-blue-200 hover:shadow-sm transition-all cursor-pointer transform hover:-translate-y-0.5"
+                                    className="inline-flex items-center justify-center px-2 py-0.5 ml-1.5 text-xs font-bold bg-blue-50 text-blue-700 rounded-md border border-blue-100 hover:bg-blue-600 hover:text-white hover:border-blue-600 hover:shadow-md transition-all cursor-pointer transform hover:-translate-y-0.5"
                                   >
-                                    [{props.children}]
+                                    {props.children}
                                   </a>
                                 );
                               }
-                              return <a {...props} />;
+                              return <a className="text-blue-600 hover:text-blue-700 hover:underline underline-offset-2 transition-colors" {...props} />;
                             }
                           }}
                         >
