@@ -134,7 +134,7 @@ export default function Home() {
         <RotatingWheel />
         
         {/* Call to Action */}
-        <section className="py-40 px-8 md:px-16 bg-blue-600 text-white text-center relative overflow-hidden">
+        <section className="py-40 px-8 md:px-16 bg-blue-600 text-white text-center relative overflow-hidden rounded-t-[50%] mt-20">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.15)_0%,transparent_100%)]" />
           <div className="absolute top-0 w-full h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
           <FadeInWhenVisible>

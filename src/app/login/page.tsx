@@ -182,75 +182,74 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="bg-background text-on-background font-body-md min-h-screen flex items-center justify-center p-4 md:p-10 relative overflow-hidden"
+    <div className="bg-slate-950 text-slate-300 font-sans min-h-screen flex items-center justify-center p-4 md:p-10 relative overflow-hidden"
          style={{
-           backgroundColor: '#f9f9ff',
-           backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(135, 206, 235, 0.15) 1px, transparent 0)',
+           backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(59, 130, 246, 0.15) 1px, transparent 0)',
            backgroundSize: '40px 40px'
          }}>
       
       {/* Atmospheric Animated Background */}
-      <div id="bg-container" className="absolute inset-0 z-0 opacity-40 pointer-events-none"></div>
+      <div id="bg-container" className="absolute inset-0 z-0 opacity-20 pointer-events-none"></div>
 
       {/* Main Container */}
       <main className="relative z-10 w-full max-w-[1100px] grid md:grid-cols-2 gap-8 items-stretch min-h-[680px]">
         
         {/* Left Side: Illustrative & Branding */}
-        <div className="hidden md:flex flex-col justify-between p-12 bg-primary-container/20 rounded-lg border border-white/40 glass-card relative overflow-hidden">
+        <div className="hidden md:flex flex-col justify-between p-12 bg-slate-900/50 backdrop-blur-md rounded-3xl border border-slate-800 shadow-2xl relative overflow-hidden">
           <div className="relative z-10">
             <div className="flex items-center gap-3 mb-12">
-              <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
+              <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center shadow-[0_0_20px_rgba(37,99,235,0.4)]">
                 <span className="material-symbols-outlined text-white" style={{fontVariationSettings: "'FILL' 1"}}>psychology</span>
               </div>
-              <span className="font-headline-md text-headline-md text-primary tracking-tight">Cura</span>
+              <span className="text-2xl font-medium tracking-tight text-white">Cura</span>
             </div>
             
-            <h1 className="font-headline-lg text-headline-lg text-primary mb-6 leading-tight">
-                Your journey to <br/><span className="text-secondary">mental clarity</span> starts here.
+            <h1 className="text-5xl font-light tracking-tight text-white mb-6 leading-tight">
+                Your journey to <br/><span className="text-blue-400 font-normal">mental clarity</span> starts here.
             </h1>
-            <p className="font-body-lg text-body-lg text-on-surface-variant max-w-[320px]">
+            <p className="text-lg text-slate-400 max-w-[320px] font-light leading-relaxed">
                 Experience a companion that listens, understands, and grows with you through every mood.
             </p>
           </div>
           
-          <div className="relative z-10 mt-12 bg-white/40 p-6 rounded-lg border border-white/60">
+          <div className="relative z-10 mt-12 bg-white/5 backdrop-blur-sm p-6 rounded-2xl border border-white/10">
             <div className="flex gap-2 mb-4">
-              <span className="material-symbols-outlined text-secondary" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
-              <span className="material-symbols-outlined text-secondary" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
-              <span className="material-symbols-outlined text-secondary" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
-              <span className="material-symbols-outlined text-secondary" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
-              <span className="material-symbols-outlined text-secondary" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
+              <span className="material-symbols-outlined text-blue-400" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
+              <span className="material-symbols-outlined text-blue-400" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
+              <span className="material-symbols-outlined text-blue-400" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
+              <span className="material-symbols-outlined text-blue-400" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
+              <span className="material-symbols-outlined text-blue-400" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
             </div>
-            <p className="italic text-on-surface-variant font-body-md mb-2">"Cura has helped me navigate through my most stressful weeks with grace and empathy."</p>
-            <span className="text-label-md font-label-md text-primary">— Sarah J., Member since 2023</span>
+            <p className="italic text-slate-300 text-sm mb-3">"Cura has helped me navigate through my most stressful weeks with grace and empathy."</p>
+            <span className="text-xs font-medium text-slate-500">— Sarah J., Member since 2023</span>
           </div>
 
-          <div className="absolute bottom-[-10%] right-[-10%] w-[300px] h-[300px] bg-secondary-container/30 rounded-full blur-[80px]"></div>
-          <div className="absolute top-[20%] right-[-5%] w-[150px] h-[150px] bg-primary/10 rounded-full blur-[40px]"></div>
+          <div className="absolute bottom-[-10%] right-[-10%] w-[300px] h-[300px] bg-blue-600/20 rounded-full blur-[80px]"></div>
+          <div className="absolute top-[20%] right-[-5%] w-[150px] h-[150px] bg-indigo-500/10 rounded-full blur-[40px]"></div>
         </div>
 
         {/* Right Side: Interaction (Forms) */}
-        <div className="bg-surface-container-lowest rounded-lg shadow-[0_20px_40px_rgba(12,103,128,0.08)] p-8 md:p-12 flex flex-col justify-center border border-white/60 relative z-10 bg-white">
+        <div className="bg-slate-900 rounded-3xl shadow-2xl p-8 md:p-12 flex flex-col justify-center border border-slate-800 relative z-10">
           
           {/* Mobile Brand Logo */}
           <div className="md:hidden flex items-center justify-center gap-2 mb-8">
-            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
+            <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
               <span className="material-symbols-outlined text-white text-[20px]" style={{fontVariationSettings: "'FILL' 1"}}>psychology</span>
             </div>
-            <span className="font-headline-md text-headline-md text-primary">Cura</span>
+            <span className="text-xl font-medium tracking-tight text-white">Cura</span>
           </div>
 
           {/* Tab Switcher */}
           {activeTab !== 'forgot_password' && activeTab !== 'update_password' && (
-            <div className="flex bg-surface-container-low p-1 rounded-full mb-8 w-fit mx-auto md:mx-0 bg-gray-100">
+            <div className="flex bg-slate-800/50 p-1 rounded-full mb-8 w-fit mx-auto md:mx-0">
             <button 
-              className={`px-8 py-2.5 rounded-full text-label-md transition-all duration-300 ${activeTab === 'login' ? 'bg-white text-primary shadow-sm' : 'text-on-surface-variant hover:text-primary text-gray-500'}`}
+              className={`px-8 py-2.5 rounded-full text-sm font-medium transition-all duration-300 ${activeTab === 'login' ? 'bg-slate-700 text-white shadow-sm' : 'text-slate-400 hover:text-white'}`}
               onClick={() => { setActiveTab('login'); setError(null); setSuccessMsg(null); }}
             >
                 Login
             </button>
             <button 
-              className={`px-8 py-2.5 rounded-full text-label-md transition-all duration-300 ${activeTab === 'signup' ? 'bg-white text-primary shadow-sm' : 'text-on-surface-variant hover:text-primary text-gray-500'}`}
+              className={`px-8 py-2.5 rounded-full text-sm font-medium transition-all duration-300 ${activeTab === 'signup' ? 'bg-slate-700 text-white shadow-sm' : 'text-slate-400 hover:text-white'}`}
               onClick={() => { setActiveTab('signup'); setError(null); setSuccessMsg(null); }}
             >
                 Sign Up
@@ -273,32 +272,32 @@ export default function LoginPage() {
           {activeTab === 'login' && (
             <div className="animate-in fade-in duration-300">
               <header className="mb-8">
-                <h2 className="font-headline-md text-headline-md text-on-background mb-2">Welcome Back</h2>
-                <p className="text-on-surface-variant text-gray-500">Please enter your details to continue your session.</p>
+                <h2 className="text-2xl font-light text-white tracking-tight mb-2">Welcome Back</h2>
+                <p className="text-slate-400 font-light">Please enter your details to continue your session.</p>
               </header>
               <form className="space-y-5" onSubmit={handleLogin}>
                 <div className="space-y-2">
-                  <label className="text-label-sm font-label-sm text-on-surface-variant ml-4 text-gray-600">Email Address</label>
+                  <label className="text-xs font-medium text-slate-400 ml-4 uppercase tracking-wider">Email Address</label>
                   <input 
                     type="email" 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="w-full px-6 py-4 rounded-full bg-surface border-none ring-1 ring-outline-variant/30 focus:ring-2 focus:ring-primary-container outline-none transition-all shadow-[inset_0_2px_4px_rgba(12,103,128,0.03)] bg-gray-50" 
+                    className="w-full px-6 py-4 rounded-full bg-slate-950/50 border border-slate-800 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" 
                     placeholder="hello@cura.ai" 
                   />
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between items-center px-4">
-                    <label className="text-label-sm font-label-sm text-on-surface-variant text-gray-600">Password</label>
-                    <button type="button" onClick={() => { setActiveTab('forgot_password'); setError(null); setSuccessMsg(null); }} className="text-label-sm font-label-sm text-primary hover:underline">Forgot?</button>
+                    <label className="text-xs font-medium text-slate-400 uppercase tracking-wider">Password</label>
+                    <button type="button" onClick={() => { setActiveTab('forgot_password'); setError(null); setSuccessMsg(null); }} className="text-xs font-medium text-blue-400 hover:text-blue-300">Forgot?</button>
                   </div>
                   <input 
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="w-full px-6 py-4 rounded-full bg-surface border-none ring-1 ring-outline-variant/30 focus:ring-2 focus:ring-primary-container outline-none transition-all shadow-[inset_0_2px_4px_rgba(12,103,128,0.03)] bg-gray-50" 
+                    className="w-full px-6 py-4 rounded-full bg-slate-950/50 border border-slate-800 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" 
                     placeholder="••••••••" 
                   />
                 </div>
@@ -317,16 +316,16 @@ export default function LoginPage() {
                     id="terms-login" 
                     checked={termsAccepted}
                     onChange={(e) => setTermsAccepted(e.target.checked)}
-                    className="mt-1 h-4 w-4 rounded border-gray-300 text-black focus:ring-black"
+                    className="mt-1 h-4 w-4 rounded border-slate-700 bg-slate-800 text-blue-500 focus:ring-blue-500 focus:ring-offset-slate-900"
                   />
-                  <label htmlFor="terms-login" className="text-sm text-gray-600 leading-tight">
-                    I agree to the <Link href="/terms" className="text-black font-semibold hover:underline">Terms & Conditions</Link> and <Link href="/terms" className="text-black font-semibold hover:underline">Privacy Policy</Link>.
+                  <label htmlFor="terms-login" className="text-sm text-slate-400 leading-tight">
+                    I agree to the <Link href="/terms" className="text-slate-200 font-medium hover:text-white">Terms & Conditions</Link> and <Link href="/terms" className="text-slate-200 font-medium hover:text-white">Privacy Policy</Link>.
                   </label>
                 </div>
                 <button 
                   type="submit"
                   disabled={loading || !termsAccepted}
-                  className="w-full py-4 rounded-full bg-black text-white font-bold shadow-lg shadow-black/20 hover:bg-neutral-800 hover:scale-[1.01] active:scale-95 transition-all mt-4 disabled:opacity-50"
+                  className="w-full py-4 rounded-full bg-blue-600 text-white font-medium shadow-lg shadow-blue-500/20 hover:bg-blue-500 hover:scale-[1.02] active:scale-95 transition-all mt-4 disabled:opacity-50"
                 >
                     {loading ? "..." : "Login to Account"}
                 </button>
@@ -338,53 +337,53 @@ export default function LoginPage() {
           {activeTab === 'signup' && (
             <div className="animate-in fade-in duration-300">
               <header className="mb-8">
-                <h2 className="font-headline-md text-headline-md text-on-background mb-2">Create Account</h2>
-                <p className="text-on-surface-variant text-gray-500">Start your personal wellness journey today.</p>
+                <h2 className="text-2xl font-light text-white tracking-tight mb-2">Create Account</h2>
+                <p className="text-slate-400 font-light">Start your personal wellness journey today.</p>
               </header>
               <form className="space-y-4" onSubmit={handleSignup}>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="text-label-sm font-label-sm text-on-surface-variant ml-4 text-gray-600">First Name</label>
+                    <label className="text-xs font-medium text-slate-400 ml-4 uppercase tracking-wider">First Name</label>
                     <input 
                       type="text" 
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
                       required
-                      className="w-full px-6 py-3 rounded-full bg-surface border-none ring-1 ring-outline-variant/30 focus:ring-2 focus:ring-primary-container outline-none transition-all shadow-[inset_0_2px_4px_rgba(12,103,128,0.03)] bg-gray-50" 
+                      className="w-full px-6 py-3 rounded-full bg-slate-950/50 border border-slate-800 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" 
                       placeholder="Sarah" 
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-label-sm font-label-sm text-on-surface-variant ml-4 text-gray-600">Last Name</label>
+                    <label className="text-xs font-medium text-slate-400 ml-4 uppercase tracking-wider">Last Name</label>
                     <input 
                       type="text" 
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
                       required
-                      className="w-full px-6 py-3 rounded-full bg-surface border-none ring-1 ring-outline-variant/30 focus:ring-2 focus:ring-primary-container outline-none transition-all shadow-[inset_0_2px_4px_rgba(12,103,128,0.03)] bg-gray-50" 
+                      className="w-full px-6 py-3 rounded-full bg-slate-950/50 border border-slate-800 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" 
                       placeholder="Jones" 
                     />
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-label-sm font-label-sm text-on-surface-variant ml-4 text-gray-600">Email Address</label>
+                  <label className="text-xs font-medium text-slate-400 ml-4 uppercase tracking-wider">Email Address</label>
                   <input 
                     type="email" 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="w-full px-6 py-3 rounded-full bg-surface border-none ring-1 ring-outline-variant/30 focus:ring-2 focus:ring-primary-container outline-none transition-all shadow-[inset_0_2px_4px_rgba(12,103,128,0.03)] bg-gray-50" 
+                    className="w-full px-6 py-3 rounded-full bg-slate-950/50 border border-slate-800 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" 
                     placeholder="sarah@example.com" 
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-label-sm font-label-sm text-on-surface-variant ml-4 text-gray-600">Choose Password</label>
+                  <label className="text-xs font-medium text-slate-400 ml-4 uppercase tracking-wider">Choose Password</label>
                   <input 
                     type="password" 
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="w-full px-6 py-3 rounded-full bg-surface border-none ring-1 ring-outline-variant/30 focus:ring-2 focus:ring-primary-container outline-none transition-all shadow-[inset_0_2px_4px_rgba(12,103,128,0.03)] bg-gray-50" 
+                    className="w-full px-6 py-3 rounded-full bg-slate-950/50 border border-slate-800 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" 
                     placeholder="Min. 8 characters" 
                   />
                 </div>
@@ -397,8 +396,8 @@ export default function LoginPage() {
                   />
                 </div>
 
-                <p className="text-[12px] text-on-tertiary-fixed-variant px-4 leading-relaxed text-gray-500">
-                    By clicking sign up, you agree to our <a className="text-primary underline" href="#">Privacy Policy</a> and <a className="text-primary underline" href="#">Terms of Service</a>.
+                <p className="text-xs text-slate-500 px-4 leading-relaxed">
+                    By clicking sign up, you agree to our <Link className="text-blue-400 hover:text-blue-300" href="/privacy">Privacy Policy</Link> and <Link className="text-blue-400 hover:text-blue-300" href="/terms">Terms of Service</Link>.
                 </p>
                 <div className="flex items-start gap-3 mt-6 mb-6">
                   <input 
@@ -406,16 +405,16 @@ export default function LoginPage() {
                     id="terms-signup" 
                     checked={termsAccepted}
                     onChange={(e) => setTermsAccepted(e.target.checked)}
-                    className="mt-1 h-4 w-4 rounded border-gray-300 text-black focus:ring-black"
+                    className="mt-1 h-4 w-4 rounded border-slate-700 bg-slate-800 text-blue-500 focus:ring-blue-500 focus:ring-offset-slate-900"
                   />
-                  <label htmlFor="terms-signup" className="text-sm text-gray-600 leading-tight">
-                    I agree to the <Link href="/terms" className="text-black font-semibold hover:underline">Terms & Conditions</Link> and <Link href="/terms" className="text-black font-semibold hover:underline">Privacy Policy</Link>.
+                  <label htmlFor="terms-signup" className="text-sm text-slate-400 leading-tight">
+                    I agree to the <Link href="/terms" className="text-slate-200 font-medium hover:text-white">Terms & Conditions</Link> and <Link href="/terms" className="text-slate-200 font-medium hover:text-white">Privacy Policy</Link>.
                   </label>
                 </div>
                 <button 
                   type="submit"
                   disabled={loading || !termsAccepted}
-                  className="w-full py-4 rounded-full bg-black text-white font-bold shadow-lg shadow-black/20 hover:bg-neutral-800 hover:scale-[1.01] active:scale-95 transition-all mt-4 disabled:opacity-50"
+                  className="w-full py-4 rounded-full bg-blue-600 text-white font-medium shadow-lg shadow-blue-500/20 hover:bg-blue-500 hover:scale-[1.02] active:scale-95 transition-all mt-4 disabled:opacity-50"
                 >
                     {loading ? "..." : "Get Started Free"}
                 </button>
@@ -497,23 +496,23 @@ export default function LoginPage() {
           {activeTab !== 'forgot_password' && activeTab !== 'update_password' && (
             <>
               <div className="relative my-8">
-                <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-200"></div></div>
-                <div className="relative flex justify-center text-label-sm uppercase"><span className="bg-white px-4 text-gray-400">Or continue with</span></div>
+                <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-800"></div></div>
+                <div className="relative flex justify-center text-xs uppercase tracking-wider"><span className="bg-slate-900 px-4 text-slate-500">Or continue with</span></div>
               </div>
               <div className="grid grid-cols-2 gap-4">
             <button 
               onClick={() => handleOAuth('google')}
-              className="flex items-center justify-center gap-3 py-3 px-4 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors"
+              className="flex items-center justify-center gap-3 py-3 px-4 rounded-full border border-slate-700 bg-slate-800/50 hover:bg-slate-800 transition-colors"
             >
               <img alt="Google" className="w-4 h-4" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDlhLQDXd8w65k6DcdG8b8ZJJieVQKUQT1LSGAkTDu9JArZZmlye3AOIu62GcEtsOu_g42OP93baM9XJ5gb7NaqChIZKcBhGLiRIqLE9FGSyhjHG2sZ-yOFLQSbB27-8BrBuXsGOZkbkQowZoE7tQzcYHAWVZuCoN0gLRkWo-QV77KKBINWNVnD10FuJEOWrfIBHFiOYyGb2vfrbz0iWBgpVz8tMGzS2Ugckax7vdIduLY2SE2-6rjOsDt_7USzOxU3xUKgeEsEIMCD"/>
-              <span className="text-label-sm font-bold text-gray-600">Google</span>
+              <span className="text-sm font-medium text-slate-300">Google</span>
             </button>
             <button 
               onClick={() => handleOAuth('github')}
-              className="flex items-center justify-center gap-3 py-3 px-4 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors"
+              className="flex items-center justify-center gap-3 py-3 px-4 rounded-full border border-slate-700 bg-slate-800/50 hover:bg-slate-800 transition-colors"
             >
-              <img alt="GitHub" className="w-4 h-4" src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" />
-              <span className="text-label-sm font-bold text-gray-600">GitHub</span>
+              <img alt="GitHub" className="w-4 h-4" src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" style={{ filter: 'invert(1)' }} />
+              <span className="text-sm font-medium text-slate-300">GitHub</span>
             </button>
           </div>
           </>

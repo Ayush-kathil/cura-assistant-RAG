@@ -4,7 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowDown, Database, FileUp, Webhook, ListTree, FileText, Blocks, BrainCircuit, Share2, CheckCircle2 } from "lucide-react";
 
-const FlowNode = ({ icon: Icon, title, delay }: { icon: any, title: string, delay: number }) => (
+const FlowNode = ({ icon: Icon, title, delay, shape = "rounded-2xl w-48 py-4 px-4" }: { icon: any, title: string, delay: number, shape?: string }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     whileInView={{ opacity: 1, y: 0 }}
@@ -12,11 +12,11 @@ const FlowNode = ({ icon: Icon, title, delay }: { icon: any, title: string, dela
     transition={{ duration: 0.6, delay }}
     className="flex flex-col items-center group relative z-10"
   >
-    <div className="w-48 py-4 px-4 bg-white/80 backdrop-blur-md border border-slate-200 rounded-2xl shadow-lg shadow-slate-200/50 flex flex-col items-center justify-center gap-3 hover:shadow-xl hover:border-blue-300 transition-all">
-      <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+    <div className={`${shape} bg-white/80 backdrop-blur-md border border-slate-200 shadow-lg shadow-slate-200/50 flex flex-col items-center justify-center gap-3 hover:shadow-xl hover:border-blue-300 transition-all`}>
+      <div className="w-10 h-10 shrink-0 rounded-full bg-slate-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
         <Icon className="w-5 h-5" />
       </div>
-      <span className="text-sm font-medium text-slate-700 text-center">{title}</span>
+      <span className="text-sm font-medium text-slate-700 text-center leading-tight">{title}</span>
     </div>
   </motion.div>
 );
@@ -77,22 +77,22 @@ export default function SciencePage() {
         
         <div className="flex flex-col items-center py-12 relative z-10">
           
-          <FlowNode icon={FileUp} title="File Upload UI" delay={0.1} />
+          <FlowNode icon={FileUp} title="File Upload UI" delay={0.1} shape="rounded-[40px_10px_40px_10px] w-48 py-5 px-4" />
           <FlowArrow delay={0.2} />
           
-          <FlowNode icon={Database} title="Supabase Storage" delay={0.3} />
+          <FlowNode icon={Database} title="Supabase Storage" delay={0.3} shape="rounded-full w-40 h-40 p-4" />
           <FlowArrow delay={0.4} />
 
-          <FlowNode icon={Webhook} title="API Trigger / Validation" delay={0.5} />
+          <FlowNode icon={Webhook} title="API Trigger / Validation" delay={0.5} shape="rounded-[10px_40px_10px_40px] w-48 py-5 px-4" />
           <FlowArrow delay={0.6} />
 
-          <FlowNode icon={ListTree} title="Inngest Queue" delay={0.7} />
+          <FlowNode icon={ListTree} title="Inngest Queue" delay={0.7} shape="rounded-none w-48 py-5 px-4" />
           <FlowArrow delay={0.8} />
 
-          <FlowNode icon={FileText} title="Parsing Worker" delay={0.9} />
+          <FlowNode icon={FileText} title="Parsing Worker" delay={0.9} shape="rounded-[30%_70%_70%_30%/30%_30%_70%_70%] w-48 py-6 px-4" />
           <FlowArrow delay={1.0} />
 
-          <FlowNode icon={Blocks} title="Chunking Worker" delay={1.1} />
+          <FlowNode icon={Blocks} title="Chunking Worker" delay={1.1} shape="rounded-[50%_50%_10px_10px] w-48 py-6 px-4" />
 
           {/* Split Path */}
           <motion.div
@@ -113,14 +113,14 @@ export default function SciencePage() {
           {/* Parallel Nodes */}
           <div className="flex gap-12 mt-4">
             <div className="flex flex-col items-center">
-              <FlowNode icon={Share2} title="Entity Extraction Worker" delay={1.3} />
+              <FlowNode icon={Share2} title="Entity Extraction Worker" delay={1.3} shape="rounded-[20px] w-48 py-5 px-4 rotate-2 hover:rotate-0" />
               <FlowArrow delay={1.4} />
-              <FlowNode icon={Database} title="Postgres: Entities/Edges" delay={1.5} />
+              <FlowNode icon={Database} title="Postgres: Entities/Edges" delay={1.5} shape="rounded-[10px_10px_40px_40px] w-48 py-6 px-4" />
             </div>
             <div className="flex flex-col items-center">
-              <FlowNode icon={BrainCircuit} title="Embedding Worker" delay={1.3} />
+              <FlowNode icon={BrainCircuit} title="Embedding Worker" delay={1.3} shape="rounded-[20px] w-48 py-5 px-4 -rotate-2 hover:rotate-0" />
               <FlowArrow delay={1.4} />
-              <FlowNode icon={Database} title="Postgres: pgvector" delay={1.5} />
+              <FlowNode icon={Database} title="Postgres: pgvector" delay={1.5} shape="rounded-[10px_10px_40px_40px] w-48 py-6 px-4" />
             </div>
           </div>
 
@@ -141,7 +141,7 @@ export default function SciencePage() {
             <div className="absolute bottom-[-16px] left-1/2 w-px h-4 bg-blue-300 -translate-x-1/2"><ArrowDown className="w-4 h-4 text-blue-400 absolute bottom-[-10px] -left-[7px]" /></div>
           </motion.div>
 
-          <FlowNode icon={CheckCircle2} title="Status: Completed" delay={1.7} />
+          <FlowNode icon={CheckCircle2} title="Status: Completed" delay={1.7} shape="rounded-[50px] border-emerald-300 shadow-emerald-200/50 w-48 py-5 px-4" />
 
         </div>
       </main>

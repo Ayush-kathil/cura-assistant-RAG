@@ -237,6 +237,16 @@ export default function WorkspacePage() {
               <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
               <span className="text-[10px] uppercase tracking-wider font-bold">{documents.length} Docs Indexed</span>
             </div>
+            {isUploading && (
+              <div className="flex items-center gap-2 px-3 py-1 bg-amber-50 text-amber-700 rounded-full text-xs font-medium border border-amber-200">
+                <div className="w-4 h-4 border-2 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
+                Uploading {uploadProgress}%
+              </div>
+            )}
+            <Link href="/dashboard" className="hidden md:flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-full font-medium shadow-md hover:bg-slate-800 transition-all text-sm">
+              <LayoutDashboard className="w-4 h-4" />
+              Save & Dashboard
+            </Link>
             <button className="w-10 h-10 rounded-full flex items-center justify-center bg-white shadow-sm border border-slate-200 hover:shadow-md transition-all text-slate-500">
               <MoreVertical className="w-5 h-5" />
             </button>
@@ -267,9 +277,19 @@ export default function WorkspacePage() {
             isDevMode={true}
             selectedModel={selectedModel}
             onModelChange={setSelectedModel}
+            onTriggerUpload={() => fileInputRef.current?.click()}
           />
         </div>
       </main>
+      
+      {/* Hidden file input for document upload */}
+      <input 
+        type="file" 
+        ref={fileInputRef} 
+        onChange={handleFileUpload} 
+        className="hidden" 
+        accept=".pdf,.txt,.md,.csv" 
+      />
     </div>
   );
 }

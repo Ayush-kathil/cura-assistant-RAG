@@ -17,9 +17,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <AdminAuthWrapper expectedPasscode={expectedPasscode}>
-      <div className="bg-slate-50 min-h-screen text-slate-800 font-sans flex overflow-hidden">
+      <div className="bg-slate-950 min-h-screen text-slate-300 font-sans flex overflow-hidden">
         {/* Admin Sidebar */}
-        <aside className="hidden md:flex fixed left-0 top-0 h-full z-40 flex-col w-64 bg-slate-900 border-r border-slate-800 transition-all duration-300">
+        <aside className="hidden md:flex fixed left-0 top-0 h-full z-40 flex-col w-64 bg-slate-900/40 backdrop-blur-xl border-r border-slate-800 transition-all duration-300">
           <div className="flex items-center gap-3 p-6 mb-4 border-b border-slate-800">
             <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
               <ShieldCheck className="w-6 h-6 text-white" />
@@ -78,7 +78,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         </aside>
 
         {/* Main Content Area */}
-        <main className="flex-1 md:ml-64 flex flex-col min-h-screen relative overflow-y-auto bg-slate-50">
+        <main className="flex-1 md:ml-64 flex flex-col min-h-screen relative overflow-y-auto bg-slate-950">
           {children}
         </main>
       </div>

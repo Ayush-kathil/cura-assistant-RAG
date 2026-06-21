@@ -26,6 +26,7 @@ interface ChatInterfaceProps {
   saveUserMessage?: (msg: string) => Promise<string>;
   saveAssistantMessage?: (sessionId: string, msg: string) => Promise<void>;
   currentSessionId?: string | null;
+  onTriggerUpload?: () => void;
   [key: string]: any;
 }
 
@@ -352,6 +353,7 @@ export function ChatInterface(props: ChatInterfaceProps) {
             <div className="flex items-end pb-2 pl-4">
               <button
                 type="button"
+                onClick={props.onTriggerUpload}
                 className="p-2.5 bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-blue-600 rounded-full transition-colors shrink-0"
                 title="Add Context / Upload File"
               >

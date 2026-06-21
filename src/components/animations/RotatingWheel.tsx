@@ -12,23 +12,25 @@ export function RotatingWheel() {
     offset: ["start start", "end end"]
   });
 
-  // 3D Wheel Rotation
+  // 3D Wheel Rotation - now with flip and full 360 degrees
   const rotateZ = useTransform(scrollYProgress, [0, 1], [0, 360]);
+  const rotateX = useTransform(scrollYProgress, [0, 0.5, 1], [65, 25, 65]);
+  const rotateY = useTransform(scrollYProgress, [0, 1], [0, 180]);
   
   // Cloud 1: Memory Without Context
   const opacity1 = useTransform(scrollYProgress, [0, 0.1, 0.25, 0.35], [0, 1, 1, 0]);
-  const y1 = useTransform(scrollYProgress, [0, 0.1], [50, 0]);
-  const scale1 = useTransform(scrollYProgress, [0, 0.1, 0.25, 0.35], [0.8, 1, 1, 0.8]);
+  const y1 = useTransform(scrollYProgress, [0, 0.1], [80, 0]);
+  const scale1 = useTransform(scrollYProgress, [0, 0.1, 0.25, 0.35], [0.5, 1, 1, 0.5]);
 
   // Cloud 2: The Library Card
   const opacity2 = useTransform(scrollYProgress, [0.3, 0.4, 0.6, 0.7], [0, 1, 1, 0]);
-  const y2 = useTransform(scrollYProgress, [0.3, 0.4], [50, 0]);
-  const scale2 = useTransform(scrollYProgress, [0.3, 0.4, 0.6, 0.7], [0.8, 1, 1, 0.8]);
+  const y2 = useTransform(scrollYProgress, [0.3, 0.4], [80, 0]);
+  const scale2 = useTransform(scrollYProgress, [0.3, 0.4, 0.6, 0.7], [0.5, 1, 1, 0.5]);
 
   // Cloud 3: The Future of Work
   const opacity3 = useTransform(scrollYProgress, [0.65, 0.75, 0.95, 1], [0, 1, 1, 0]);
-  const y3 = useTransform(scrollYProgress, [0.65, 0.75], [50, 0]);
-  const scale3 = useTransform(scrollYProgress, [0.65, 0.75, 0.95, 1], [0.8, 1, 1, 0.8]);
+  const y3 = useTransform(scrollYProgress, [0.65, 0.75], [80, 0]);
+  const scale3 = useTransform(scrollYProgress, [0.65, 0.75, 0.95, 1], [0.5, 1, 1, 0.5]);
 
   // Generate spokes for the cycle wheel
   const spokes = Array.from({ length: 16 });
@@ -41,7 +43,8 @@ export function RotatingWheel() {
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-40">
           <motion.div 
             style={{ 
-              rotateX: 65, 
+              rotateX, 
+              rotateY,
               rotateZ,
               transformStyle: "preserve-3d"
             }}
@@ -78,54 +81,72 @@ export function RotatingWheel() {
             {/* Cloud 1 */}
             <motion.div 
               style={{ opacity: opacity1, y: y1, scale: scale1 }}
-              className="absolute inset-0 flex items-center"
+              className="absolute inset-0 flex items-center justify-center pointer-events-none"
             >
-              {/* Cloud Frame Shape using organic border-radius */}
-              <div className="bg-white/10 backdrop-blur-xl border border-white/20 p-10 shadow-2xl w-full relative rounded-[3rem] rounded-tl-[6rem] rounded-br-[5rem]">
-                <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center mb-6 border border-blue-400/30">
-                  <Database className="text-blue-400 w-6 h-6" />
+              <div className="relative w-full max-w-lg">
+                {/* 3D Cloud Shapes Base */}
+                <div className="absolute top-[-40px] left-[10%] w-[120px] h-[120px] bg-blue-500/20 rounded-full blur-xl"></div>
+                <div className="absolute top-[-60px] right-[20%] w-[150px] h-[150px] bg-indigo-500/20 rounded-full blur-xl"></div>
+                <div className="absolute bottom-[-30px] right-[10%] w-[100px] h-[100px] bg-purple-500/20 rounded-full blur-xl"></div>
+                
+                {/* Main Cloud Body */}
+                <div className="bg-white/10 backdrop-blur-2xl border-t border-l border-white/30 p-10 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5),inset_0_0_20px_rgba(255,255,255,0.1)] w-full relative rounded-[3rem]">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center mb-6 shadow-lg shadow-blue-500/30 border border-white/20">
+                    <Database className="text-white w-7 h-7" />
+                  </div>
+                  <h3 className="text-3xl font-light text-white tracking-tight mb-4 drop-shadow-md">Memory Without Context</h3>
+                  <p className="text-slate-200 leading-relaxed text-lg">
+                    When AI first began generating text, it was like a brilliant student trapped in a closed room. It had read millions of books during its training, but couldn't look anything up.
+                  </p>
                 </div>
-                <h3 className="text-3xl font-light text-white tracking-tight mb-4">Memory Without Context</h3>
-                <p className="text-slate-300 leading-relaxed">
-                  When AI first began generating text, it was like a brilliant student trapped in a closed room. It had read millions of books during its training, but couldn't look anything up. If asked a specific query, it would confidently guess—often wrongly, hallucinating facts without realizing it.
-                </p>
               </div>
             </motion.div>
 
             {/* Cloud 2 */}
             <motion.div 
               style={{ opacity: opacity2, y: y2, scale: scale2 }}
-              className="absolute inset-0 flex items-center pointer-events-none"
+              className="absolute inset-0 flex items-center justify-center pointer-events-none"
             >
-              {/* Cloud Frame Shape using organic border-radius */}
-              <div className="bg-white/10 backdrop-blur-xl border border-white/20 p-10 shadow-2xl w-full relative rounded-[4rem] rounded-tr-[6rem] rounded-bl-[5rem]">
-                <div className="w-12 h-12 rounded-xl bg-indigo-500/20 flex items-center justify-center mb-6 border border-indigo-400/30">
-                  <Network className="text-indigo-400 w-6 h-6" />
+              <div className="relative w-full max-w-lg">
+                {/* 3D Cloud Shapes Base */}
+                <div className="absolute top-[-50px] right-[10%] w-[130px] h-[130px] bg-indigo-500/20 rounded-full blur-xl"></div>
+                <div className="absolute top-[-30px] left-[20%] w-[140px] h-[140px] bg-blue-500/20 rounded-full blur-xl"></div>
+                <div className="absolute bottom-[-40px] left-[10%] w-[110px] h-[110px] bg-sky-500/20 rounded-full blur-xl"></div>
+                
+                {/* Main Cloud Body */}
+                <div className="bg-white/10 backdrop-blur-2xl border-t border-l border-white/30 p-10 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5),inset_0_0_20px_rgba(255,255,255,0.1)] w-full relative rounded-[3rem]">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-400 to-indigo-600 flex items-center justify-center mb-6 shadow-lg shadow-indigo-500/30 border border-white/20">
+                    <Network className="text-white w-7 h-7" />
+                  </div>
+                  <h3 className="text-3xl font-light text-white tracking-tight mb-4 drop-shadow-md">The Library Card</h3>
+                  <p className="text-slate-200 leading-relaxed mb-4 text-lg">
+                    Then came the breakthrough: <strong>Retrieval-Augmented Generation (RAG)</strong>. We gave the AI an open-book test in the world's largest library.
+                  </p>
                 </div>
-                <h3 className="text-3xl font-light text-white tracking-tight mb-4">The Library Card</h3>
-                <p className="text-slate-300 leading-relaxed mb-4">
-                  Then came the breakthrough: <strong>Retrieval-Augmented Generation (RAG)</strong>. We gave the AI an open-book test in the world's largest library.
-                </p>
-                <p className="text-slate-300 leading-relaxed">
-                  Before answering, it acts as a lightning-fast researcher, scanning private documents to find exact paragraphs. Only then does it read to construct an accurate response.
-                </p>
               </div>
             </motion.div>
 
             {/* Cloud 3 */}
             <motion.div 
               style={{ opacity: opacity3, y: y3, scale: scale3 }}
-              className="absolute inset-0 flex items-center pointer-events-none"
+              className="absolute inset-0 flex items-center justify-center pointer-events-none"
             >
-              {/* Cloud Frame Shape using organic border-radius */}
-              <div className="bg-white/10 backdrop-blur-xl border border-white/20 p-10 shadow-2xl w-full relative rounded-[3.5rem] rounded-tl-[5rem] rounded-br-[6rem]">
-                <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center mb-6 border border-purple-400/30">
-                  <Cpu className="text-purple-400 w-6 h-6" />
+              <div className="relative w-full max-w-lg">
+                {/* 3D Cloud Shapes Base */}
+                <div className="absolute top-[-60px] left-[30%] w-[150px] h-[150px] bg-purple-500/20 rounded-full blur-xl"></div>
+                <div className="absolute top-[-20px] right-[5%] w-[120px] h-[120px] bg-pink-500/20 rounded-full blur-xl"></div>
+                <div className="absolute bottom-[-30px] left-[20%] w-[130px] h-[130px] bg-indigo-500/20 rounded-full blur-xl"></div>
+                
+                {/* Main Cloud Body */}
+                <div className="bg-white/10 backdrop-blur-2xl border-t border-l border-white/30 p-10 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5),inset_0_0_20px_rgba(255,255,255,0.1)] w-full relative rounded-[3rem]">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center mb-6 shadow-lg shadow-purple-500/30 border border-white/20">
+                    <Cpu className="text-white w-7 h-7" />
+                  </div>
+                  <h3 className="text-3xl font-light text-white tracking-tight mb-4 drop-shadow-md">The Future of Work</h3>
+                  <p className="text-slate-200 leading-relaxed text-lg">
+                    At CURA, we've built a system that deeply understands the <em>meaning</em> of your documents. It builds a map of concepts and relationships.
+                  </p>
                 </div>
-                <h3 className="text-3xl font-light text-white tracking-tight mb-4">The Future of Work</h3>
-                <p className="text-slate-300 leading-relaxed">
-                  Today, RAG isn't just searching for keywords. At CURA, we've built a system that deeply understands the <em>meaning</em> of your documents. It builds a map of concepts, relationships, and ideas. That's the power of humanized, enterprise-grade RAG.
-                </p>
               </div>
             </motion.div>
 

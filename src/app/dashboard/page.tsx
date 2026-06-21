@@ -14,7 +14,9 @@ export default function DashboardPage() {
   const [recentDocs, setRecentDocs] = useState<any[]>([]);
   const [profileName, setProfileName] = useState("");
   const [profileEmail, setProfileEmail] = useState("");
+  const [profilePhotoUrl, setProfilePhotoUrl] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const { activeWorkspace } = useWorkspace();
 
   useEffect(() => {
@@ -34,6 +36,7 @@ export default function DashboardPage() {
       const name = data.user?.user_metadata?.first_name || data.user?.email?.split('@')[0] || 'Guest';
       setProfileName(name);
       setProfileEmail(data.user?.email || '');
+      setProfilePhotoUrl(data.user?.user_metadata?.avatar_url || '');
     };
     
     fetchStats();
@@ -42,11 +45,45 @@ export default function DashboardPage() {
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
-    // Simulate API call for now
-    setTimeout(() => {
-      setIsSaving(false);
+    try {
+      const { error } = await supabase.auth.updateUser({
+        email: profileEmail !== user?.email ? profileEmail : undefined,
+        data: { 
+          first_name: profileName,
+          avatar_url: profilePhotoUrl
+        }
+      });
+      if (error) throw error;
       alert("Profile updated successfully!");
-    }, 1000);
+    } catch (err: any) {
+      alert("Error updating profile: " + err.message);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    setIsUploadingPhoto(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}_avatar_${Date.now()}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage.from('nexus_docs').upload(`avatars/${fileName}`, file);
+      if (uploadError) throw uploadError;
+      
+      const { data: { publicUrl } } = supabase.storage.from('nexus_docs').getPublicUrl(`avatars/${fileName}`);
+      setProfilePhotoUrl(publicUrl);
+      
+      // Update user metadata immediately
+      await supabase.auth.updateUser({
+        data: { avatar_url: publicUrl }
+      });
+    } catch (err: any) {
+      alert("Error uploading photo: " + err.message);
+    } finally {
+      setIsUploadingPhoto(false);
+    }
   };
 
   const firstName = user?.user_metadata?.first_name || user?.email?.split('@')[0] || 'Guest';
@@ -257,11 +294,18 @@ export default function DashboardPage() {
             <form onSubmit={handleUpdateProfile} className="space-y-6">
               <div className="flex items-center gap-6 mb-8">
                 <div className="relative group">
-                  <div className="w-24 h-24 rounded-full border-2 border-slate-200 bg-slate-50 flex items-center justify-center text-3xl font-light text-slate-600 shadow-sm overflow-hidden">
-                    {profileName ? profileName.charAt(0).toUpperCase() : 'U'}
-                    <div className="absolute inset-0 bg-slate-900/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer backdrop-blur-sm">
+                  <div className="w-24 h-24 rounded-full border-2 border-slate-200 bg-slate-50 flex items-center justify-center text-3xl font-light text-slate-600 shadow-sm overflow-hidden relative">
+                    {isUploadingPhoto ? (
+                      <Activity className="w-6 h-6 animate-spin text-slate-400" />
+                    ) : profilePhotoUrl ? (
+                      <img src={profilePhotoUrl} alt="Profile" className="w-full h-full object-cover" />
+                    ) : (
+                      profileName ? profileName.charAt(0).toUpperCase() : 'U'
+                    )}
+                    <label className="absolute inset-0 bg-slate-900/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer backdrop-blur-sm">
                       <Camera className="w-6 h-6 text-white" />
-                    </div>
+                      <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} disabled={isUploadingPhoto} />
+                    </label>
                   </div>
                 </div>
                 <div>
