@@ -238,7 +238,7 @@ export function ChatInterface(props: ChatInterfaceProps) {
                   }
                 `}>
                   {msg.role === 'assistant' ? (
-                    <div className="prose prose-slate max-w-none prose-p:leading-relaxed prose-headings:font-semibold prose-headings:tracking-tight prose-headings:text-slate-900 prose-strong:text-slate-900 prose-a:text-blue-600 hover:prose-a:text-blue-700 prose-li:marker:text-blue-400 prose-blockquote:border-l-blue-500 prose-blockquote:bg-blue-50/50 prose-blockquote:px-4 prose-blockquote:py-1 prose-blockquote:rounded-r-lg prose-blockquote:not-italic prose-blockquote:text-slate-700">
+                    <div className="text-justify prose prose-slate max-w-none prose-p:leading-relaxed prose-p:mb-4 prose-headings:font-semibold prose-headings:tracking-tight prose-headings:text-slate-900 prose-headings:mt-6 prose-headings:mb-3 prose-strong:text-slate-900 prose-a:text-blue-600 hover:prose-a:text-blue-700 prose-li:marker:text-blue-400 prose-ul:mb-4 prose-ol:mb-4 prose-li:mb-1 prose-blockquote:border-l-blue-500 prose-blockquote:bg-blue-50/50 prose-blockquote:px-4 prose-blockquote:py-1 prose-blockquote:rounded-r-lg prose-blockquote:not-italic prose-blockquote:text-slate-700">
                       {msg.content === '' && chatState !== 'COMPLETED' ? (
                         <div className="flex items-center gap-3 text-slate-400 font-medium">
                            <Loader2 className="w-5 h-5 animate-spin text-blue-500" /> Thinking...
