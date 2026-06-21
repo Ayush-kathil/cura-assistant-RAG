@@ -7,8 +7,8 @@ SELECT
     au.email,
     au.raw_user_meta_data,
     au.last_sign_in_at,
-    (SELECT COUNT(*) FROM public.documents d WHERE d.metadata->>'user_id' = au.id::text) as total_docs,
-    (SELECT COUNT(*) FROM public.chat_messages c WHERE c.user_id = au.id) as total_queries
+    (SELECT COUNT(*) FROM public.documents d WHERE d.user_id = au.id) as total_docs,
+    (SELECT COUNT(*) FROM public.chat_messages c JOIN public.chat_sessions s ON c.session_id = s.id WHERE s.user_id = au.id) as total_queries
 FROM auth.users au;
 
 -- We need to ensure that only authenticated users can access this view, but we are trusting the application-layer passcode for the admin panel. 
