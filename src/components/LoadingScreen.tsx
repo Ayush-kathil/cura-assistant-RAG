@@ -36,8 +36,8 @@ export default function LoadingScreen() {
         >
           {/* Animated Background Gradients */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-blue-100/50 rounded-full blur-3xl mix-blend-multiply animate-pulse" />
-            <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-purple-100/50 rounded-full blur-3xl mix-blend-multiply animate-pulse" style={{ animationDelay: '1s' }} />
+            <div className="absolute top-1/4 left-1/4 w-[50vw] max-w-[500px] h-[50vw] max-h-[500px] bg-blue-100/50 rounded-full blur-3xl mix-blend-multiply animate-pulse" />
+            <div className="absolute bottom-1/4 right-1/4 w-[50vw] max-w-[500px] h-[50vw] max-h-[500px] bg-purple-100/50 rounded-full blur-3xl mix-blend-multiply animate-pulse" style={{ animationDelay: '1s' }} />
           </div>
 
           <motion.div

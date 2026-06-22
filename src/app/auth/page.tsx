@@ -55,9 +55,9 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#05050A] flex items-center justify-center overflow-hidden relative selection:bg-blue-500/30">
+    <div className="min-h-[100dvh] w-full bg-[#05050A] flex items-center justify-center overflow-hidden relative selection:bg-blue-500/30">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/20 via-[#05050A] to-[#05050A] pointer-events-none" />
-      <div className="absolute w-[800px] h-[800px] bg-blue-500/10 blur-[120px] rounded-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-50" />
+      <div className="absolute w-[800px] max-w-[100vw] h-[800px] bg-blue-500/10 blur-[120px] rounded-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-50" />
 
       <motion.div
         animate={{ y: [0, -8, 0] }}

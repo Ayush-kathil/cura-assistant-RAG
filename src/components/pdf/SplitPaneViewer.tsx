@@ -47,7 +47,7 @@ export function SplitPaneViewer({ documentId, onClose, citationText }: SplitPane
   if (!documentId) return null;
 
   return (
-    <div className="flex flex-col h-full bg-white border-l border-slate-200 shadow-xl overflow-hidden animate-in slide-in-from-right-8 duration-300 w-[500px] shrink-0 z-10 relative">
+    <div className="flex flex-col h-full bg-white border-l border-slate-200 shadow-xl overflow-hidden animate-in slide-in-from-right-8 duration-300 w-full md:w-[500px] shrink-0 z-10 relative">
       <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 bg-slate-50">
         <div className="flex items-center gap-2">
           <FileText className="w-4 h-4 text-slate-500" />
@@ -72,11 +72,15 @@ export function SplitPaneViewer({ documentId, onClose, citationText }: SplitPane
             <p className="text-sm font-medium">Loading Document...</p>
           </div>
         ) : pdfUrl ? (
-          <iframe 
-            src={`${pdfUrl}#toolbar=0&navpanes=0&view=FitH`} 
-            className="w-full h-full border-none bg-white"
-            title="Document Viewer"
-          />
+          <div className="flex-1 w-full h-full overflow-hidden" style={{ WebkitOverflowScrolling: 'touch' }}>
+            <iframe 
+              src={`${pdfUrl}#toolbar=0&navpanes=0`} 
+              className="w-full h-full border-none bg-slate-100"
+              title="PDF Viewer"
+              loading="lazy"
+              sandbox="allow-same-origin allow-scripts"
+            />
+          </div>
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-slate-400">
             <p className="text-sm font-medium">Document not found or unable to load.</p>

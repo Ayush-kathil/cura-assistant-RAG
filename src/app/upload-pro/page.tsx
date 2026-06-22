@@ -145,7 +145,7 @@ export default function UploadPage() {
   const firstName = userEmail.split('@')[0] || 'Guest';
 
   return (
-    <div className="bg-slate-50 min-h-screen text-slate-800 font-sans selection:bg-blue-100 selection:text-blue-900 flex overflow-hidden">
+    <div className="bg-slate-50 min-h-[100dvh] text-slate-800 font-sans selection:bg-blue-100 selection:text-blue-900 flex overflow-hidden">
       
       {/* Sidebar */}
       <aside className="hidden md:flex fixed left-0 top-0 h-full z-40 flex-col w-64 bg-white/80 backdrop-blur-xl border-r border-slate-200 transition-all duration-300">
@@ -181,7 +181,7 @@ export default function UploadPage() {
       </aside>
 
       {/* Main Content Canvas */}
-      <main className="flex-1 md:ml-64 relative overflow-y-auto h-screen custom-scrollbar">
+      <main className="flex-1 md:ml-64 relative overflow-y-auto h-[100dvh] custom-scrollbar">
         
         {/* Header */}
         <header className="sticky top-0 z-30 px-8 py-6 flex justify-between items-center bg-white/80 backdrop-blur-md border-b border-slate-200">

@@ -453,7 +453,7 @@ export function ChatInterface(props: ChatInterfaceProps) {
         </div>
       </div>
 
-      <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-white via-white to-transparent pt-10 pb-4 px-4 md:px-8">
+      <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-white via-white to-transparent pt-10 pb-4 px-4 md:px-8 pb-[env(safe-area-inset-bottom)] pb-20">
         <div className="max-w-4xl mx-auto relative">
           
           {/* Document Mention Popover */}
@@ -543,6 +543,17 @@ export function ChatInterface(props: ChatInterfaceProps) {
                   <Send className="w-5 h-5" />
                 </button>
               )}
+                <button
+                  type="button"
+                  onClick={toggleVoiceInput}
+                  onTouchEnd={(e) => { e.preventDefault(); toggleVoiceInput(); }}
+                  className={`p-2 shrink-0 transition-colors ${
+                    isListening ? 'text-red-500 bg-red-50 hover:bg-red-100 rounded-full animate-pulse' : 'text-slate-400 hover:text-slate-600'
+                  }`}
+                  title="Voice Input"
+                >
+                  <Mic className="w-5 h-5" />
+                </button>
             </div>
           </form>
           </div>

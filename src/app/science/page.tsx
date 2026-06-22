@@ -38,7 +38,7 @@ export default function SciencePage() {
   const activeNode = nodes.find(n => n.id === activeNodeId);
 
   return (
-    <div className="bg-slate-50 min-h-screen text-slate-800 font-sans selection:bg-blue-200 selection:text-blue-900 overflow-hidden flex flex-col">
+    <div className="bg-slate-50 min-h-[100dvh] text-slate-800 font-sans selection:bg-blue-200 selection:text-blue-900 overflow-hidden flex flex-col">
       
       {/* Navigation */}
       <nav className="w-full z-50 border-b border-slate-200 py-4 px-8 flex justify-between items-center bg-white/80 backdrop-blur-md shadow-sm">
@@ -144,7 +144,7 @@ export default function SciencePage() {
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: "100%", opacity: 0 }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed top-0 right-0 w-[400px] max-w-full h-full bg-white/95 backdrop-blur-3xl border-l border-slate-200 shadow-[-20px_0_50px_rgba(0,0,0,0.1)] z-50 flex flex-col"
+            className="fixed top-0 right-0 max-w-[100vw] w-[400px] h-[100dvh] bg-white/95 backdrop-blur-3xl border-l border-slate-200 shadow-[-20px_0_50px_rgba(0,0,0,0.1)] z-50 flex flex-col"
           >
             <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
               <div className="flex items-center gap-3">

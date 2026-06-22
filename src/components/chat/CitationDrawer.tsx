@@ -39,7 +39,7 @@ export function CitationDrawer({ isOpen, citation, onClose }: CitationDrawerProp
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-y-0 right-0 w-full md:w-[450px] bg-white shadow-2xl z-50 border-l border-slate-200 flex flex-col"
+            className="fixed inset-y-0 right-0 w-full max-w-[100vw] md:w-[450px] bg-white shadow-2xl z-50 border-l border-slate-200 flex flex-col"
           >
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-slate-50/50">

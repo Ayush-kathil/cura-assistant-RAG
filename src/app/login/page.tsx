@@ -183,7 +183,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="bg-slate-50 text-slate-800 font-sans min-h-screen flex items-center justify-center p-4 md:p-10 relative overflow-hidden"
+    <div className="bg-slate-50 text-slate-800 font-sans min-h-[100dvh] flex items-center justify-center p-4 md:p-10 relative overflow-hidden"
          style={{
            backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(59, 130, 246, 0.05) 1px, transparent 0)',
            backgroundSize: '40px 40px'
@@ -208,7 +208,7 @@ export default function LoginPage() {
             <h1 className="text-5xl font-light tracking-tight text-slate-900 mb-6 leading-tight">
                 Your journey to <br/><span className="text-blue-600 font-normal">mental clarity</span> starts here.
             </h1>
-            <p className="text-lg text-slate-500 max-w-[320px] font-light leading-relaxed">
+            <p className="text-lg text-slate-500 max-w-full sm:max-w-[320px] font-light leading-relaxed">
                 Experience a companion that listens, understands, and grows with you through every mood.
             </p>
           </div>
@@ -225,8 +225,8 @@ export default function LoginPage() {
             <span className="text-xs font-medium text-slate-500">— Sarah J., Member since 2023</span>
           </div>
 
-          <div className="absolute bottom-[-10%] right-[-10%] w-[300px] h-[300px] bg-blue-600/10 rounded-full blur-[80px]"></div>
-          <div className="absolute top-[20%] right-[-5%] w-[150px] h-[150px] bg-indigo-500/10 rounded-full blur-[40px]"></div>
+          <div className="absolute bottom-[-10%] right-[-10%] w-[80vw] max-w-[300px] h-[80vw] max-h-[300px] bg-blue-600/10 rounded-full blur-[80px]"></div>
+          <div className="absolute top-[20%] right-[-5%] w-[40vw] max-w-[150px] h-[40vw] max-h-[150px] bg-indigo-500/10 rounded-full blur-[40px]"></div>
         </div>
 
         {/* Right Side: Interaction (Forms) */}

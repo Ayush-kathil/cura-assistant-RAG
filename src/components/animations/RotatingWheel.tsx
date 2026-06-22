@@ -48,10 +48,10 @@ export function RotatingWheel() {
               rotateZ,
               transformStyle: "preserve-3d"
             }}
-            className="w-[800px] h-[800px] rounded-full border-8 border-slate-700/80 shadow-[0_0_50px_rgba(0,0,0,0.5)_inset] flex items-center justify-center relative"
+            className="w-[90vw] max-w-[800px] h-[90vw] max-h-[800px] rounded-full border-8 border-slate-700/80 shadow-[0_0_50px_rgba(0,0,0,0.5)_inset] flex items-center justify-center relative"
           >
             {/* Inner Rim */}
-            <div className="absolute w-[760px] h-[760px] rounded-full border-4 border-slate-600/50"></div>
+            <div className="absolute w-[85vw] max-w-[760px] h-[85vw] max-h-[760px] rounded-full border-4 border-slate-600/50"></div>
             
             {/* Center Hub */}
             <div className="absolute w-16 h-16 rounded-full bg-slate-800 border-[6px] border-slate-600 shadow-2xl z-10 flex items-center justify-center">

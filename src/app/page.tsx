@@ -89,7 +89,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="bg-slate-50 text-slate-900 font-sans selection:bg-blue-100 selection:text-blue-900 min-h-screen">
+    <div className="bg-slate-50 text-slate-900 font-sans selection:bg-blue-100 selection:text-blue-900 min-h-[100dvh]">
       {/* Top Navigation */}
       <motion.nav 
         initial={{ y: -100, opacity: 0 }}
@@ -121,7 +121,7 @@ export default function Home() {
 
       <main>
         {/* Hero Section with Centered Text and Video Background */}
-        <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+        <section className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden">
           
           {/* Background Video (Lottie iframe mimicking video) */}
           <motion.div 

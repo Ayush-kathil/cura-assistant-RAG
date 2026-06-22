@@ -10,8 +10,8 @@ export default function NotFound() {
       
       {/* Animated Background */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/4 left-1/3 w-[600px] h-[600px] bg-blue-100/40 rounded-full blur-3xl mix-blend-multiply animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/3 w-[500px] h-[500px] bg-indigo-100/40 rounded-full blur-3xl mix-blend-multiply animate-pulse" style={{ animationDelay: '2s' }} />
+        <div className="absolute top-1/4 left-1/3 w-[600px] max-w-[100vw] h-[600px] bg-blue-100/40 rounded-full blur-3xl mix-blend-multiply animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/3 w-[500px] max-w-[100vw] h-[500px] bg-indigo-100/40 rounded-full blur-3xl mix-blend-multiply animate-pulse" style={{ animationDelay: '2s' }} />
       </div>
 
       <motion.div

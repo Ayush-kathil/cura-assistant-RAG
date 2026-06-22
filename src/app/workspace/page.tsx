@@ -169,7 +169,7 @@ export default function WorkspacePage() {
   const firstName = userEmail?.split('@')[0] || 'Guest';
 
   return (
-    <div className="bg-slate-50 h-screen text-slate-800 font-sans selection:bg-blue-100 selection:text-blue-900 flex overflow-hidden">
+    <div className="bg-slate-50 h-[100dvh] text-slate-800 font-sans selection:bg-blue-100 selection:text-blue-900 flex overflow-hidden">
       
       {/* Overlay for mobile sidebar */}
       {isSidebarOpen && (
