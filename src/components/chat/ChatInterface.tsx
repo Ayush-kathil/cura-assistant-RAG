@@ -9,7 +9,7 @@ import { CitationDrawer, CitationData } from './CitationDrawer';
 import { chatStateMachine, ChatState } from '@/lib/events/ChatStateMachine';
 import { agentEventBus } from '@/lib/events/AgentEventBus';
 import { useWorkspace } from '@/contexts/WorkspaceContext';
-import { Send, Bot, User, Loader2, StopCircle, FileText, Plus, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { Send, Bot, User, Loader2, StopCircle, FileText, Plus, ThumbsUp, ThumbsDown, Mic } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { SplitPaneViewer } from '../pdf/SplitPaneViewer';
 
@@ -55,6 +55,50 @@ export function ChatInterface(props: ChatInterfaceProps) {
   
   const [viewerDocumentId, setViewerDocumentId] = useState<string | null>(null);
   const [viewerCitationText, setViewerCitationText] = useState<string>("");
+
+  // Voice Input State
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = true;
+      recognitionRef.current.interimResults = true;
+      
+      recognitionRef.current.onresult = (event: any) => {
+        let finalTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            finalTranscript += event.results[i][0].transcript;
+          }
+        }
+        if (finalTranscript) {
+          setInputValue(prev => prev + (prev.endsWith(' ') || prev.length === 0 ? '' : ' ') + finalTranscript);
+        }
+      };
+
+      recognitionRef.current.onerror = (event: any) => {
+        console.error("Speech recognition error", event.error);
+        setIsListening(false);
+      };
+
+      recognitionRef.current.onend = () => {
+        setIsListening(false);
+      };
+    }
+  }, []);
+
+  const toggleVoiceInput = () => {
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+    } else {
+      recognitionRef.current?.start();
+      setIsListening(true);
+    }
+  };
 
   const scrollRef = useRef<HTMLDivElement>(null);
 

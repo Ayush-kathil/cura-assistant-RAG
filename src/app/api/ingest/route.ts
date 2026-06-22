@@ -71,17 +71,30 @@ export async function POST(req: NextRequest) {
     let fullText = "";
     
     if (doc.file_name.toLowerCase().endsWith(".pdf")) {
-      const { extractText } = await import("unpdf");
-      const uint8Array = new Uint8Array(buffer);
-      const pdfText = await extractText(uint8Array);
+      console.log("[MULTI-MODAL PARSING] Analyzing PDF with Gemini Vision...");
+      const extractionModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const b64Data = buffer.toString("base64");
       
-      if (typeof pdfText === 'string') {
-        fullText = pdfText;
-      } else if (pdfText && pdfText.text) {
-        fullText = typeof pdfText.text === 'string' ? pdfText.text : (Array.isArray(pdfText.text) ? pdfText.text.join('\\n') : String(pdfText.text));
-      } else {
-        fullText = String(pdfText);
-      }
+      const prompt = `You are a highly precise document extraction AI. Extract the content of the attached PDF document perfectly into Markdown. 
+Rules:
+1. Preserve all text verbatim. Do not summarize.
+2. If there are tables, format them perfectly using Markdown tables.
+3. If there are images, charts, or graphs, write a detailed textual description of what they show enclosed in brackets like this: [IMAGE: A bar chart showing...].
+4. Ignore repetitive headers/footers (like page numbers) if they interrupt the flow of the text.
+5. Output nothing but the markdown content. Do not add conversational intro/outro text.`;
+
+      const result = await extractionModel.generateContent([
+        {
+          inlineData: {
+            data: b64Data,
+            mimeType: "application/pdf"
+          }
+        },
+        prompt
+      ]);
+      
+      fullText = result.response.text();
+      console.log("[MULTI-MODAL PARSING] Completed successfully. Extracted length:", fullText.length);
     } else {
       fullText = buffer.toString("utf-8"); // Assume text or markdown
     }
@@ -101,6 +114,22 @@ export async function POST(req: NextRequest) {
     const chunks = await splitter.splitText(fullText);
     console.log("[CHUNK COUNT]", chunks.length);
     console.log("[FIRST CHUNK PREVIEW]", chunks[0]?.substring(0,200));
+
+    // GraphRAG Entity Extraction
+    console.log("[ENTITY EXTRACTION] Extracting GraphRAG entities...");
+    let entities: string[] = [];
+    try {
+      const entityModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const entityPrompt = `Extract key entities (People, Organizations, Locations, Technical Concepts) from the following text. Return them as a simple comma-separated list of highly relevant keywords. Max 15 entities. Do not add any introductory or formatting text, just the comma-separated list.
+Text: ${fullText.substring(0, 15000)}`;
+      
+      const entityResult = await entityModel.generateContent(entityPrompt);
+      const entityText = entityResult.response.text().trim();
+      entities = entityText.split(',').map(e => e.trim()).filter(e => e.length > 0);
+      console.log("[ENTITY EXTRACTION] Extracted entities:", entities.join(", "));
+    } catch (e) {
+      console.warn("[ENTITY EXTRACTION] Failed to extract entities, continuing without them", e);
+    }
 
     // Embeddings
     const embeddingModel = genAI.getGenerativeModel({ model: "gemini-embedding-2" });
@@ -142,7 +171,7 @@ export async function POST(req: NextRequest) {
           document_id: documentId,
           workspace_id: workspaceId,
           content: batchChunks[j],
-          metadata: { chunk_index: i + j, source: doc.file_name },
+          metadata: { chunk_index: i + j, source: doc.file_name, entities },
           embedding: embeddingValues,
         });
       }

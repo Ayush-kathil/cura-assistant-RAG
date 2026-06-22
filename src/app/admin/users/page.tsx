@@ -11,7 +11,7 @@ export default function UsersAdmin() {
 
   useEffect(() => {
     async function fetchUsers() {
-      const { data, error } = await supabase.from('admin_users_view').select('*').limit(50);
+      const { data, error } = await supabase.rpc('get_admin_users').limit(50);
       
       if (data && !error) {
         const mapped = data.map((u: any) => ({

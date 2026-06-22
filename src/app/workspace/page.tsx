@@ -4,6 +4,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { ChatInterface } from "@/components/chat/ChatInterface";
 import { useChatSession } from "@/hooks/useChatSession";
 import { Menu, X, MessageSquare, LayoutDashboard, Database, PlusCircle, User, Trash2, MoreVertical, Search, Loader2 } from "lucide-react";
@@ -315,6 +316,7 @@ export default function WorkspacePage() {
               <LayoutDashboard className="w-4 h-4" />
               Save & Dashboard
             </Link>
+            <ThemeToggle />
             <button className="w-10 h-10 rounded-full flex items-center justify-center bg-white shadow-sm border border-slate-200 hover:shadow-md transition-all text-slate-500">
               <MoreVertical className="w-5 h-5" />
             </button>
