@@ -36,11 +36,11 @@ export function RotatingWheel() {
   const spokes = Array.from({ length: 16 });
 
   return (
-    <div ref={containerRef} className="h-[300vh] w-full bg-slate-900 relative">
+    <div ref={containerRef} className="h-[300vh] w-full relative">
       <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center perspective-[1200px]">
         
         {/* The 3D Cycle Wheel Structure */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-40">
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
           <motion.div 
             style={{ 
               rotateX, 
@@ -83,22 +83,28 @@ export function RotatingWheel() {
               style={{ opacity: opacity1, y: y1, scale: scale1 }}
               className="absolute inset-0 flex items-center justify-center pointer-events-none"
             >
-              <div className="relative w-full max-w-lg">
-                {/* 3D Cloud Shapes Base */}
-                <div className="absolute top-[-40px] left-[10%] w-[120px] h-[120px] bg-blue-500/20 rounded-full blur-xl"></div>
-                <div className="absolute top-[-60px] right-[20%] w-[150px] h-[150px] bg-indigo-500/20 rounded-full blur-xl"></div>
-                <div className="absolute bottom-[-30px] right-[10%] w-[100px] h-[100px] bg-purple-500/20 rounded-full blur-xl"></div>
+              <div className="relative w-full max-w-lg flex flex-col items-center text-center">
                 
-                {/* Main Cloud Body */}
-                <div style={{ borderRadius: '60% 40% 50% 50% / 50% 50% 60% 40%' }} className="bg-white/10 backdrop-blur-2xl border-t border-l border-white/30 p-10 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5),inset_0_0_20px_rgba(255,255,255,0.1)] w-full relative">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center mb-6 shadow-lg shadow-blue-500/30 border border-white/20">
-                    <Database className="text-white w-7 h-7" />
+                {/* Cloud Shape Graphic */}
+                <div className="relative w-48 h-32 mb-8 flex items-center justify-center filter drop-shadow-xl">
+                  {/* SVG Cloud Path */}
+                  <svg className="absolute inset-0 w-full h-full text-white fill-current opacity-90 drop-shadow-lg" viewBox="0 0 24 24" preserveAspectRatio="none">
+                    <path d="M17.5 19c2.485 0 4.5-2.015 4.5-4.5 0-2.434-1.92-4.412-4.333-4.495A5.5 5.5 0 0 0 7 8a5.502 5.502 0 0 0-4.996 7.643A4 4 0 0 0 6 23h11.5a4.5 4.5 0 0 0 0-4z" />
+                  </svg>
+                  {/* Inner Icon */}
+                  <div className="relative z-10 w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/30 border-2 border-white mt-2">
+                    <Database className="text-white w-8 h-8" />
                   </div>
-                  <h3 className="text-3xl font-light text-white tracking-tight mb-4 drop-shadow-md">Memory Without Context</h3>
-                  <p className="text-slate-200 leading-relaxed text-lg">
+                </div>
+
+                {/* Text underneath the cloud */}
+                <div className="w-full">
+                  <h3 className="text-3xl font-light text-slate-900 tracking-tight mb-4 drop-shadow-sm">Memory Without Context</h3>
+                  <p className="text-slate-700 leading-relaxed text-lg px-4 md:px-0">
                     When AI first began generating text, it was like a brilliant student trapped in a closed room. It had read millions of books during its training, but couldn't look anything up.
                   </p>
                 </div>
+
               </div>
             </motion.div>
 
@@ -107,22 +113,28 @@ export function RotatingWheel() {
               style={{ opacity: opacity2, y: y2, scale: scale2 }}
               className="absolute inset-0 flex items-center justify-center pointer-events-none"
             >
-              <div className="relative w-full max-w-lg">
-                {/* 3D Cloud Shapes Base */}
-                <div className="absolute top-[-50px] right-[10%] w-[130px] h-[130px] bg-indigo-500/20 rounded-full blur-xl"></div>
-                <div className="absolute top-[-30px] left-[20%] w-[140px] h-[140px] bg-blue-500/20 rounded-full blur-xl"></div>
-                <div className="absolute bottom-[-40px] left-[10%] w-[110px] h-[110px] bg-sky-500/20 rounded-full blur-xl"></div>
+              <div className="relative w-full max-w-lg flex flex-col items-center text-center">
                 
-                {/* Main Cloud Body */}
-                <div style={{ borderRadius: '40% 60% 60% 40% / 50% 40% 60% 50%' }} className="bg-white/10 backdrop-blur-2xl border-t border-l border-white/30 p-10 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5),inset_0_0_20px_rgba(255,255,255,0.1)] w-full relative">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-400 to-indigo-600 flex items-center justify-center mb-6 shadow-lg shadow-indigo-500/30 border border-white/20">
-                    <Network className="text-white w-7 h-7" />
+                {/* Cloud Shape Graphic */}
+                <div className="relative w-48 h-32 mb-8 flex items-center justify-center filter drop-shadow-xl">
+                  {/* SVG Cloud Path */}
+                  <svg className="absolute inset-0 w-full h-full text-white fill-current opacity-90 drop-shadow-lg" viewBox="0 0 24 24" preserveAspectRatio="none">
+                    <path d="M17.5 19c2.485 0 4.5-2.015 4.5-4.5 0-2.434-1.92-4.412-4.333-4.495A5.5 5.5 0 0 0 7 8a5.502 5.502 0 0 0-4.996 7.643A4 4 0 0 0 6 23h11.5a4.5 4.5 0 0 0 0-4z" />
+                  </svg>
+                  {/* Inner Icon */}
+                  <div className="relative z-10 w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-400 to-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/30 border-2 border-white mt-2">
+                    <Network className="text-white w-8 h-8" />
                   </div>
-                  <h3 className="text-3xl font-light text-white tracking-tight mb-4 drop-shadow-md">The Library Card</h3>
-                  <p className="text-slate-200 leading-relaxed mb-4 text-lg">
+                </div>
+
+                {/* Text underneath the cloud */}
+                <div className="w-full">
+                  <h3 className="text-3xl font-light text-slate-900 tracking-tight mb-4 drop-shadow-sm">The Library Card</h3>
+                  <p className="text-slate-700 leading-relaxed text-lg px-4 md:px-0">
                     Then came the breakthrough: <strong>Retrieval-Augmented Generation (RAG)</strong>. We gave the AI an open-book test in the world's largest library.
                   </p>
                 </div>
+
               </div>
             </motion.div>
 
@@ -131,22 +143,28 @@ export function RotatingWheel() {
               style={{ opacity: opacity3, y: y3, scale: scale3 }}
               className="absolute inset-0 flex items-center justify-center pointer-events-none"
             >
-              <div className="relative w-full max-w-lg">
-                {/* 3D Cloud Shapes Base */}
-                <div className="absolute top-[-60px] left-[30%] w-[150px] h-[150px] bg-purple-500/20 rounded-full blur-xl"></div>
-                <div className="absolute top-[-20px] right-[5%] w-[120px] h-[120px] bg-pink-500/20 rounded-full blur-xl"></div>
-                <div className="absolute bottom-[-30px] left-[20%] w-[130px] h-[130px] bg-indigo-500/20 rounded-full blur-xl"></div>
+              <div className="relative w-full max-w-lg flex flex-col items-center text-center">
                 
-                {/* Main Cloud Body */}
-                <div style={{ borderRadius: '50% 50% 40% 60% / 60% 50% 40% 50%' }} className="bg-white/10 backdrop-blur-2xl border-t border-l border-white/30 p-10 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5),inset_0_0_20px_rgba(255,255,255,0.1)] w-full relative">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center mb-6 shadow-lg shadow-purple-500/30 border border-white/20">
-                    <Cpu className="text-white w-7 h-7" />
+                {/* Cloud Shape Graphic */}
+                <div className="relative w-48 h-32 mb-8 flex items-center justify-center filter drop-shadow-xl">
+                  {/* SVG Cloud Path */}
+                  <svg className="absolute inset-0 w-full h-full text-white fill-current opacity-90 drop-shadow-lg" viewBox="0 0 24 24" preserveAspectRatio="none">
+                    <path d="M17.5 19c2.485 0 4.5-2.015 4.5-4.5 0-2.434-1.92-4.412-4.333-4.495A5.5 5.5 0 0 0 7 8a5.502 5.502 0 0 0-4.996 7.643A4 4 0 0 0 6 23h11.5a4.5 4.5 0 0 0 0-4z" />
+                  </svg>
+                  {/* Inner Icon */}
+                  <div className="relative z-10 w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-500/30 border-2 border-white mt-2">
+                    <Cpu className="text-white w-8 h-8" />
                   </div>
-                  <h3 className="text-3xl font-light text-white tracking-tight mb-4 drop-shadow-md">The Future of Work</h3>
-                  <p className="text-slate-200 leading-relaxed text-lg">
+                </div>
+
+                {/* Text underneath the cloud */}
+                <div className="w-full">
+                  <h3 className="text-3xl font-light text-slate-900 tracking-tight mb-4 drop-shadow-sm">The Future of Work</h3>
+                  <p className="text-slate-700 leading-relaxed text-lg px-4 md:px-0">
                     At CURA, we've built a system that deeply understands the <em>meaning</em> of your documents. It builds a map of concepts and relationships.
                   </p>
                 </div>
+
               </div>
             </motion.div>
 
@@ -159,8 +177,8 @@ export function RotatingWheel() {
         </div>
 
         <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center opacity-50">
-          <p className="text-white text-xs uppercase tracking-[0.3em] mb-2">Scroll to explore</p>
-          <div className="w-[1px] h-12 bg-gradient-to-b from-white to-transparent"></div>
+          <p className="text-slate-400 text-xs uppercase tracking-[0.3em] mb-2">Scroll to explore</p>
+          <div className="w-[1px] h-12 bg-gradient-to-b from-slate-400 to-transparent"></div>
         </div>
 
       </div>

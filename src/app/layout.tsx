@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist_Mono } from "next/font/google";
+import { Geist_Mono, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import QueryProvider from "@/components/providers/QueryProvider";
@@ -10,6 +10,11 @@ import CookieBanner from "@/components/CookieBanner";
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space-grotesk",
   subsets: ["latin"],
 });
 
@@ -55,8 +60,8 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${geistMono.variable} antialiased font-sans overscroll-y-none selection:bg-blue-100 selection:text-blue-900`}
-        style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"' }}
+        className={`${spaceGrotesk.variable} ${geistMono.variable} antialiased font-sans overscroll-y-none selection:bg-blue-100 selection:text-blue-900`}
+        style={{ fontFamily: 'var(--font-space-grotesk), -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif' }}
       >
         <ThemeProvider>
           <QueryProvider>

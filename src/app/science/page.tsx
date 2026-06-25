@@ -59,10 +59,11 @@ export default function SciencePage() {
             </p>
         </div>
 
-        {/* The 1200x800 Canvas Blueprint */}
-        <div 
-          className="relative w-[1100px] h-[700px] shrink-0 border border-slate-200 rounded-[3rem] overflow-hidden bg-white shadow-2xl shadow-slate-200/50"
-          style={{
+        {/* The 1100x700 Canvas Blueprint (Scaled for mobile) */}
+        <div className="w-full flex justify-center pb-20 md:pb-0">
+          <div 
+            className="relative w-[1100px] h-[700px] shrink-0 border border-slate-200 rounded-[3rem] overflow-hidden bg-white shadow-2xl shadow-slate-200/50 origin-top scale-[0.32] sm:scale-[0.5] md:scale-[0.75] lg:scale-100 transition-transform duration-300"
+            style={{
             backgroundImage: 'radial-gradient(circle, #cbd5e1 1.5px, transparent 1.5px)',
             backgroundSize: '30px 30px'
           }}
@@ -133,6 +134,7 @@ export default function SciencePage() {
               </button>
             );
           })}
+          </div>
         </div>
       </main>
 
@@ -144,7 +146,7 @@ export default function SciencePage() {
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: "100%", opacity: 0 }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed top-0 right-0 max-w-[100vw] w-[400px] h-[100dvh] bg-white/95 backdrop-blur-3xl border-l border-slate-200 shadow-[-20px_0_50px_rgba(0,0,0,0.1)] z-50 flex flex-col"
+            className="fixed top-0 right-0 w-full md:w-[400px] h-[100dvh] bg-white/95 backdrop-blur-3xl md:border-l border-slate-200 shadow-[-20px_0_50px_rgba(0,0,0,0.1)] z-50 flex flex-col"
           >
             <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
               <div className="flex items-center gap-3">
