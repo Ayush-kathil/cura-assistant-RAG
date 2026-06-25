@@ -2,12 +2,31 @@
 @import "tailwindcss";
 @config "../../tailwind.config.ts";
 
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  -webkit-tap-highlight-color: transparent;
+}
+
 body {
   background-color: theme('colors.background');
   color: theme('colors.on-background');
   overflow-x: hidden;
   min-height: 100vh;
   font-family: theme('fontFamily.body-lg'), sans-serif;
+}
+
+/* Prevent sticky hover states on mobile */
+@media (hover: hover) and (pointer: fine) {
+  .hover-target:hover {
+    /* Apply your hover effects here instead of using the generic hover: class */
+  }
+}
+
+@media (hover: none) {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
 }
 
 h1, h2, h3, h4, h5, h6 {

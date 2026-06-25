@@ -45,7 +45,7 @@ function CtaSection() {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.15)_0%,transparent_100%)] pointer-events-none" />
       <div className="absolute top-0 w-full h-px bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
       <motion.div style={{ scale }} className="max-w-4xl mx-auto relative z-10 w-full flex flex-col items-center">
-        <h2 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-light tracking-tighter mb-10 flex justify-center gap-x-3 gap-y-2 flex-wrap text-white">
+        <h2 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-light tracking-tighter mb-10 flex justify-center gap-x-3 gap-y-2 flex-wrap text-white">
           {"Experience the difference.".split(" ").map((word, i) => (
             <AnimatedWord 
               key={i} 
@@ -145,7 +145,7 @@ export default function Home() {
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-              className="text-5xl sm:text-6xl md:text-8xl lg:text-9xl leading-[1.1] md:leading-[0.95] font-bold tracking-tighter text-slate-900 mb-8 break-words"
+              className="text-4xl sm:text-5xl md:text-8xl lg:text-9xl leading-[1.1] md:leading-[0.95] font-bold tracking-tighter text-slate-900 mb-8 break-words"
             >
               Rethink <br/>
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">

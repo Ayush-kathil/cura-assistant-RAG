@@ -16,6 +16,7 @@ Built specifically to demonstrate staff-level engineering rigor, Cura features a
 * **Distributed Async Ingestion:** Utilizes Inngest to map-reduce document parsing and embedding extraction. Features strict rate limiting, event batching, and exponential backoff to respect downstream LLM quotas.
 * **Concurrency-Safe Storage:** Employs Postgres `ON CONFLICT DO UPDATE` schemas to guarantee idempotent insertions and prevent race conditions when thousands of chunks are ingested concurrently.
 * **100% Serverless Architecture:** Node.js (Vercel) + Supabase + Gemini 1.5 Flash. Zero persistent infrastructure overhead.
+* **Mobile-First & PWA Ready:** Engineered for flawlessly responsive UI across iOS Safari and Android devices. Features dynamic viewport handling (`100dvh`), strict touch-action optimizations, OS-level typography scaling, and safe-area notch padding.
 
 ---
 
@@ -33,6 +34,7 @@ Cura leverages a modern serverless stack to deliver enterprise-grade scalability
 | Component | Technology | Purpose |
 | :--- | :--- | :--- |
 | **Frontend** | Next.js 15, React, Tailwind CSS | High-performance, responsive UI |
+| **Mobile UX** | WebKit APIs, Tailwind safe-area | Native-feeling touch bounds & layout |
 | **Backend** | Next.js Route Handlers, Inngest | Serverless API and background jobs |
 | **Database** | Supabase (PostgreSQL) | Relational data, authentication |
 | **Vector Store** | `pgvector` | HNSW semantic search |

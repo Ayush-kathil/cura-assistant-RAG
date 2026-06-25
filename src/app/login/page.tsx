@@ -205,7 +205,7 @@ export default function LoginPage() {
               <span className="text-2xl font-medium tracking-tight text-slate-900">Cura</span>
             </div>
             
-            <h1 className="text-5xl font-light tracking-tight text-slate-900 mb-6 leading-tight">
+            <h1 className="text-3xl md:text-5xl font-light tracking-tight text-slate-900 mb-6 leading-tight">
                 Your journey to <br/><span className="text-blue-600 font-normal">mental clarity</span> starts here.
             </h1>
             <p className="text-lg text-slate-500 max-w-full sm:max-w-[320px] font-light leading-relaxed">

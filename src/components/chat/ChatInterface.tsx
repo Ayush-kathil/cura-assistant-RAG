@@ -321,7 +321,7 @@ export function ChatInterface(props: ChatInterfaceProps) {
                 )}
                 
                 <div className={`
-                  max-w-[90%] md:max-w-[85%] rounded-3xl px-6 py-5
+                  max-w-[90%] md:max-w-[85%] rounded-3xl px-6 py-5 break-words
                   ${msg.role === 'user' 
                     ? 'bg-blue-600 text-white shadow-md ml-auto' 
                     : 'bg-white border border-slate-100 text-slate-800 shadow-sm shadow-slate-200/50'

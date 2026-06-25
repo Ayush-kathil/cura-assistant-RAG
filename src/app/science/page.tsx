@@ -51,7 +51,7 @@ export default function SciencePage() {
       <main className="flex-grow relative w-full flex flex-col items-center justify-center overflow-x-auto overflow-y-hidden custom-scrollbar py-12">
         
         <div className="text-center mb-8">
-            <h1 className="text-4xl md:text-5xl font-light tracking-tighter text-slate-900 mb-4">
+            <h1 className="text-2xl md:text-5xl font-light tracking-tighter text-slate-900 mb-4">
               Interactive Architecture
             </h1>
             <p className="text-slate-500 max-w-lg mx-auto">

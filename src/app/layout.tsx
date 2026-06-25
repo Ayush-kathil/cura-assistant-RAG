@@ -27,6 +27,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false, // Prevents iOS zooming which causes the shrink effect
+  viewportFit: "cover", // Handles notches
+  themeColor: "#05050A",
 };
 
 export default function RootLayout({
@@ -53,7 +55,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${geistMono.variable} antialiased font-sans`}
+        className={`${geistMono.variable} antialiased font-sans overscroll-y-none selection:bg-blue-100 selection:text-blue-900`}
         style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"' }}
       >
         <ThemeProvider>

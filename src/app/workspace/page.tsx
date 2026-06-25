@@ -288,8 +288,8 @@ export default function WorkspacePage() {
       {/* Main Canvas Area */}
       <main className="flex-1 flex flex-col relative bg-white md:bg-transparent min-w-0 md:rounded-l-3xl shadow-[-10px_0_40px_rgba(0,0,0,0.03)] border-l border-slate-200">
         
-        {/* Chat Header */}
-        <header className="flex items-center justify-between px-6 py-4 md:py-6 z-20 bg-white/80 backdrop-blur-md border-b border-slate-200">
+        {/* Header */}
+        <header className="sticky top-0 z-30 px-8 py-6 pt-[max(1.5rem,env(safe-area-inset-top))] flex justify-between items-center bg-white/80 backdrop-blur-md border-b border-slate-200">
           <div className="flex items-center gap-4">
             <button 
               onClick={() => setIsSidebarOpen(true)}
