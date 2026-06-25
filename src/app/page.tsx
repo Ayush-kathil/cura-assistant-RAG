@@ -295,13 +295,13 @@ export default function Home() {
                 transition={{ duration: 1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
                 className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto pointer-events-auto"
               >
-                <button 
-                  onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
+                <Link 
+                  href="/login"
                   className="inline-flex items-center justify-center px-8 py-4 bg-slate-900 text-white text-sm font-medium uppercase tracking-wider hover:bg-slate-800 shadow-2xl shadow-slate-900/20 transition-all hover:-translate-y-1 active:scale-95 group rounded-full w-full sm:w-auto whitespace-nowrap"
                 >
                   Start Your Journey
-                  <span className="ml-4 transform group-hover:translate-x-2 group-hover:rotate-90 transition-transform">&rarr;</span>
-                </button>
+                  <span className="ml-4 transform group-hover:translate-x-2 transition-transform">&rarr;</span>
+                </Link>
                 <Link href="/science" className="inline-flex items-center justify-center px-8 py-4 bg-white/80 backdrop-blur-md text-slate-800 border border-slate-200 text-sm font-medium uppercase tracking-wider hover:border-slate-300 hover:bg-slate-50 active:scale-95 transition-all rounded-full w-full sm:w-auto whitespace-nowrap">
                   Read the Science
                 </Link>
