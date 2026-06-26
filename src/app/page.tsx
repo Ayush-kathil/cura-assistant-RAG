@@ -178,13 +178,14 @@ export default function Home() {
   
   // Cinematic Robot Scroll Animation Logic
   // Scale: Normal (0) -> Large (0.1) -> Small Logo Size (0.25)
-  const robotScale = useTransform(scrollYProgress, [0, 0.1, 0.25, 1], [1, 1.3, 0.12, 0.12]);
+  // Scale: Normal (1) -> Large (1.3) -> Small Logo Size (0.1333 for a 300px wrapper to become 40px)
+  const robotScale = useTransform(scrollYProgress, [0, 0.1, 0.25, 1], [1, 1.3, 0.1333, 0.1333]);
   
   // X/Y Position: Center (0) -> Slightly Down (0.1) -> Top Left Navbar (0.25)
-  // To perfectly align with px-6 md:px-16 navbar logo (which is w-10 = 2.5rem).
-  // Left edge of screen + 1.5rem (px-6) + 1.25rem (half of logo) = 2.75rem from left.
-  const robotX = useTransform(scrollYProgress, [0, 0.1, 0.25, 1], ["0vw", "0vw", "calc(-50vw + 2.75rem)", "calc(-50vw + 2.75rem)"]);
-  const robotY = useTransform(scrollYProgress, [0, 0.1, 0.25, 1], ["-5vh", "0vh", "calc(-50vh + 2.75rem)", "calc(-50vh + 2.75rem)"]);
+  // Nav is px-8 (32px) + mx-4 (16px) = 48px left. Logo is 40px, center = 68px.
+  // Nav is top-4 (16px) + py-4 (16px) = 32px top. Logo center = 52px.
+  const robotX = useTransform(scrollYProgress, [0, 0.1, 0.25, 1], ["0vw", "0vw", "calc(-50vw + 68px)", "calc(-50vw + 68px)"]);
+  const robotY = useTransform(scrollYProgress, [0, 0.1, 0.25, 1], ["-5vh", "0vh", "calc(-50vh + 52px)", "calc(-50vh + 52px)"]);
   
   // Fade out static logo as robot arrives
   const staticLogoOpacity = useTransform(scrollYProgress, [0.15, 0.25], [1, 0]);
@@ -217,7 +218,7 @@ export default function Home() {
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           id="top-nav"
-          className="fixed top-0 w-full z-50 flex justify-between items-center px-6 md:px-16 transition-all duration-500 bg-transparent py-6 border border-transparent text-slate-800"
+          className="fixed top-0 w-full z-50 flex justify-between items-center px-8 transition-all duration-500 bg-transparent py-6 border border-transparent text-slate-800"
         >
           <div className="flex items-center gap-4">
             <Link href="/" className="flex items-center gap-3 group relative w-[120px]">
@@ -263,9 +264,9 @@ export default function Home() {
               y: robotY, 
               scale: robotScale 
             }}
-            className="fixed inset-0 flex items-center justify-center pointer-events-none z-40"
+            className="fixed inset-0 w-full h-full flex items-center justify-center pointer-events-none z-40"
           >
-            <div className="relative w-[80vw] h-[80vw] md:w-[60vh] md:h-[60vh]">
+            <div className="relative w-[300px] h-[300px]">
               <ThinkingCloud />
               <Scene3D />
             </div>
