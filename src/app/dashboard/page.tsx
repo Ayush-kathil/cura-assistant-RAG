@@ -5,7 +5,8 @@ import Link from "next/link";
 import { createClient } from "@/utils/supabase/client";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { MessageSquare, LayoutDashboard, Database, PlusCircle, User, Zap, Bell, FileText, Download, Activity, FileCheck2, HeartPulse, Save, Camera } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { HandDrawnArrow } from "@/components/animations/HandDrawnArrow";
 
 export default function DashboardPage() {
   const supabase = createClient();
@@ -99,8 +100,37 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="bg-slate-50 min-h-screen text-slate-800 font-sans selection:bg-blue-100 selection:text-blue-900 flex overflow-hidden">
+    <div className="bg-slate-50 min-h-screen text-slate-800 font-sans selection:bg-blue-100 selection:text-blue-900 flex overflow-hidden relative">
       
+      {/* Zero-State Onboarding Overlay */}
+      <AnimatePresence>
+        {docCount === 0 && !isLoadingAuth && (
+          <div className="fixed inset-0 z-[45] pointer-events-none">
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1 }} 
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-[3px]" 
+            />
+            <motion.div 
+              initial={{ opacity: 0, x: 20, scale: 0.9 }} 
+              animate={{ opacity: 1, x: 0, scale: 1 }} 
+              transition={{ delay: 0.5, type: "spring", stiffness: 200, damping: 20 }}
+              className="absolute top-[210px] left-[280px] bg-white p-5 rounded-3xl rounded-tl-sm border-2 border-blue-500 shadow-[0_0_40px_rgba(59,130,246,0.3)] max-w-[280px]"
+            >
+              <p className="text-sm font-medium text-slate-800 leading-relaxed relative z-10">
+                Hey {firstName}! I'm a bit empty-headed right now. Upload your first document here so I can learn and answer your questions!
+              </p>
+              {/* Pointing arrow */}
+              <div className="absolute top-4 -left-[60px] w-12 h-12 text-white transform -rotate-90 scale-x-[-1]">
+                <HandDrawnArrow delay={1} />
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* Sidebar */}
       <aside className="hidden md:flex fixed left-0 top-0 h-full z-40 flex-col w-64 bg-white/80 backdrop-blur-xl border-r border-slate-200 transition-all duration-300">
         <div className="flex items-center gap-3 p-6 mb-4">
@@ -120,7 +150,7 @@ export default function DashboardPage() {
             <LayoutDashboard className="w-4 h-4" />
             <span>Dashboard</span>
           </Link>
-          <Link href="/upload-pro" className="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-100 transition-all rounded-xl text-sm font-medium">
+          <Link href="/upload-pro" className={`flex items-center gap-3 px-4 py-3 transition-all rounded-xl text-sm font-medium ${docCount === 0 ? 'relative z-50 bg-white text-blue-600 shadow-[0_0_30px_rgba(59,130,246,0.4)] ring-2 ring-blue-500 scale-105 pointer-events-auto' : 'text-slate-600 hover:bg-slate-100'}`}>
             <Database className="w-4 h-4" />
             <span>Resources</span>
           </Link>

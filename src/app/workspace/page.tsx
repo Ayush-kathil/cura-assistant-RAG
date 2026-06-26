@@ -11,6 +11,7 @@ import { Menu, X, MessageSquare, LayoutDashboard, Database, PlusCircle, User, Tr
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
+import { HandDrawnArrow } from "@/components/animations/HandDrawnArrow";
 
 export default function WorkspacePage() {
   const router = useRouter();
@@ -169,8 +170,36 @@ export default function WorkspacePage() {
   const firstName = userEmail?.split('@')[0] || 'Guest';
 
   return (
-    <div className="bg-slate-50 h-[100dvh] text-slate-800 font-sans selection:bg-blue-100 selection:text-blue-900 flex overflow-hidden">
+    <div className="bg-slate-50 h-[100dvh] text-slate-800 font-sans selection:bg-blue-100 selection:text-blue-900 flex overflow-hidden relative">
       
+      {/* Zero-State Onboarding Overlay */}
+      <AnimatePresence>
+        {documents.length === 0 && (
+          <div className="fixed inset-0 z-[45] pointer-events-none hidden md:block">
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1 }} 
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-[3px]" 
+            />
+            <motion.div 
+              initial={{ opacity: 0, x: 20, scale: 0.9 }} 
+              animate={{ opacity: 1, x: 0, scale: 1 }} 
+              transition={{ delay: 0.5, type: "spring", stiffness: 200, damping: 20 }}
+              className="absolute top-[210px] left-[280px] bg-white p-5 rounded-3xl rounded-tl-sm border-2 border-blue-500 shadow-[0_0_40px_rgba(59,130,246,0.3)] max-w-[280px]"
+            >
+              <p className="text-sm font-medium text-slate-800 leading-relaxed relative z-10">
+                Hey {firstName}! I can't answer any questions until you give me some context. Upload a document here first!
+              </p>
+              <div className="absolute top-4 -left-[60px] w-12 h-12 text-white transform -rotate-90 scale-x-[-1]">
+                <HandDrawnArrow delay={1} />
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* Overlay for mobile sidebar */}
       {isSidebarOpen && (
         <div 
@@ -210,7 +239,7 @@ export default function WorkspacePage() {
             <LayoutDashboard className="w-4 h-4" />
             <span>Dashboard</span>
           </Link>
-          <Link href="/upload-pro" className="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-100 transition-all rounded-xl text-sm font-medium">
+          <Link href="/upload-pro" className={`flex items-center gap-3 px-4 py-3 transition-all rounded-xl text-sm font-medium ${documents.length === 0 ? 'relative z-50 bg-white text-blue-600 shadow-[0_0_30px_rgba(59,130,246,0.4)] ring-2 ring-blue-500 scale-105 pointer-events-auto' : 'text-slate-600 hover:bg-slate-100'}`}>
             <Database className="w-4 h-4" />
             <span>Resources</span>
           </Link>
