@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
     
     if (doc.file_name.toLowerCase().endsWith(".pdf")) {
       console.log("[MULTI-MODAL PARSING] Analyzing PDF with Gemini Vision...");
-      const extractionModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const extractionModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
       const b64Data = buffer.toString("base64");
       
       const prompt = `You are a highly precise document extraction AI. Extract the content of the attached PDF document perfectly into Markdown. 
@@ -119,7 +119,7 @@ Rules:
     console.log("[ENTITY EXTRACTION] Extracting GraphRAG entities...");
     let entities: string[] = [];
     try {
-      const entityModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const entityModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
       const entityPrompt = `Extract key entities (People, Organizations, Locations, Technical Concepts) from the following text. Return them as a simple comma-separated list of highly relevant keywords. Max 15 entities. Do not add any introductory or formatting text, just the comma-separated list.
 Text: ${fullText.substring(0, 15000)}`;
       
