@@ -12,6 +12,9 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { HandDrawnArrow } from "@/components/animations/HandDrawnArrow";
+import dynamic from "next/dynamic";
+
+const Scene3D = dynamic(() => import("@/components/animations/Scene3D").then(mod => mod.Scene3D), { ssr: false });
 
 export default function WorkspacePage() {
   const router = useRouter();
@@ -212,7 +215,11 @@ export default function WorkspacePage() {
       {/* SideNavBar */}
       <aside className={`fixed md:relative left-0 top-0 h-full z-40 flex flex-col w-64 bg-white/80 backdrop-blur-xl border-r border-slate-200 transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
         <div className="flex items-center gap-3 p-6 mb-4">
-          <img src="/bot.jpg" alt="Cura Logo" className="w-10 h-10 rounded-full object-cover border border-slate-200 shadow-sm" />
+          <div className="w-10 h-10 relative border border-slate-200 rounded-full shadow-sm overflow-hidden bg-white shrink-0">
+             <div className="absolute inset-0 scale-[2.5] translate-y-1 pointer-events-none">
+                <Scene3D isSplashActive={false} />
+             </div>
+          </div>
           <div>
             <h1 className="font-light text-xl tracking-tighter text-slate-900 uppercase">Cura</h1>
             <p className="text-[10px] text-slate-400 font-medium uppercase tracking-widest">Your AI Companion</p>

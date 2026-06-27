@@ -1,14 +1,18 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { agentEventBus, AgentStreamEvent } from '@/lib/events/AgentEventBus';
 import { chatStateMachine } from '@/lib/events/ChatStateMachine';
 
 export function useAgentStream() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const submitQueryMock = useCallback(async (query: string, workspaceId: string, targetDocumentId?: string | null, researchMode: boolean = false) => {
     setIsStreaming(true);
     setError(null);
+    
+    abortControllerRef.current = new AbortController();
+    const signal = abortControllerRef.current.signal;
     chatStateMachine.transition('SUBMITTING');
 
     const emit = (event: Omit<AgentStreamEvent, 'id' | 'timestamp'>) => {
@@ -27,6 +31,7 @@ export function useAgentStream() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query, workspaceId, targetDocumentId, researchMode }),
+        signal,
       });
 
       if (!response.ok) {
@@ -87,7 +92,11 @@ export function useAgentStream() {
         }
       }
     } catch (err: any) {
-      setError(err.message);
+      if (err.name === 'AbortError') {
+        console.log('Stream aborted by user');
+      } else {
+        setError(err.message);
+      }
       chatStateMachine.transition('IDLE');
     } finally {
       setIsStreaming(false);
@@ -95,9 +104,19 @@ export function useAgentStream() {
 
   }, []);
 
+  const stopQuery = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    setIsStreaming(false);
+    chatStateMachine.transition('IDLE');
+  }, []);
+
   return {
     submitQueryMock, // Keeping the same name to avoid breaking ChatInterface references before we update it
     submitQuery: submitQueryMock,
+    stopQuery,
     isStreaming,
     error
   };

@@ -38,7 +38,7 @@ export function ChatInterface(props: ChatInterfaceProps) {
   const [chatState, setChatState] = useState<ChatState>('IDLE');
   
   // SSE Streaming Hook
-  const { submitQuery, isStreaming, error } = useAgentStream();
+  const { submitQuery, stopQuery, isStreaming, error } = useAgentStream();
   const { documents } = useChatSession();
   const { activeWorkspace } = useWorkspace();
   
@@ -356,7 +356,9 @@ export function ChatInterface(props: ChatInterfaceProps) {
                             }
                           }}
                         >
-                          {(msg.content || '').replace(/\[(\d+)\]/g, '[$1](citation)')}
+                          {(msg.content || '')
+                            .replace(/\[[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\]/g, '')
+                            .replace(/\[(\d+)\]/g, '[$1](citation)')}
                         </ReactMarkdown>
                       )}
                       
@@ -499,6 +501,7 @@ export function ChatInterface(props: ChatInterfaceProps) {
               {isStreaming ? (
                 <button
                   type="button"
+                  onClick={stopQuery}
                   className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl transition-colors"
                 >
                   <StopCircle className="w-5 h-5" />
