@@ -75,7 +75,7 @@ function MobileMenu({ isOpen, onClose }: { isOpen: boolean, onClose: () => void 
             <X className="w-8 h-8" />
           </button>
           <div className="flex flex-col gap-6 text-3xl font-light tracking-tight mt-10">
-            {['History of RAG', 'Science', 'Pricing', 'Dashboard'].map((item, i) => (
+            {['History of RAG', 'Science', 'Pricing'].map((item, i) => (
               <motion.div
                 key={item}
                 initial={{ opacity: 0, x: -20 }}
@@ -83,7 +83,7 @@ function MobileMenu({ isOpen, onClose }: { isOpen: boolean, onClose: () => void 
                 transition={{ delay: i * 0.1, type: "spring", stiffness: 300, damping: 24 }}
               >
                 <Link 
-                  href={item === 'History of RAG' ? '#history' : `/${item.toLowerCase()}`}
+                  href={item === 'History of RAG' ? '/history' : `/${item.toLowerCase()}`}
                   onClick={onClose}
                   className="block hover:text-blue-600 transition-colors"
                 >
@@ -119,15 +119,14 @@ function ThinkingCloudContent() {
 
   const messages = isLogout && userName 
     ? [
-        `Hello ${userName}, should we start our work?`,
-        "I'm ready when you are.",
-        "Let's build something amazing today.",
+        `Welcome back, ${userName}! Ready to brainstorm?`,
+        "I've been analyzing your recent data.",
+        "Let's dive into some deep problem solving.",
       ]
     : [
-        "Shall we start?",
-        "I am CURA, your AI companion.",
-        "What can I help you discover?",
-        "Let's explore the science of RAG.",
+        "Thinking about how to optimize your workflow...",
+        "Analyzing patterns in your documents...",
+        "Ready to assist with your next big idea.",
       ];
 
   const [messageIndex, setMessageIndex] = useState(0);
@@ -144,62 +143,78 @@ function ThinkingCloudContent() {
       initial={{ opacity: 0, scale: 0.8, y: 10 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{ delay: 1, type: "spring", stiffness: 200, damping: 15 }}
-      className="absolute top-[10%] right-[10%] bg-white text-slate-800 px-6 py-4 rounded-3xl rounded-bl-sm shadow-2xl border-2 border-blue-500 z-50 max-w-[200px]"
+      className="absolute top-[-30%] left-[90%] z-50 flex items-center justify-center min-w-[200px]"
     >
-      <AnimatePresence mode="wait">
-        <motion.p 
-          key={messageIndex}
-          initial={{ opacity: 0, y: 5 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -5 }}
-          transition={{ duration: 0.2 }}
-          className="text-sm font-medium leading-snug"
-        >
-          {messages[messageIndex]}
-        </motion.p>
-      </AnimatePresence>
-      {/* Little tail for the cloud */}
-      <div className="absolute -bottom-2 left-4 w-4 h-4 bg-white border-b-2 border-r-2 border-blue-500 transform rotate-45" />
+      {/* Fluffy CSS Cloud using overlapping divs */}
+      <div className="relative bg-white text-slate-800 px-8 py-6 rounded-[3rem] shadow-2xl z-10 w-full min-h-[80px] flex items-center justify-center">
+        {/* Cloud bumps */}
+        <div className="absolute -top-4 left-6 w-12 h-12 bg-white rounded-full"></div>
+        <div className="absolute -top-6 right-8 w-16 h-16 bg-white rounded-full"></div>
+        <div className="absolute -bottom-3 left-10 w-10 h-10 bg-white rounded-full"></div>
+        
+        {/* Thinking tail circles */}
+        <div className="absolute -bottom-4 -left-2 w-6 h-6 bg-white rounded-full shadow-lg"></div>
+        <div className="absolute -bottom-8 -left-6 w-3 h-3 bg-white rounded-full shadow-sm"></div>
+
+        <div className="relative z-20">
+          <AnimatePresence mode="wait">
+            <motion.p 
+              key={messageIndex}
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -5 }}
+              transition={{ duration: 0.2 }}
+              className="text-sm font-medium leading-snug whitespace-nowrap"
+            >
+              {messages[messageIndex]}
+            </motion.p>
+          </AnimatePresence>
+        </div>
+      </div>
     </motion.div>
   );
 }
 
-function ThinkingCloud() {
+function ThinkingCloud({ opacity }: { opacity: any }) {
   return (
-    <Suspense fallback={null}>
-      <ThinkingCloudContent />
-    </Suspense>
+    <motion.div style={{ opacity }}>
+      <Suspense fallback={null}>
+        <ThinkingCloudContent />
+      </Suspense>
+    </motion.div>
   );
 }
 
 export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [showSplash, setShowSplash] = useState(true);
+  const [showSplash, setShowSplash] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const { scrollYProgress } = useScroll();
 
   useEffect(() => {
+    setIsMounted(true);
     const hasSeenSplash = sessionStorage.getItem('hasSeenSplash');
-    if (hasSeenSplash) {
-      setShowSplash(false);
-    } else {
+    if (!hasSeenSplash) {
+      setShowSplash(true);
       sessionStorage.setItem('hasSeenSplash', 'true');
       const timer = setTimeout(() => {
         setShowSplash(false);
-      }, 3500); // Wait 3.5 seconds before fading out splash
+      }, 3500);
       return () => clearTimeout(timer);
     }
   }, []);
   
   // Cinematic Robot Scroll Animation Logic
-  // Scale: Normal (0) -> Large (0.1) -> Small Logo Size (0.25)
-  // Scale: Normal (1) -> Large (1.3) -> Small Logo Size (0.1333 for a 300px wrapper to become 40px)
-  const robotScale = useTransform(scrollYProgress, [0, 0.1, 0.25, 1], [1, 1.3, 0.1333, 0.1333]);
+  // Scale: Normal (1) -> Large (1.3) -> Small Logo Size (0.15)
+  const robotScale = useTransform(scrollYProgress, [0, 0.1, 0.25, 1], [1, 1.2, 0.25, 0.25]);
   
-  // X/Y Position: Center (0) -> Slightly Down (0.1) -> Top Left Navbar (0.25)
-  // Nav is px-8 (32px) + mx-4 (16px) = 48px left. Logo is 40px, center = 68px.
-  // Nav is top-4 (16px) + py-4 (16px) = 32px top. Logo center = 52px.
-  const robotX = useTransform(scrollYProgress, [0, 0.1, 0.25, 1], ["0vw", "0vw", "calc(-50vw + 68px)", "calc(-50vw + 68px)"]);
-  const robotY = useTransform(scrollYProgress, [0, 0.1, 0.25, 1], ["-5vh", "0vh", "calc(-50vh + 52px)", "calc(-50vh + 52px)"]);
+  // X/Y Position: Center (0) -> Slightly Down (0.1) -> Bottom Right (0.25)
+  // Bottom Right is approx 50vw - 80px and 50vh - 80px
+  const robotX = useTransform(scrollYProgress, [0, 0.1, 0.25, 1], ["0vw", "0vw", "calc(50vw - 80px)", "calc(50vw - 80px)"]);
+  const robotY = useTransform(scrollYProgress, [0, 0.1, 0.25, 1], ["-5vh", "0vh", "calc(50vh - 80px)", "calc(50vh - 80px)"]);
+  
+  // Fade out thinking cloud on scroll
+  const cloudOpacity = useTransform(scrollYProgress, [0, 0.05], [1, 0]);
   
   // Fade out static logo as robot arrives
   const staticLogoOpacity = useTransform(scrollYProgress, [0.15, 0.25], [1, 0]);
@@ -225,7 +240,7 @@ export default function Home() {
   return (
     <>
       <AnimatePresence>
-        {showSplash && (
+        {isMounted && showSplash && (
           <motion.div 
             key="splash"
             initial={{ opacity: 1 }}
@@ -233,8 +248,34 @@ export default function Home() {
             transition={{ duration: 1 }}
             className="fixed inset-0 z-[100] bg-white flex items-center justify-center overflow-hidden"
           >
-            <div className="w-full h-full relative">
-              <Scene3D isSplashActive={true} />
+            <div className="w-full h-full relative flex flex-col items-center justify-center">
+              <div className="w-[150px] h-[150px]">
+                <Scene3D isSplashActive={true} />
+              </div>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ delay: 1, type: "spring", stiffness: 200, damping: 15 }}
+                className="mt-12 flex items-center justify-center min-w-[200px]"
+              >
+                {/* Fluffy CSS Cloud using overlapping divs */}
+                <div className="relative bg-white text-slate-800 px-8 py-4 rounded-[3rem] shadow-2xl z-10 w-full min-h-[60px] flex items-center justify-center">
+                  {/* Cloud bumps */}
+                  <div className="absolute -top-4 left-6 w-12 h-12 bg-white rounded-full"></div>
+                  <div className="absolute -top-6 right-8 w-16 h-16 bg-white rounded-full"></div>
+                  <div className="absolute -bottom-3 left-10 w-10 h-10 bg-white rounded-full"></div>
+                  
+                  {/* Thinking tail circles (pointing UP towards the bot since it's below) */}
+                  <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-6 h-6 bg-white rounded-full shadow-lg"></div>
+                  <div className="absolute -top-10 left-1/2 -translate-x-1/2 ml-4 w-3 h-3 bg-white rounded-full shadow-sm"></div>
+
+                  <div className="relative z-20">
+                    <p className="text-xl font-bold leading-snug whitespace-nowrap text-blue-600">
+                      hiiiii
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
             </div>
           </motion.div>
         )}
@@ -264,10 +305,9 @@ export default function Home() {
             </Link>
           </div>
           <div className="hidden md:flex items-center gap-10">
-            <Link href="#history" className="text-sm font-medium tracking-wide uppercase hover:text-blue-600 transition-colors">History of RAG</Link>
+            <Link href="/history" className="text-sm font-medium tracking-wide uppercase hover:text-blue-600 transition-colors">History of RAG</Link>
             <Link href="/science" className="text-sm font-medium tracking-wide uppercase hover:text-blue-600 transition-colors">Science</Link>
             <Link href="/pricing" className="text-sm font-medium tracking-wide uppercase hover:text-blue-600 transition-colors">Pricing</Link>
-            <Link href="/dashboard" className="text-sm font-medium tracking-wide uppercase hover:text-blue-600 transition-colors">Dashboard</Link>
           </div>
           <div className="hidden md:flex items-center gap-4">
             <Link href="/login" className="px-6 py-3 bg-blue-600 text-white text-sm font-medium uppercase tracking-wider hover:bg-blue-700 shadow-lg shadow-blue-500/30 hover:shadow-blue-600/40 hover:-translate-y-0.5 active:scale-95 transition-all rounded-full duration-300">
@@ -296,17 +336,17 @@ export default function Home() {
             }}
             className="fixed inset-0 w-full h-full flex items-center justify-center pointer-events-none z-40"
           >
-            <div className="relative w-[300px] h-[300px]">
-              <ThinkingCloud />
+            <Link href="/login" className="relative w-[300px] h-[300px] pointer-events-auto cursor-pointer block hover:scale-110 transition-transform">
+              <ThinkingCloud opacity={cloudOpacity} />
               <Scene3D />
-            </div>
+            </Link>
           </motion.div>
 
           {/* Hero Section with React Three Fiber 3D Scene */}
           <section className="relative min-h-[100dvh] flex flex-col items-center justify-center overflow-hidden bg-white pt-32 pb-16">
             
             {/* Invisible spacer to maintain layout balance where the robot used to be */}
-            <div className="relative w-full h-[40vh] md:h-[45vh] mb-4 mt-8 pointer-events-none" />
+            <div className="relative w-full h-[25vh] md:h-[30vh] mb-4 mt-8 pointer-events-none" />
             
             {/* Subheading and CTAs below */}
             <div className="relative z-10 w-full px-6 md:px-8 flex flex-col items-center text-center max-w-2xl pointer-events-none">

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { Turnstile } from '@marsidev/react-turnstile';
 import Link from "next/link";
+import { Scene3D } from "@/components/animations/Scene3D";
 
 export default function LoginPage() {
   const [activeTab, setActiveTab] = useState<'login' | 'signup' | 'forgot_password' | 'update_password'>('login');
@@ -198,31 +199,26 @@ export default function LoginPage() {
         {/* Left Side: Illustrative & Branding */}
         <div className="hidden md:flex flex-col justify-between p-12 bg-white/80 backdrop-blur-md rounded-3xl border border-slate-200 shadow-xl relative overflow-hidden">
           <div className="relative z-10">
-            <div className="flex items-center gap-3 mb-12">
+            <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center shadow-[0_0_20px_rgba(37,99,235,0.4)]">
                 <span className="material-symbols-outlined text-white" style={{fontVariationSettings: "'FILL' 1"}}>psychology</span>
               </div>
               <span className="text-2xl font-medium tracking-tight text-slate-900">Cura</span>
             </div>
             
-            <h1 className="text-3xl md:text-5xl font-light tracking-tight text-slate-900 mb-6 leading-tight">
-                Your journey to <br/><span className="text-blue-600 font-normal">mental clarity</span> starts here.
-            </h1>
-            <p className="text-lg text-slate-500 max-w-full sm:max-w-[320px] font-light leading-relaxed">
-                Experience a companion that listens, understands, and grows with you through every mood.
-            </p>
+            {/* 3D Bot replacing the text */}
+            <div className="w-full h-[320px] relative -ml-4 pointer-events-none">
+              <Scene3D isSplashActive={false} />
+            </div>
           </div>
           
-          <div className="relative z-10 mt-12 bg-slate-50 backdrop-blur-sm p-6 rounded-2xl border border-slate-200">
-            <div className="flex gap-2 mb-4">
-              <span className="material-symbols-outlined text-blue-400" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
-              <span className="material-symbols-outlined text-blue-400" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
-              <span className="material-symbols-outlined text-blue-400" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
-              <span className="material-symbols-outlined text-blue-400" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
-              <span className="material-symbols-outlined text-blue-400" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
-            </div>
-            <p className="italic text-slate-700 text-sm mb-3">"Cura has helped me navigate through my most stressful weeks with grace and empathy."</p>
-            <span className="text-xs font-medium text-slate-500">— Sarah J., Member since 2023</span>
+          <div className="relative z-10 mt-auto bg-slate-50/80 backdrop-blur-sm p-8 rounded-2xl border border-slate-200 shadow-sm">
+            <h1 className="text-2xl md:text-3xl font-light tracking-tight text-slate-900 mb-4 leading-tight">
+                Meet your new <br/><span className="text-blue-600 font-normal">AI companion</span>.
+            </h1>
+            <p className="text-base text-slate-500 font-light leading-relaxed">
+                Chat, learn, and explore ideas with an intelligent assistant designed to help you accomplish more every day.
+            </p>
           </div>
 
           <div className="absolute bottom-[-10%] right-[-10%] w-[80vw] max-w-[300px] h-[80vw] max-h-[300px] bg-blue-600/10 rounded-full blur-[80px]"></div>
@@ -272,11 +268,11 @@ export default function LoginPage() {
           {/* Login Form */}
           {activeTab === 'login' && (
             <div className="animate-in fade-in duration-300">
-              <header className="mb-8">
+              <header className="mb-6">
                 <h2 className="text-2xl font-light text-slate-900 tracking-tight mb-2">Welcome Back</h2>
                 <p className="text-slate-500 font-light">Please enter your details to continue your session.</p>
               </header>
-              <form className="space-y-5" onSubmit={handleLogin}>
+              <form className="space-y-4" onSubmit={handleLogin}>
                 <div className="space-y-2">
                   <label className="text-xs font-medium text-slate-500 ml-4 uppercase tracking-wider">Email Address</label>
                   <input 
@@ -304,14 +300,14 @@ export default function LoginPage() {
                 </div>
                 
                 {/* Cloudflare Turnstile */}
-                <div className="flex justify-center mt-2">
+                <div className="flex justify-center mt-2 min-h-[65px]">
                   <Turnstile
                     siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA"}
                     onSuccess={(token) => setCaptchaToken(token)}
                   />
                 </div>
 
-                <div className="flex items-start gap-3 mt-6 mb-6">
+                <div className="flex items-start gap-3 mt-4 mb-4">
                   <input 
                     type="checkbox" 
                     id="terms-login" 
@@ -337,11 +333,11 @@ export default function LoginPage() {
           {/* Signup Form */}
           {activeTab === 'signup' && (
             <div className="animate-in fade-in duration-300">
-              <header className="mb-8">
+              <header className="mb-6">
                 <h2 className="text-2xl font-light text-slate-900 tracking-tight mb-2">Create Account</h2>
                 <p className="text-slate-500 font-light">Start your personal wellness journey today.</p>
               </header>
-              <form className="space-y-4" onSubmit={handleSignup}>
+              <form className="space-y-3" onSubmit={handleSignup}>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="text-xs font-medium text-slate-500 ml-4 uppercase tracking-wider">First Name</label>
@@ -390,17 +386,17 @@ export default function LoginPage() {
                 </div>
                 
                 {/* Cloudflare Turnstile */}
-                <div className="flex justify-center mt-2">
+                <div className="flex justify-center mt-2 min-h-[65px]">
                   <Turnstile
                     siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA"}
                     onSuccess={(token) => setCaptchaToken(token)}
                   />
                 </div>
 
-                <p className="text-xs text-slate-500 px-4 leading-relaxed">
+                <p className="text-xs text-slate-500 px-4 leading-relaxed hidden">
                     By clicking sign up, you agree to our <Link className="text-blue-600 hover:text-blue-700" href="/privacy">Privacy Policy</Link> and <Link className="text-blue-600 hover:text-blue-700" href="/terms">Terms of Service</Link>.
                 </p>
-                <div className="flex items-start gap-3 mt-6 mb-6">
+                <div className="flex items-start gap-3 mt-4 mb-4">
                   <input 
                     type="checkbox" 
                     id="terms-signup" 

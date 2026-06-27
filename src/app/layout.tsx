@@ -5,7 +5,6 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import QueryProvider from "@/components/providers/QueryProvider";
 import { WorkspaceProvider } from "@/contexts/WorkspaceContext";
 import { Toaster } from "sonner";
-import LoadingScreen from "@/components/LoadingScreen";
 import CookieBanner from "@/components/CookieBanner";
 
 const geistMono = Geist_Mono({
@@ -66,7 +65,6 @@ export default function RootLayout({
         <ThemeProvider>
           <QueryProvider>
             <WorkspaceProvider>
-              <LoadingScreen />
               {children}
               <CookieBanner />
               <Toaster position="top-right" />
