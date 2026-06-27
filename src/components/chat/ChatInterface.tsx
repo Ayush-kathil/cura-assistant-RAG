@@ -9,7 +9,7 @@ import { CitationDrawer, CitationData } from './CitationDrawer';
 import { chatStateMachine, ChatState } from '@/lib/events/ChatStateMachine';
 import { agentEventBus } from '@/lib/events/AgentEventBus';
 import { useWorkspace } from '@/contexts/WorkspaceContext';
-import { Send, Bot, User, Loader2, StopCircle, FileText, Plus, ThumbsUp, ThumbsDown, Mic, Database } from 'lucide-react';
+import { Send, Bot, User, Loader2, StopCircle, FileText, Plus, ThumbsUp, ThumbsDown, Mic, Database, Copy, Check } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { SplitPaneViewer } from '../pdf/SplitPaneViewer';
 
@@ -58,6 +58,7 @@ export function ChatInterface(props: ChatInterfaceProps) {
 
   // Voice Input State
   const [isListening, setIsListening] = useState(false);
+  const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
@@ -271,6 +272,12 @@ export function ChatInterface(props: ChatInterfaceProps) {
     setViewerCitationText(`Citation Reference: ${citationMatch}`);
   };
 
+  const handleCopy = (messageId: string, content: string) => {
+    navigator.clipboard.writeText(content);
+    setCopiedMessageId(messageId);
+    setTimeout(() => setCopiedMessageId(null), 2000);
+  };
+
   return (
     <div className="flex h-full w-full">
       <div className="flex flex-col h-full bg-white relative flex-1 min-w-0">
@@ -367,6 +374,13 @@ export function ChatInterface(props: ChatInterfaceProps) {
                       {/* RLHF Feedback Loop */}
                       {msg.content !== '' && chatState === 'COMPLETED' && (
                         <div className="flex items-center gap-2 mt-3 pt-3 border-t border-slate-100">
+                          <button 
+                            onClick={() => handleCopy(msg.id, msg.content)}
+                            className="p-1.5 rounded-md hover:bg-slate-100 transition-colors text-slate-400"
+                            title="Copy message"
+                          >
+                            {copiedMessageId === msg.id ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+                          </button>
                           <button 
                             onClick={() => handleFeedback(msg.id, true)}
                             className={`p-1.5 rounded-md hover:bg-slate-100 transition-colors ${msg.feedback === 'up' ? 'text-green-600 bg-green-50' : 'text-slate-400'}`}
