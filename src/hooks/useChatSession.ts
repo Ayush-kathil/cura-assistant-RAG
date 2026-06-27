@@ -16,6 +16,7 @@ export interface DocumentItem {
 export function useChatSession() {
   const supabase = createClient();
   const [documents, setDocuments] = useState<DocumentItem[]>([]);
+  const [isLoadingDocuments, setIsLoadingDocuments] = useState(true);
   const [messages, setMessages] = useState<Message[]>([]);
   const [generationState, setGenerationState] = useState<GenerationState>("idle");
   const [currentLeafId, setCurrentLeafId] = useState<string | null>(null);
@@ -43,6 +44,7 @@ export function useChatSession() {
 
   const fetchDocuments = async () => {
     if (!activeWorkspace) return;
+    setIsLoadingDocuments(true);
     const { data } = await supabase.from('documents')
       .select('*')
       .eq('workspace_id', activeWorkspace.id)
@@ -51,6 +53,7 @@ export function useChatSession() {
       setDocuments(data);
       setActiveDocumentIds(data.map((d: any) => d.id));
     }
+    setIsLoadingDocuments(false);
   };
 
   const fetchChatSessions = async (page = 0, query = searchQuery, append = false) => {
@@ -172,6 +175,7 @@ export function useChatSession() {
 
   return {
     documents,
+    isLoadingDocuments,
     setDocuments,
     messages,
     setMessages,

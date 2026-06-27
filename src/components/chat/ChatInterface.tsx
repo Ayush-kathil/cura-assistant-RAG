@@ -360,23 +360,7 @@ export function ChatInterface(props: ChatInterfaceProps) {
                         </ReactMarkdown>
                       )}
                       
-                      {msg.verificationResult && (
-                        <div className="mt-4 pt-4 border-t border-slate-200">
-                          <p className="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wider">Citation Verification</p>
-                          <ul className="text-xs space-y-1">
-                            {msg.verificationResult.map((v: any, i: number) => (
-                              <li key={i} className="flex flex-col mb-1">
-                                <span className={`px-2 py-0.5 rounded font-bold self-start mb-1 ${
-                                  v.status === 'Verified' ? 'bg-green-100 text-green-800' :
-                                  v.status === 'Unsupported' ? 'bg-red-100 text-red-800' :
-                                  'bg-yellow-100 text-yellow-800'
-                                }`}>{v.status}</span>
-                                <span className="text-slate-600 italic">"{v.sentence}"</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
+
                       
                       {/* RLHF Feedback Loop */}
                       {msg.content !== '' && chatState === 'COMPLETED' && (

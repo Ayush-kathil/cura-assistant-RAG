@@ -174,7 +174,21 @@ function ThinkingCloud() {
 
 export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
   const { scrollYProgress } = useScroll();
+
+  useEffect(() => {
+    const hasSeenSplash = sessionStorage.getItem('hasSeenSplash');
+    if (hasSeenSplash) {
+      setShowSplash(false);
+    } else {
+      sessionStorage.setItem('hasSeenSplash', 'true');
+      const timer = setTimeout(() => {
+        setShowSplash(false);
+      }, 3500); // Wait 3.5 seconds before fading out splash
+      return () => clearTimeout(timer);
+    }
+  }, []);
   
   // Cinematic Robot Scroll Animation Logic
   // Scale: Normal (0) -> Large (0.1) -> Small Logo Size (0.25)
@@ -209,8 +223,24 @@ export default function Home() {
   }, []);
 
   return (
-    <SmoothScroll>
-      <div className="bg-slate-50 text-slate-900 font-sans selection:bg-blue-100 selection:text-blue-900 min-h-[100dvh]">
+    <>
+      <AnimatePresence>
+        {showSplash && (
+          <motion.div 
+            key="splash"
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1 }}
+            className="fixed inset-0 z-[100] bg-white flex items-center justify-center overflow-hidden"
+          >
+            <div className="w-full h-full relative">
+              <Scene3D isSplashActive={true} />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <SmoothScroll>
+        <div className="bg-slate-50 text-slate-900 font-sans selection:bg-blue-100 selection:text-blue-900 min-h-[100dvh]">
         
         {/* Top Navigation */}
         <motion.nav 
@@ -352,5 +382,6 @@ export default function Home() {
         </footer>
       </div>
     </SmoothScroll>
+    </>
   );
 }

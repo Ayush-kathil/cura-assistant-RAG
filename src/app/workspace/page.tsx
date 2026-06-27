@@ -23,6 +23,7 @@ export default function WorkspacePage() {
 
   const {
     documents,
+    isLoadingDocuments,
     setDocuments,
     messages,
     setMessages,
@@ -174,7 +175,7 @@ export default function WorkspacePage() {
       
       {/* Zero-State Onboarding Overlay */}
       <AnimatePresence>
-        {documents.length === 0 && (
+        {!isLoadingDocuments && documents.length === 0 && (
           <div className="fixed inset-0 z-[45] pointer-events-none hidden md:block">
             <motion.div 
               initial={{ opacity: 0 }} 

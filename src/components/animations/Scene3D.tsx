@@ -2,11 +2,15 @@
 
 import { useRef, useState, useEffect } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Sphere, Float, Trail, Sparkles } from "@react-three/drei";
+import { Float, RoundedBox, Sphere, Cylinder } from "@react-three/drei";
 import * as THREE from "three";
 
-function NeuralConstellation() {
+export function FullBotModel({ isSplashActive }: { isSplashActive: boolean }) {
   const groupRef = useRef<THREE.Group>(null);
+  const headRef = useRef<THREE.Group>(null);
+  const leftEyeRef = useRef<THREE.Mesh>(null);
+  const rightEyeRef = useRef<THREE.Mesh>(null);
+  const mouthRef = useRef<THREE.Mesh>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
@@ -21,104 +25,103 @@ function NeuralConstellation() {
   }, []);
 
   useFrame((state) => {
-    if (groupRef.current) {
-      // Gentle constant rotation
-      groupRef.current.rotation.y += 0.002;
-      groupRef.current.rotation.x += 0.001;
+    // Look at cursor logic
+    if (headRef.current && !isSplashActive) {
+      const targetRotationX = -mousePos.y * 0.5;
+      const targetRotationY = mousePos.x * 0.5;
+      headRef.current.rotation.x += (targetRotationX - headRef.current.rotation.x) * 0.05;
+      headRef.current.rotation.y += (targetRotationY - headRef.current.rotation.y) * 0.05;
+    }
 
-      // Parallax effect based on mouse
-      const targetX = mousePos.x * 0.2;
-      const targetY = mousePos.y * 0.2;
-      
-      groupRef.current.position.x += (targetX - groupRef.current.position.x) * 0.05;
-      groupRef.current.position.y += (targetY - groupRef.current.position.y) * 0.05;
+    if (groupRef.current && isSplashActive) {
+      // In splash mode, look straight ahead, smile, and slowly scale up
+      headRef.current!.rotation.x += (0 - headRef.current!.rotation.x) * 0.05;
+      headRef.current!.rotation.y += (0 - headRef.current!.rotation.y) * 0.05;
+      const t = state.clock.elapsedTime;
+      const scale = Math.min(1 + t * 0.3, 3); // Scale up over time
+      groupRef.current.scale.set(scale, scale, scale);
+    }
+
+    // Blinking logic
+    if (leftEyeRef.current && rightEyeRef.current) {
+      const time = state.clock.elapsedTime;
+      const blink = Math.sin(time * 3) > 0.98 || Math.sin(time * 5) > 0.99;
+      const targetScaleY = blink ? 0.1 : 1;
+      leftEyeRef.current.scale.y += (targetScaleY - leftEyeRef.current.scale.y) * 0.5;
+      rightEyeRef.current.scale.y += (targetScaleY - rightEyeRef.current.scale.y) * 0.5;
+    }
+
+    // Smiling logic during splash
+    if (mouthRef.current) {
+      const targetScaleY = isSplashActive ? 1.5 : 0.2; // Smile when splash is active
+      const targetScaleX = isSplashActive ? 1.2 : 0.8;
+      mouthRef.current.scale.y += (targetScaleY - mouthRef.current.scale.y) * 0.1;
+      mouthRef.current.scale.x += (targetScaleX - mouthRef.current.scale.x) * 0.1;
     }
   });
 
   return (
-    <group ref={groupRef}>
-      {/* Central glowing core */}
-      <Float speed={2} rotationIntensity={0.5} floatIntensity={1}>
-        <Sphere args={[1, 64, 64]} scale={1.2}>
-          <meshStandardMaterial 
-            color="#3b82f6" 
-            emissive="#1d4ed8" 
-            emissiveIntensity={0.8}
-            wireframe={true}
-            transparent
-            opacity={0.15}
-          />
-        </Sphere>
+    <Float speed={2} rotationIntensity={0.2} floatIntensity={1}>
+      <group ref={groupRef}>
         
-        {/* Inner solid core */}
-        <Sphere args={[0.5, 32, 32]}>
-          <meshPhysicalMaterial 
-            color="#ffffff" 
-            emissive="#60a5fa" 
-            emissiveIntensity={1}
-            roughness={0.2}
-            metalness={0.8}
-            clearcoat={1}
-          />
+        {/* Head Group */}
+        <group ref={headRef} position={[0, 1.2, 0]}>
+          <RoundedBox args={[2, 1.5, 1.2]} radius={0.5} smoothness={8}>
+            <meshPhysicalMaterial color="#ffffff" roughness={0.1} metalness={0.1} clearcoat={1} />
+          </RoundedBox>
+
+          {/* Visor / Faceplate */}
+          <RoundedBox args={[1.7, 0.8, 0.2]} radius={0.3} smoothness={8} position={[0, 0, 0.55]}>
+            <meshPhysicalMaterial color="#0f172a" roughness={0.2} metalness={0.8} clearcoat={1} />
+          </RoundedBox>
+
+          {/* Left Eye */}
+          <Sphere ref={leftEyeRef} args={[0.15, 32, 32]} position={[-0.4, 0.1, 0.62]}>
+            <meshStandardMaterial color="#3b82f6" emissive="#3b82f6" emissiveIntensity={2} toneMapped={false} />
+          </Sphere>
+
+          {/* Right Eye */}
+          <Sphere ref={rightEyeRef} args={[0.15, 32, 32]} position={[0.4, 0.1, 0.62]}>
+            <meshStandardMaterial color="#3b82f6" emissive="#3b82f6" emissiveIntensity={2} toneMapped={false} />
+          </Sphere>
+
+          {/* Mouth / Smile */}
+          <mesh ref={mouthRef} position={[0, -0.2, 0.62]}>
+            <boxGeometry args={[0.4, 0.05, 0.05]} />
+            <meshStandardMaterial color="#3b82f6" emissive="#3b82f6" emissiveIntensity={2} />
+          </mesh>
+        </group>
+
+        {/* Neck */}
+        <Cylinder args={[0.3, 0.4, 0.8, 32]} position={[0, 0.5, 0]}>
+          <meshPhysicalMaterial color="#94a3b8" roughness={0.4} metalness={0.6} />
+        </Cylinder>
+
+        {/* Torso */}
+        <RoundedBox args={[2.5, 2, 1.5]} radius={0.4} smoothness={8} position={[0, -1, 0]}>
+          <meshPhysicalMaterial color="#ffffff" roughness={0.1} metalness={0.1} clearcoat={1} />
+        </RoundedBox>
+
+        {/* Logo/Core on Torso */}
+        <Sphere args={[0.3, 32, 32]} position={[0, -0.8, 0.75]}>
+          <meshStandardMaterial color="#3b82f6" emissive="#3b82f6" emissiveIntensity={2} toneMapped={false} />
         </Sphere>
-      </Float>
-
-      {/* Orbiting data points representing RAG documents */}
-      <DataOrbit radius={2} speed={1} color="#60a5fa" size={0.08} />
-      <DataOrbit radius={3} speed={-0.6} color="#c084fc" size={0.06} axis="y" />
-      <DataOrbit radius={2.5} speed={0.8} color="#38bdf8" size={0.05} axis="z" />
-      <DataOrbit radius={3.5} speed={-0.4} color="#818cf8" size={0.04} axis="x" offset={Math.PI / 4} />
-      
-      {/* Ambient background particles */}
-      <Sparkles count={300} scale={10} size={2} speed={0.2} opacity={0.3} color="#93c5fd" />
-    </group>
+      </group>
+    </Float>
   );
 }
 
-function DataOrbit({ radius, speed, color, size, axis = "y", offset = 0 }: { radius: number, speed: number, color: string, size: number, axis?: string, offset?: number }) {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const groupRef = useRef<THREE.Group>(null);
-
-  useFrame((state) => {
-    if (groupRef.current) {
-      const t = state.clock.elapsedTime * speed + offset;
-      if (axis === "y") {
-        groupRef.current.rotation.y = t;
-        groupRef.current.rotation.x = Math.sin(t * 0.5) * 0.3;
-      } else if (axis === "x") {
-        groupRef.current.rotation.x = t;
-        groupRef.current.rotation.z = Math.cos(t * 0.5) * 0.3;
-      } else {
-        groupRef.current.rotation.z = t;
-        groupRef.current.rotation.y = Math.sin(t * 0.5) * 0.3;
-      }
-    }
-  });
-
-  return (
-    <group ref={groupRef}>
-      <Trail width={0.5} length={4} color={color} attenuation={(t) => t * t}>
-        <mesh ref={meshRef} position={[radius, 0, 0]}>
-          <sphereGeometry args={[size, 16, 16]} />
-          <meshBasicMaterial color={color} />
-        </mesh>
-      </Trail>
-    </group>
-  );
-}
-
-export function Scene3D() {
+export function Scene3D({ isSplashActive = false }: { isSplashActive?: boolean }) {
   return (
     <Canvas
       style={{ width: "100%", height: "100%", position: "absolute", top: 0, left: 0 }}
       camera={{ position: [0, 0, 8], fov: 45 }}
       dpr={[1, 2]}
     >
-      <ambientLight intensity={0.5} />
-      <directionalLight position={[10, 10, 5]} intensity={2} color="#ffffff" />
-      <directionalLight position={[-10, -10, -5]} intensity={1} color="#e0e7ff" />
-      
-      <NeuralConstellation />
+      <ambientLight intensity={1.5} />
+      <directionalLight position={[5, 10, 5]} intensity={2} color="#ffffff" />
+      <directionalLight position={[-5, -5, -5]} intensity={0.5} color="#e0e7ff" />
+      <FullBotModel isSplashActive={isSplashActive} />
     </Canvas>
   );
 }
