@@ -9,7 +9,7 @@ import { CitationDrawer, CitationData } from './CitationDrawer';
 import { chatStateMachine, ChatState } from '@/lib/events/ChatStateMachine';
 import { agentEventBus } from '@/lib/events/AgentEventBus';
 import { useWorkspace } from '@/contexts/WorkspaceContext';
-import { Send, Bot, User, Loader2, StopCircle, FileText, Plus, ThumbsUp, ThumbsDown, Mic } from 'lucide-react';
+import { Send, Bot, User, Loader2, StopCircle, FileText, Plus, ThumbsUp, ThumbsDown, Mic, Database } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { SplitPaneViewer } from '../pdf/SplitPaneViewer';
 
@@ -277,34 +277,6 @@ export function ChatInterface(props: ChatInterfaceProps) {
         <div className="flex-1 overflow-y-auto p-4 md:p-8" ref={scrollRef}>
           <div className="max-w-4xl mx-auto flex flex-col gap-8 pb-32">
           
-          {messages.length === 0 && (
-            <div className="flex flex-col items-center justify-center pt-20 pb-10 text-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
-              <div className="w-24 h-24 mb-8 relative">
-                <div className="absolute inset-0 bg-gradient-to-tr from-blue-400 to-purple-500 rounded-3xl blur-xl opacity-40 animate-pulse" />
-                <div className="w-full h-full bg-white rounded-3xl shadow-xl border border-slate-100 flex items-center justify-center relative z-10">
-                  <Bot className="w-10 h-10 text-blue-600" />
-                </div>
-              </div>
-              <h2 className="text-4xl font-light text-slate-800 tracking-tight mb-4">
-                How can I help you today?
-              </h2>
-              <p className="text-slate-500 font-light mb-12 max-w-lg">
-                I am your intelligent companion. Mention a specific document with @ or ask me anything to search your entire workspace.
-              </p>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-2xl">
-                {["Summarize the latest quarterly report", "Extract key entities from the legal contract", "Explain the RAG architecture", "Find references to 'Project Apollo'"].map((suggestion, i) => (
-                  <button 
-                    key={i}
-                    onClick={() => setInputValue(suggestion)}
-                    className="p-4 bg-white border border-slate-200 rounded-2xl text-sm text-slate-600 text-left hover:border-blue-300 hover:shadow-md transition-all font-medium"
-                  >
-                    {suggestion}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
 
           <AnimatePresence initial={false}>
             {messages.map((msg) => (
@@ -455,9 +427,16 @@ export function ChatInterface(props: ChatInterfaceProps) {
         </div>
       </div>
 
-      <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-white via-white to-transparent pt-10 pb-4 px-4 md:px-8 pb-[env(safe-area-inset-bottom)] pb-20">
-        <div className="max-w-4xl mx-auto relative">
+      <div className={messages.length === 0 ? "flex-1 flex flex-col items-center justify-center px-4 pb-20" : "shrink-0 bg-gradient-to-t from-white via-white to-transparent pt-4 pb-4 px-4 md:px-8 pb-[env(safe-area-inset-bottom)]"}>
+        <motion.div layout className="max-w-4xl w-full mx-auto relative">
           
+          {messages.length === 0 && (
+             <motion.div layout="position" className="text-center mb-8">
+               <h2 className="text-4xl md:text-5xl font-light text-slate-800 tracking-tight mb-3">Built around your knowledge.</h2>
+               <p className="text-slate-500 font-light">Your AI companion for research and insights.</p>
+             </motion.div>
+          )}
+
           {/* Document Mention Popover */}
           <AnimatePresence>
             {showMentionMenu && filteredDocs.length > 0 && (
@@ -491,20 +470,32 @@ export function ChatInterface(props: ChatInterfaceProps) {
             )}
           </AnimatePresence>
 
-          <div className="relative p-[2px] rounded-t-[3rem] rounded-b-xl bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-[length:200%_auto] animate-[gradient_3s_linear_infinite] shadow-lg shadow-purple-500/20 transition-all focus-within:shadow-xl focus-within:shadow-purple-500/40">
+          <motion.div layout="position" className="relative p-[2px] rounded-t-[3rem] rounded-b-xl bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-[length:200%_auto] animate-[gradient_3s_linear_infinite] shadow-lg shadow-purple-500/20 transition-all focus-within:shadow-xl focus-within:shadow-purple-500/40">
             <form 
               onSubmit={handleSubmit}
-              className="relative bg-white rounded-t-[3rem] rounded-b-xl overflow-hidden flex"
+              className="relative bg-white rounded-t-[3rem] rounded-b-xl overflow-visible flex"
             >
             <div className="flex items-end pb-2 pl-4">
-              <button
-                type="button"
-                onClick={props.onTriggerUpload}
-                className="p-2.5 bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-blue-600 rounded-full transition-colors shrink-0"
-                title="Add Context / Upload File"
-              >
-                <Plus className="w-5 h-5" />
-              </button>
+              <div className="relative group">
+                <button
+                  type="button"
+                  className="p-2.5 bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-blue-600 rounded-full transition-colors shrink-0"
+                  title="More Options"
+                >
+                  <Plus className="w-5 h-5" />
+                </button>
+                <div className="absolute bottom-full left-0 mb-2 hidden group-hover:flex flex-col gap-2 p-2 bg-white rounded-2xl shadow-xl border border-slate-100 z-50">
+                  <button type="button" onClick={props.onTriggerUpload} className="flex items-center gap-2 px-3 py-2 hover:bg-slate-50 rounded-xl text-sm text-slate-700 whitespace-nowrap">
+                    <FileText className="w-4 h-4 text-blue-500" /> Upload Document
+                  </button>
+                  <button type="button" onClick={() => setResearchMode(!researchMode)} className="flex items-center gap-2 px-3 py-2 hover:bg-slate-50 rounded-xl text-sm text-slate-700 whitespace-nowrap">
+                    <Database className="w-4 h-4 text-indigo-500" /> {researchMode ? 'Disable Research' : 'Enable Research'}
+                  </button>
+                  <button type="button" onClick={toggleVoiceInput} className="flex items-center gap-2 px-3 py-2 hover:bg-slate-50 rounded-xl text-sm text-slate-700 whitespace-nowrap">
+                    <Mic className={`w-4 h-4 ${isListening ? 'text-red-500 animate-pulse' : 'text-slate-500'}`} /> Voice Input
+                  </button>
+                </div>
+              </div>
             </div>
             <textarea
               value={inputValue}
@@ -516,19 +507,11 @@ export function ChatInterface(props: ChatInterfaceProps) {
                 }
               }}
               placeholder="Ask the Agentic AI (Type @ to mention a PDF)..."
-              className="w-full max-h-48 min-h-[56px] resize-none border-0 bg-transparent py-5 pl-4 pr-32 text-slate-800 placeholder:text-slate-400 focus:ring-0 outline-none self-center"
+              className="w-full max-h-48 min-h-[56px] resize-none border-0 bg-transparent py-5 pl-4 pr-14 text-slate-800 placeholder:text-slate-400 focus:ring-0 outline-none self-center"
               rows={1}
             />
             
             <div className="absolute right-2 bottom-2 flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setResearchMode(!researchMode)}
-                className={`text-xs px-2 py-1.5 rounded-lg font-bold transition-colors ${researchMode ? 'bg-indigo-100 text-indigo-700 border border-indigo-200' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
-                title="Enable deep research multi-hop reasoning"
-              >
-                {researchMode ? 'Research: ON' : 'Research: OFF'}
-              </button>
               {isStreaming ? (
                 <button
                   type="button"
@@ -545,25 +528,31 @@ export function ChatInterface(props: ChatInterfaceProps) {
                   <Send className="w-5 h-5" />
                 </button>
               )}
-                <button
-                  type="button"
-                  onClick={toggleVoiceInput}
-                  onTouchEnd={(e) => { e.preventDefault(); toggleVoiceInput(); }}
-                  className={`p-2 shrink-0 transition-colors ${
-                    isListening ? 'text-red-500 bg-red-50 hover:bg-red-100 rounded-full animate-pulse' : 'text-slate-400 hover:text-slate-600'
-                  }`}
-                  title="Voice Input"
-                >
-                  <Mic className="w-5 h-5" />
-                </button>
             </div>
           </form>
-          </div>
-          <div className="text-center mt-3 flex justify-between">
-            <span className="text-xs text-slate-400">Target Document: {selectedDocumentName || 'All Documents'}</span>
-            <span className="text-xs text-slate-400">Agentic Platform | Engine Connected</span>
-          </div>
-        </div>
+          </motion.div>
+          
+          {messages.length === 0 && (
+             <motion.div layout="position" className="flex flex-wrap justify-center gap-2 mt-6 max-w-2xl mx-auto">
+               {["Summarize the latest quarterly report", "Extract key entities from the legal contract", "Explain the RAG architecture", "Find references to 'Project Apollo'"].map((suggestion, i) => (
+                 <button 
+                   key={i}
+                   onClick={() => setInputValue(suggestion)}
+                   className="px-4 py-2 bg-white border border-slate-200 rounded-full text-xs text-slate-600 hover:border-blue-300 hover:bg-blue-50 transition-all font-medium"
+                 >
+                   {suggestion}
+                 </button>
+               ))}
+             </motion.div>
+          )}
+
+          {messages.length > 0 && (
+            <div className="text-center mt-3 flex flex-col md:flex-row justify-between gap-1">
+              <span className="text-[10px] md:text-xs text-slate-400 truncate">Target Document: {selectedDocumentName || 'All Documents'}</span>
+              <span className="text-[10px] md:text-xs text-slate-400 truncate">Agentic Platform | Engine Connected</span>
+            </div>
+          )}
+        </motion.div>
       </div>
       </div>
       <SplitPaneViewer 
