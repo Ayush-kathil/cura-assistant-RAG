@@ -132,7 +132,7 @@ Text: ${fullText.substring(0, 15000)}`;
     }
 
     // Embeddings
-    const embeddingModel = genAI.getGenerativeModel({ model: "text-embedding-004" });
+    const embeddingModel = genAI.getGenerativeModel({ model: "gemini-embedding-2" });
     
     // Batch process to avoid payload too large
     const BATCH_SIZE = 50;
