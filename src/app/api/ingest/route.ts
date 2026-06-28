@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 
 export const maxDuration = 60; // Set max duration to 60 seconds (Vercel max for Hobby)
@@ -139,7 +140,10 @@ Text: ${fullText.substring(0, 15000)}`;
     }
 
     // Embeddings
-    const embeddingModel = genAI.getGenerativeModel({ model: "gemini-embedding-2" });
+    const embeddings = new GoogleGenerativeAIEmbeddings({
+      model: "gemini-embedding-2",
+      apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || "dummy",
+    });
     
     // Batch process to avoid payload too large
     const BATCH_SIZE = 50;
@@ -147,19 +151,12 @@ Text: ${fullText.substring(0, 15000)}`;
 
     for (let i = 0; i < chunks.length; i += BATCH_SIZE) {
       const batchChunks = chunks.slice(i, i + BATCH_SIZE);
-      const batchRequests = batchChunks.map(text => ({
-        content: { role: 'user', parts: [{ text }] }
-      }));
       
-      const result = await embeddingModel.batchEmbedContents({
-        requests: batchRequests
-      });
-
-      const embeddings = result.embeddings;
-      console.log("[EMBEDDINGS COUNT]", embeddings.length);
+      const batchEmbeddings = await embeddings.embedDocuments(batchChunks);
+      console.log("[EMBEDDINGS COUNT]", batchEmbeddings.length);
 
       for (let j = 0; j < batchChunks.length; j++) {
-        let embeddingValues = embeddings[j].values;
+        let embeddingValues = batchEmbeddings[j];
         if (embeddingValues.length > 768) {
           embeddingValues = embeddingValues.slice(0, 768);
           const magnitude = Math.sqrt(embeddingValues.reduce((sum, val) => sum + val * val, 0));

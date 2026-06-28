@@ -303,14 +303,23 @@ export function ChatInterface(props: ChatInterfaceProps) {
                 )}
                 
                 <div className={`
-                  max-w-[90%] md:max-w-[85%] rounded-3xl px-6 py-5 break-words
+                  max-w-[90%] md:max-w-[85%] rounded-3xl px-6 py-5 break-words relative group
                   ${msg.role === 'user' 
                     ? 'bg-blue-600 text-white shadow-md ml-auto' 
                     : 'bg-white border border-slate-100 text-slate-800 shadow-sm shadow-slate-200/50'
                   }
                 `}>
                   {msg.role === 'assistant' ? (
-                    <div className="max-w-none w-full">
+                    <div className="max-w-none w-full relative">
+                      {msg.content !== '' && (
+                        <button 
+                          onClick={() => handleCopy(msg.id, msg.content)}
+                          className="absolute -top-3 -right-3 p-1.5 rounded-md hover:bg-slate-100 transition-colors text-slate-400 opacity-0 group-hover:opacity-100 md:opacity-0 md:group-hover:opacity-100 bg-white shadow-sm border border-slate-100 z-10"
+                          title="Copy message"
+                        >
+                          {copiedMessageId === msg.id ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+                        </button>
+                      )}
                       {msg.content === '' && chatState !== 'COMPLETED' ? (
                         <div className="flex items-center gap-3 text-slate-400 font-medium">
                            <Loader2 className="w-5 h-5 animate-spin text-blue-500" /> Thinking...
@@ -375,13 +384,6 @@ export function ChatInterface(props: ChatInterfaceProps) {
                       {/* RLHF Feedback Loop */}
                       {msg.content !== '' && chatState === 'COMPLETED' && (
                         <div className="flex items-center gap-2 mt-3 pt-3 border-t border-slate-100">
-                          <button 
-                            onClick={() => handleCopy(msg.id, msg.content)}
-                            className="p-1.5 rounded-md hover:bg-slate-100 transition-colors text-slate-400"
-                            title="Copy message"
-                          >
-                            {copiedMessageId === msg.id ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
-                          </button>
                           <button 
                             onClick={() => handleFeedback(msg.id, true)}
                             className={`p-1.5 rounded-md hover:bg-slate-100 transition-colors ${msg.feedback === 'up' ? 'text-green-600 bg-green-50' : 'text-slate-400'}`}
