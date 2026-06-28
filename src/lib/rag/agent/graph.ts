@@ -15,6 +15,7 @@ export const AgentState = Annotation.Root({
   hallucinated: Annotation<boolean>,
   verificationResult: Annotation<any>,
   researchMode: Annotation<boolean>,
+  isCasual: Annotation<boolean>,
   startTime: Annotation<number>,
   loopCount: Annotation<number>({
     reducer: (x, y) => x + y,
@@ -43,14 +44,27 @@ async function queryAnalyzer(state: typeof AgentState.State) {
   const match = state.query.match(/@([\w-]+\.pdf)/i);
   if (match) {
     const fileName = match[1];
-    // We would resolve filename to doc ID here. 
-    // For now we simulate by storing the name so the hybrid search can use it.
     targetDoc = fileName;
     finalQuery = state.query.replace(match[0], "").trim();
   }
 
+  const casualRegex = /^(hi|hello|hey|how are you|who are you|good morning|good evening|what's up)\b/i;
+  const isCasual = casualRegex.test(finalQuery.trim());
+
+  if (isCasual) {
+    return { query: finalQuery, targetDocumentId: targetDoc, startTime: Date.now(), isCasual: true };
+  }
+
   const embedding = await getEmbeddings(finalQuery);
-  return { query: finalQuery, queryEmbedding: embedding, targetDocumentId: targetDoc, startTime: Date.now() };
+  return { query: finalQuery, queryEmbedding: embedding, targetDocumentId: targetDoc, startTime: Date.now(), isCasual: false };
+}
+
+async function casualGenerate(state: typeof AgentState.State) {
+  const llm = getLlm();
+  const prompt = `You are Cura, a highly intelligent and helpful AI assistant. Answer the following casual user greeting/question naturally and politely.
+Query: ${state.query}`;
+  const response = await llm.invoke(prompt);
+  return { generation: response.content.toString(), loopCount: 1 };
 }
 
 async function retrieve(state: typeof AgentState.State) {
@@ -74,8 +88,9 @@ async function generate(state: typeof AgentState.State) {
 CRITICAL INSTRUCTIONS:
 1. Answer in a natural, conversational, and highly polished manner.
 2. Structure your response beautifully using modern formatting (bold text, lists, and headers where appropriate). DO NOT force a rigid "Executive Summary" format unless specifically requested by the user.
-3. If the answer is found in the context, explicitly cite the sources inline using brackets like [1], [2], etc. corresponding to the Chunk ID.
+3. If the answer is found in the context, you MUST explicitly cite the sources inline using brackets like [1], [2], etc. corresponding to the Chunk ID. You MUST also provide exact substring quotes from the text to justify your answer.
 4. If you don't know the answer based on the context, politely state that you cannot find the exact information in the provided documents.
+5. If the user explicitly asks for a diagram, flowchart, mind map, or visual representation, you MUST output a valid Mermaid.js block using \`\`\`mermaid ... \`\`\` syntax.
 
 Context:
 ${context}
@@ -157,14 +172,21 @@ function routeAfterVerify(state: typeof AgentState.State) {
   return END;
 }
 
+function routeAfterAnalyzer(state: typeof AgentState.State) {
+  if (state.isCasual) return "casualGenerate";
+  return "retrieve";
+}
+
 // Build Graph
 const workflow = new StateGraph(AgentState)
   .addNode("queryAnalyzer", queryAnalyzer)
+  .addNode("casualGenerate", casualGenerate)
   .addNode("retrieve", retrieve)
   .addNode("generate", generate)
   .addNode("verify", verify)
   .addEdge(START, "queryAnalyzer")
-  .addEdge("queryAnalyzer", "retrieve")
+  .addConditionalEdges("queryAnalyzer", routeAfterAnalyzer)
+  .addEdge("casualGenerate", END)
   .addEdge("retrieve", "generate")
   .addEdge("generate", "verify")
   .addConditionalEdges("verify", routeAfterVerify);

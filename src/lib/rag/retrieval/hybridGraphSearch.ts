@@ -49,9 +49,16 @@ export async function hybridGraphSearch(workspaceId: string, query: string, quer
   const k = 50;
   
   vectorResults?.forEach((res: any, index: number) => {
+    // Time-Weighted Decay Factor
+    let decayFactor = 1.0;
+    if (res.created_at) {
+      const ageInDays = (Date.now() - new Date(res.created_at).getTime()) / (1000 * 60 * 60 * 24);
+      decayFactor = Math.exp(-0.005 * ageInDays); // Slow decay factor
+    }
+    
     mergedMap.set(res.id, {
       ...res,
-      final_score: res.similarity * 0.6 
+      final_score: (res.similarity * 0.6) * decayFactor
     });
   });
 

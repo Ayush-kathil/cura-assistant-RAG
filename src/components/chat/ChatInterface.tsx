@@ -13,6 +13,33 @@ import { Send, Bot, User, Loader2, StopCircle, FileText, Plus, ThumbsUp, ThumbsD
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { SplitPaneViewer } from '../pdf/SplitPaneViewer';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import mermaid from 'mermaid';
+import TextareaAutosize from 'react-textarea-autosize';
+import { toast } from 'sonner';
+
+const Mermaid = ({ chart }: { chart: string }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    if (containerRef.current) {
+      mermaid.initialize({ startOnLoad: true, theme: 'default', securityLevel: 'loose' });
+      try {
+        const id = 'mermaid-svg-' + Math.random().toString(36).substr(2, 9);
+        mermaid.render(id, chart).then(({ svg }) => {
+          if (containerRef.current) {
+            containerRef.current.innerHTML = svg;
+          }
+        }).catch((e) => console.error("Mermaid error:", e));
+      } catch (e) {
+        console.error("Mermaid sync error:", e);
+      }
+    }
+  }, [chart]);
+
+  return <div ref={containerRef} className="my-6 p-4 bg-white rounded-xl border border-slate-200 shadow-sm overflow-x-auto flex justify-center" />;
+};
 
 interface ChatMessage {
   id: string;
@@ -276,6 +303,7 @@ export function ChatInterface(props: ChatInterfaceProps) {
   const handleCopy = (messageId: string, content: string) => {
     navigator.clipboard.writeText(content);
     setCopiedMessageId(messageId);
+    toast.success('Message copied to clipboard');
     setTimeout(() => setCopiedMessageId(null), 2000);
   };
 
@@ -345,7 +373,28 @@ export function ChatInterface(props: ChatInterfaceProps) {
                               );
                             },
                             blockquote: ({ node, ...props }) => <blockquote className="border-l-4 border-blue-500 bg-gradient-to-r from-blue-50/50 to-transparent text-slate-700 px-5 py-3 rounded-r-xl mb-6 italic" {...props} />,
-                            code: ({ node, ...props }) => <code className="bg-slate-100 text-slate-800 px-1.5 py-0.5 rounded-md font-mono text-[13px] border border-slate-200/60" {...props} />,
+                            code: ({ node, inline, className, children, ...props }: any) => {
+                              const match = /language-(\w+)/.exec(className || '');
+                              const language = match ? match[1] : '';
+                              if (!inline && language === 'mermaid') {
+                                return <Mermaid chart={String(children).replace(/\n$/, '')} />;
+                              }
+                              return !inline && match ? (
+                                <SyntaxHighlighter
+                                  {...props}
+                                  style={vscDarkPlus}
+                                  language={language}
+                                  PreTag="div"
+                                  className="rounded-xl my-4 text-[13px] shadow-sm"
+                                >
+                                  {String(children).replace(/\n$/, '')}
+                                </SyntaxHighlighter>
+                              ) : (
+                                <code className="bg-slate-100 text-slate-800 px-1.5 py-0.5 rounded-md font-mono text-[13px] border border-slate-200/60" {...props}>
+                                  {children}
+                                </code>
+                              );
+                            },
                             a: ({ node, ...props }) => {
                               if (props.href === 'citation') {
                                 const citationIdx = parseInt(props.children?.toString() || "1", 10) - 1;
@@ -500,7 +549,7 @@ export function ChatInterface(props: ChatInterfaceProps) {
                 </div>
               </div>
             </div>
-            <textarea
+            <TextareaAutosize
               value={inputValue}
               onChange={handleInputChange}
               onKeyDown={(e) => {
@@ -511,7 +560,8 @@ export function ChatInterface(props: ChatInterfaceProps) {
               }}
               placeholder="Ask the Agentic AI (Type @ to mention a PDF)..."
               className="w-full max-h-48 min-h-[56px] resize-none border-0 bg-transparent py-5 pl-4 pr-14 text-slate-800 placeholder:text-slate-400 focus:ring-0 outline-none self-center"
-              rows={1}
+              minRows={1}
+              maxRows={6}
             />
             
             <div className="absolute right-2 bottom-2 flex items-center gap-2">
