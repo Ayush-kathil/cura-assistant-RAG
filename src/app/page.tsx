@@ -346,7 +346,7 @@ export default function Home() {
           <section className="relative min-h-[100dvh] flex flex-col items-center justify-center overflow-hidden bg-white pt-32 pb-16">
             
             {/* Invisible spacer to maintain layout balance where the robot used to be */}
-            <div className="relative w-full h-[25vh] md:h-[30vh] mb-4 mt-8 pointer-events-none" />
+            <div className="relative w-full h-[40vh] md:h-[30vh] mb-4 mt-8 pointer-events-none" />
             
             {/* Subheading and CTAs below */}
             <div className="relative z-10 w-full px-6 md:px-8 flex flex-col items-center text-center max-w-2xl pointer-events-none">

@@ -18,7 +18,7 @@ export default function PricingPage() {
           <Link href="/" className="font-label-md text-on-surface-variant hover:text-primary-container transition-colors">Features</Link>
           <Link href="/science" className="font-label-md text-on-surface-variant hover:text-primary-container transition-colors">Science</Link>
           <Link href="/pricing" className="font-label-md text-primary font-bold border-b-2 border-primary">Pricing</Link>
-          <Link href="#" className="font-label-md text-on-surface-variant hover:text-primary-container transition-colors">Support</Link>
+          <Link href="/contact" className="font-label-md text-on-surface-variant hover:text-primary-container transition-colors">Support</Link>
         </div>
         <Link href="/login" className="bg-primary text-on-primary px-6 py-2 rounded-full font-label-md hover:bg-primary/90 active:scale-95 transition-all shadow-md">
           Get Started
@@ -170,7 +170,7 @@ export default function PricingPage() {
                 <span className="font-label-md font-bold">Dedicated Success Manager</span>
               </li>
             </ul>
-            <Link href="#" className="w-full py-4 border-2 border-outline-variant/30 text-on-surface-variant rounded-full font-label-md font-bold hover:bg-surface-container transition-all active:scale-95 block">
+            <Link href="/contact" className="w-full py-4 border-2 border-outline-variant/30 text-on-surface-variant rounded-full font-label-md font-bold hover:bg-surface-container transition-all active:scale-95 block">
               Contact Sales
             </Link>
           </section>
@@ -251,9 +251,9 @@ export default function PricingPage() {
           <span className="font-headline-md text-headline-md font-bold text-primary">Cura</span>
         </div>
         <div className="flex flex-wrap justify-center gap-8 mb-4">
-          <Link href="#" className="font-label-md text-on-tertiary-fixed-variant hover:text-primary transition-colors font-bold">Privacy Policy</Link>
-          <Link href="#" className="font-label-md text-on-tertiary-fixed-variant hover:text-primary transition-colors font-bold">Terms of Service</Link>
-          <Link href="#" className="font-label-md text-on-tertiary-fixed-variant hover:text-primary transition-colors font-bold">Contact Us</Link>
+          <Link href="/privacy" className="font-label-md text-on-tertiary-fixed-variant hover:text-primary transition-colors font-bold">Privacy Policy</Link>
+          <Link href="/terms" className="font-label-md text-on-tertiary-fixed-variant hover:text-primary transition-colors font-bold">Terms of Service</Link>
+          <Link href="/contact" className="font-label-md text-on-tertiary-fixed-variant hover:text-primary transition-colors font-bold">Contact Us</Link>
         </div>
         <p className="font-label-sm text-on-tertiary-fixed-variant font-medium">© {new Date().getFullYear()} Cura AI. Made with empathy.</p>
       </footer>
