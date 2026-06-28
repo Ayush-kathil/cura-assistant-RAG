@@ -8,6 +8,8 @@ import { RotatingWheel } from "@/components/animations/RotatingWheel";
 import { Menu, X } from "lucide-react";
 import dynamic from "next/dynamic";
 
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+
 const Scene3D = dynamic(() => import("@/components/animations/Scene3D").then(mod => mod.Scene3D), { ssr: false });
 const SmoothScroll = dynamic(() => import("@/components/animations/SmoothScroll").then(mod => mod.SmoothScroll), { ssr: false });
 
@@ -250,7 +252,9 @@ export default function Home() {
           >
             <div className="w-full h-full relative flex flex-col items-center justify-center">
               <div className="w-[150px] h-[150px]">
-                <Scene3D isSplashActive={true} />
+                <ErrorBoundary>
+                  <Scene3D isSplashActive={true} />
+                </ErrorBoundary>
               </div>
               <motion.div
                 initial={{ opacity: 0, scale: 0.8, y: 10 }}
@@ -338,7 +342,9 @@ export default function Home() {
           >
             <Link href="/login" className="relative w-[300px] h-[300px] pointer-events-auto cursor-pointer block hover:scale-110 transition-transform">
               <ThinkingCloud opacity={cloudOpacity} />
-              <Scene3D />
+              <ErrorBoundary>
+                <Scene3D />
+              </ErrorBoundary>
             </Link>
           </motion.div>
 

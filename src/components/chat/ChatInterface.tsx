@@ -11,6 +11,7 @@ import { agentEventBus } from '@/lib/events/AgentEventBus';
 import { useWorkspace } from '@/contexts/WorkspaceContext';
 import { Send, Bot, User, Loader2, StopCircle, FileText, Plus, ThumbsUp, ThumbsDown, Mic, Database, Copy, Check } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { SplitPaneViewer } from '../pdf/SplitPaneViewer';
 
 interface ChatMessage {
@@ -316,6 +317,7 @@ export function ChatInterface(props: ChatInterfaceProps) {
                         </div>
                       ) : (
                         <ReactMarkdown
+                          remarkPlugins={[remarkGfm]}
                           components={{
                             h1: ({ node, ...props }) => <h1 className="text-2xl font-bold text-slate-900 mt-8 mb-4 tracking-tight border-b border-slate-100 pb-2" {...props} />,
                             h2: ({ node, ...props }) => <h2 className="text-xl font-bold text-slate-800 mt-6 mb-3 tracking-tight" {...props} />,

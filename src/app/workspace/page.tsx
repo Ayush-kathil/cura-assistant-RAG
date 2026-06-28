@@ -13,6 +13,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { HandDrawnArrow } from "@/components/animations/HandDrawnArrow";
 import dynamic from "next/dynamic";
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 const Scene3D = dynamic(() => import("@/components/animations/Scene3D").then(mod => mod.Scene3D), { ssr: false });
 
@@ -217,7 +218,9 @@ export default function WorkspacePage() {
         <div className="flex items-center gap-3 p-6 mb-4">
           <div className="w-10 h-10 relative border border-slate-200 rounded-full shadow-sm overflow-hidden bg-white shrink-0">
              <div className="absolute inset-0 scale-[2.5] translate-y-1 pointer-events-none">
-                <Scene3D isSplashActive={false} />
+                <ErrorBoundary>
+                  <Scene3D isSplashActive={false} />
+                </ErrorBoundary>
              </div>
           </div>
           <div>
@@ -362,30 +365,32 @@ export default function WorkspacePage() {
 
         {/* ChatInterface container */}
         <div className="flex-1 overflow-hidden relative flex flex-col bg-white">
-          <ChatInterface 
-            messages={messages}
-            setMessages={setMessages}
-            currentSessionId={currentSessionId}
-            saveUserMessage={saveUserMessage}
-            saveAssistantMessage={saveAssistantMessage}
-            generationState={generationState}
-            onNewSession={clearChat}
-            documents={documents.map(d => ({ id: d.id, filename: d.file_name }))}
-            activeDocumentIds={activeDocumentIds}
-            onToggleDocument={(id) => setActiveDocumentIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])}
-            currentLeafId={currentLeafId}
-            onNavigateBranch={(id) => {}}
-            onToggleKbExplorer={() => {}}
-            personaInstruction={personaInstruction}
-            onPersonaChange={setPersonaInstruction}
-            onSetScopedDocument={(id) => id ? setActiveDocumentIds([id]) : setActiveDocumentIds([])}
-            onApproveAction={() => {}}
-            onViewArtifact={() => {}}
-            isDevMode={true}
-            selectedModel={selectedModel}
-            onModelChange={setSelectedModel}
-            onTriggerUpload={() => fileInputRef.current?.click()}
-          />
+          <ErrorBoundary>
+            <ChatInterface 
+              messages={messages}
+              setMessages={setMessages}
+              currentSessionId={currentSessionId}
+              saveUserMessage={saveUserMessage}
+              saveAssistantMessage={saveAssistantMessage}
+              generationState={generationState}
+              onNewSession={clearChat}
+              documents={documents.map(d => ({ id: d.id, filename: d.file_name }))}
+              activeDocumentIds={activeDocumentIds}
+              onToggleDocument={(id) => setActiveDocumentIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])}
+              currentLeafId={currentLeafId}
+              onNavigateBranch={(id) => {}}
+              onToggleKbExplorer={() => {}}
+              personaInstruction={personaInstruction}
+              onPersonaChange={setPersonaInstruction}
+              onSetScopedDocument={(id) => id ? setActiveDocumentIds([id]) : setActiveDocumentIds([])}
+              onApproveAction={() => {}}
+              onViewArtifact={() => {}}
+              isDevMode={true}
+              selectedModel={selectedModel}
+              onModelChange={setSelectedModel}
+              onTriggerUpload={() => fileInputRef.current?.click()}
+            />
+          </ErrorBoundary>
         </div>
       </main>
       
