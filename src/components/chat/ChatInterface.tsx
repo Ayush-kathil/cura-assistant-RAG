@@ -344,13 +344,12 @@ export function ChatInterface(props: ChatInterfaceProps) {
                                 
                                 return (
                                   <div className="relative inline-block group">
-                                    <a 
-                                      href="#"
+                                    <span 
                                       onClick={(e) => { e.preventDefault(); handleCitationClick(props.children?.toString() || ""); }}
                                       className="inline-flex items-center justify-center px-2 py-0.5 ml-1.5 text-xs font-bold bg-blue-50 text-blue-700 rounded-md border border-blue-100 hover:bg-blue-600 hover:text-white hover:border-blue-600 hover:shadow-md transition-all cursor-pointer transform hover:-translate-y-0.5"
                                     >
                                       {props.children}
-                                    </a>
+                                    </span>
                                     {sourceChunk && (
                                       <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-72 bg-slate-900 text-white text-xs rounded-xl p-3 shadow-xl opacity-0 invisible md:group-hover:opacity-100 md:group-hover:visible transition-all duration-200 z-50 pointer-events-none md:pointer-events-auto">
                                         <div className="font-semibold text-blue-300 mb-1">Source {citationIdx + 1}</div>

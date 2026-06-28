@@ -68,6 +68,13 @@ export async function POST(req: NextRequest) {
 
     // Extract text
     const buffer = Buffer.from(await fileData.arrayBuffer());
+    
+    // File size validation (10MB limit)
+    if (buffer.length > 10 * 1024 * 1024) {
+      if (documentVersionId) await supabase.from('ingestion_jobs').update({ status: 'failed', error_message: 'File exceeds 10MB limit' }).eq('document_version_id', documentVersionId);
+      return NextResponse.json({ error: "File exceeds 10MB limit" }, { status: 413 });
+    }
+
     let fullText = "";
     
     if (doc.file_name.toLowerCase().endsWith(".pdf")) {
