@@ -145,7 +145,7 @@ function ThinkingCloudContent() {
       initial={{ opacity: 0, scale: 0.8, y: 10 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{ delay: 1, type: "spring", stiffness: 200, damping: 15 }}
-      className="absolute top-[-30%] left-[90%] z-50 flex items-center justify-center min-w-[200px]"
+      className="absolute -top-[60%] md:-top-[30%] left-1/2 -translate-x-1/2 md:left-[90%] md:translate-x-0 z-50 flex items-center justify-center min-w-[200px]"
     >
       {/* Fluffy CSS Cloud using overlapping divs */}
       <div className="relative bg-white text-slate-800 px-8 py-6 rounded-[3rem] shadow-2xl z-10 w-full min-h-[80px] flex items-center justify-center">
@@ -155,8 +155,8 @@ function ThinkingCloudContent() {
         <div className="absolute -bottom-3 left-10 w-10 h-10 bg-white rounded-full"></div>
         
         {/* Thinking tail circles */}
-        <div className="absolute -bottom-4 -left-2 w-6 h-6 bg-white rounded-full shadow-lg"></div>
-        <div className="absolute -bottom-8 -left-6 w-3 h-3 bg-white rounded-full shadow-sm"></div>
+        <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:-left-2 w-6 h-6 bg-white rounded-full shadow-lg"></div>
+        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:-left-6 w-3 h-3 bg-white rounded-full shadow-sm"></div>
 
         <div className="relative z-20">
           <AnimatePresence mode="wait">
@@ -207,8 +207,8 @@ export default function Home() {
   }, []);
   
   // Cinematic Robot Scroll Animation Logic
-  // Scale: Normal (1) -> Large (1.3) -> Small Logo Size (0.15)
-  const robotScale = useTransform(scrollYProgress, [0, 0.1, 0.25, 1], [1, 1.2, 0.25, 0.25]);
+  // Scale: Normal (1) -> Large (1.3) -> Small Logo Size (0.12)
+  const robotScale = useTransform(scrollYProgress, [0, 0.1, 0.25, 1], [1, 1.2, 0.12, 0.12]);
   
   // X/Y Position: Center (0) -> Slightly Down (0.1) -> Bottom Right (0.25)
   // Bottom Right is approx 50vw - 80px and 50vh - 80px
@@ -340,7 +340,7 @@ export default function Home() {
             }}
             className="fixed inset-0 w-full h-full flex items-center justify-center pointer-events-none z-40"
           >
-            <Link href="/login" className="relative w-[300px] h-[300px] pointer-events-auto cursor-pointer block hover:scale-110 transition-transform">
+            <Link href="/login" className="relative w-[350px] h-[350px] md:w-[400px] md:h-[400px] pointer-events-auto cursor-pointer block hover:scale-110 transition-transform">
               <ThinkingCloud opacity={cloudOpacity} />
               <ErrorBoundary>
                 <Scene3D />

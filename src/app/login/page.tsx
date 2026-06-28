@@ -194,7 +194,7 @@ export default function LoginPage() {
       <div id="bg-container" className="absolute inset-0 z-0 opacity-20 pointer-events-none"></div>
 
       {/* Main Container */}
-      <main className="relative z-10 w-full max-w-[1100px] grid md:grid-cols-2 gap-8 items-stretch min-h-[680px]">
+      <main className="relative z-10 w-full max-w-[1100px] grid md:grid-cols-2 gap-8 items-stretch min-h-[auto] md:min-h-[680px]">
         
         {/* Left Side: Illustrative & Branding */}
         <div className="hidden md:flex flex-col justify-between p-12 bg-white/80 backdrop-blur-md rounded-3xl border border-slate-200 shadow-xl relative overflow-hidden">
@@ -226,7 +226,7 @@ export default function LoginPage() {
         </div>
 
         {/* Right Side: Interaction (Forms) */}
-        <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 flex flex-col justify-center border border-slate-200 relative z-10">
+        <div className="bg-white rounded-3xl shadow-2xl p-6 md:p-12 flex flex-col justify-center border border-slate-200 relative z-10">
           
           {/* Mobile Brand Logo */}
           <div className="md:hidden flex items-center justify-center gap-2 mb-8">
