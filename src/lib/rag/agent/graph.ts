@@ -4,6 +4,21 @@ import { hybridGraphSearch } from "../retrieval/hybridGraphSearch";
 import { getEmbeddings } from "../retrieval/embeddings"; 
 import { logRetrievalTrace } from "../observability/logger";
 
+// Simple In-Memory Semantic Cache
+const semanticCache = new Map<string, { embedding: number[], generation: string, chunks: any[] }>();
+
+function cosineSimilarity(a: number[], b: number[]) {
+  let dotProduct = 0;
+  let normA = 0;
+  let normB = 0;
+  for (let i = 0; i < a.length; i++) {
+    dotProduct += a[i] * b[i];
+    normA += a[i] * a[i];
+    normB += b[i] * b[i];
+  }
+  return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+}
+
 // Define the State for our Agent
 export const AgentState = Annotation.Root({
   query: Annotation<string>,
@@ -16,6 +31,7 @@ export const AgentState = Annotation.Root({
   verificationResult: Annotation<any>,
   researchMode: Annotation<boolean>,
   isCasual: Annotation<boolean>,
+  isCached: Annotation<boolean>,
   startTime: Annotation<number>,
   loopCount: Annotation<number>({
     reducer: (x, y) => x + y,
@@ -55,8 +71,44 @@ async function queryAnalyzer(state: typeof AgentState.State) {
     return { query: finalQuery, targetDocumentId: targetDoc, startTime: Date.now(), isCasual: true };
   }
 
-  const embedding = await getEmbeddings(finalQuery);
-  return { query: finalQuery, queryEmbedding: embedding, targetDocumentId: targetDoc, startTime: Date.now(), isCasual: false };
+  // Simple Dictionary-based Query Expansion
+  const expansions: Record<string, string> = {
+    'ai': 'artificial intelligence machine learning',
+    'ml': 'machine learning artificial intelligence',
+    'rag': 'retrieval augmented generation',
+    'llm': 'large language model',
+    'ui': 'user interface ux frontend',
+    'db': 'database sql postgres',
+  };
+  
+  let expandedQuery = finalQuery;
+  Object.keys(expansions).forEach(key => {
+    const regex = new RegExp(`\\b${key}\\b`, 'gi');
+    if (regex.test(finalQuery)) {
+      expandedQuery += ' ' + expansions[key];
+    }
+  });
+
+  const embedding = await getEmbeddings(expandedQuery);
+  
+  // Check Semantic Cache
+  let isCached = false;
+  let cachedChunks: any[] = [];
+  let cachedGeneration = "";
+  for (const [key, val] of semanticCache.entries()) {
+    if (cosineSimilarity(embedding, val.embedding) > 0.98) {
+      isCached = true;
+      cachedChunks = val.chunks;
+      cachedGeneration = val.generation;
+      break;
+    }
+  }
+
+  if (isCached) {
+    return { query: finalQuery, queryEmbedding: embedding, targetDocumentId: targetDoc, startTime: Date.now(), isCasual: false, isCached: true, retrievedChunks: cachedChunks, generation: cachedGeneration };
+  }
+
+  return { query: finalQuery, queryEmbedding: embedding, targetDocumentId: targetDoc, startTime: Date.now(), isCasual: false, isCached: false };
 }
 
 async function casualGenerate(state: typeof AgentState.State) {
@@ -70,6 +122,11 @@ Query: ${state.query}`;
 async function retrieve(state: typeof AgentState.State) {
   const chunks = await hybridGraphSearch(state.workspaceId, state.query, state.queryEmbedding, state.targetDocumentId || undefined);
   return { retrievedChunks: chunks };
+}
+
+async function cachedGenerate(state: typeof AgentState.State) {
+  console.log("[SEMANTIC CACHE HIT] Using cached answer");
+  return { generation: state.generation, loopCount: 1 };
 }
 
 async function generate(state: typeof AgentState.State) {
@@ -99,7 +156,18 @@ Query: ${state.query}`;
   
   const llm = getLlm();
   const response = await llm.invoke(prompt);
-  return { generation: response.content.toString(), loopCount: 1 };
+  const genString = response.content.toString();
+
+  // Save to Semantic Cache
+  if (state.queryEmbedding && state.retrievedChunks && genString && state.queryEmbedding.length > 0) {
+    semanticCache.set(state.query, {
+      embedding: state.queryEmbedding,
+      generation: genString,
+      chunks: state.retrievedChunks
+    });
+  }
+
+  return { generation: genString, loopCount: 1 };
 }
 
 async function verify(state: typeof AgentState.State) {
@@ -174,6 +242,7 @@ function routeAfterVerify(state: typeof AgentState.State) {
 
 function routeAfterAnalyzer(state: typeof AgentState.State) {
   if (state.isCasual) return "casualGenerate";
+  if (state.isCached) return "cachedGenerate";
   return "retrieve";
 }
 
@@ -181,12 +250,14 @@ function routeAfterAnalyzer(state: typeof AgentState.State) {
 const workflow = new StateGraph(AgentState)
   .addNode("queryAnalyzer", queryAnalyzer)
   .addNode("casualGenerate", casualGenerate)
+  .addNode("cachedGenerate", cachedGenerate)
   .addNode("retrieve", retrieve)
   .addNode("generate", generate)
   .addNode("verify", verify)
   .addEdge(START, "queryAnalyzer")
   .addConditionalEdges("queryAnalyzer", routeAfterAnalyzer)
   .addEdge("casualGenerate", END)
+  .addEdge("cachedGenerate", END)
   .addEdge("retrieve", "generate")
   .addEdge("generate", "verify")
   .addConditionalEdges("verify", routeAfterVerify);

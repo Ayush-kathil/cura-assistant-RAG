@@ -11,8 +11,11 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEM
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY || "");
 
 export async function POST(req: NextRequest) {
+  let parsedDocumentId = null;
   try {
-    const { documentId, workspaceId } = await req.json();
+    const body = await req.json();
+    const { documentId, workspaceId } = body;
+    parsedDocumentId = documentId;
     console.log("[INGEST REQUEST]", {
       documentId,
       workspaceId
@@ -229,9 +232,8 @@ Text: ${fullText.substring(0, 15000)}`;
     // Safely attempt to fail the job if documentId is present
     try {
       const supabase = await createClient();
-      const body = await req.clone().json().catch(() => ({}));
-      if (body.documentId) {
-        const { data: ver } = await supabase.from('document_versions').select('id').eq('document_id', body.documentId).order('created_at', { ascending: false }).limit(1).single();
+      if (parsedDocumentId) {
+        const { data: ver } = await supabase.from('document_versions').select('id').eq('document_id', parsedDocumentId).order('created_at', { ascending: false }).limit(1).single();
         if (ver) {
           await supabase.from('ingestion_jobs').update({ status: 'failed', error_message: error.message || 'Unknown fatal error' }).eq('document_version_id', ver.id);
         }

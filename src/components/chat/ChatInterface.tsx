@@ -41,6 +41,35 @@ const Mermaid = ({ chart }: { chart: string }) => {
   return <div ref={containerRef} className="my-6 p-4 bg-white rounded-xl border border-slate-200 shadow-sm overflow-x-auto flex justify-center" />;
 };
 
+const SmoothStreamer = ({ content, isStreaming, children }: { content: string, isStreaming: boolean, children: (smoothed: string) => React.ReactNode }) => {
+  const [displayedContent, setDisplayedContent] = useState("");
+
+  useEffect(() => {
+    if (!isStreaming) {
+      setDisplayedContent(content);
+      return;
+    }
+    
+    if (displayedContent === content) return;
+
+    const interval = setInterval(() => {
+      setDisplayedContent(prev => {
+        if (prev.length < content.length) {
+          const diff = content.length - prev.length;
+          const chunkSize = Math.max(1, Math.min(8, Math.floor(diff / 3)));
+          return content.slice(0, prev.length + chunkSize);
+        }
+        clearInterval(interval);
+        return prev;
+      });
+    }, 20);
+    
+    return () => clearInterval(interval);
+  }, [content, isStreaming]);
+
+  return <>{children(displayedContent)}</>;
+};
+
 interface ChatMessage {
   id: string;
   role: 'user' | 'assistant';
@@ -353,79 +382,89 @@ export function ChatInterface(props: ChatInterfaceProps) {
                            <Loader2 className="w-5 h-5 animate-spin text-blue-500" /> Thinking...
                         </div>
                       ) : (
-                        <ReactMarkdown
-                          remarkPlugins={[remarkGfm]}
-                          components={{
-                            h1: ({ node, ...props }) => <h1 className="text-2xl font-bold text-slate-900 mt-8 mb-4 tracking-tight border-b border-slate-100 pb-2" {...props} />,
-                            h2: ({ node, ...props }) => <h2 className="text-xl font-bold text-slate-800 mt-6 mb-3 tracking-tight" {...props} />,
-                            h3: ({ node, ...props }) => <h3 className="text-lg font-semibold text-slate-800 mt-5 mb-2" {...props} />,
-                            p: ({ node, ...props }) => <p className="text-slate-600 leading-[1.75] mb-5 text-justify" {...props} />,
-                            strong: ({ node, ...props }) => <strong className="font-semibold text-slate-900" {...props} />,
-                            ul: ({ node, ...props }) => <ul className="list-none space-y-2.5 mb-6 mt-2" {...props} />,
-                            ol: ({ node, ...props }) => <ol className="list-decimal list-outside ml-4 space-y-2.5 mb-6 mt-2 text-slate-600" {...props} />,
-                            li: ({ node, className, children, ...props }) => {
-                              // If it's inside a ul, we add the custom bullet. If inside an ol, the native decimal is used.
-                              const isUnordered = !className?.includes('list-decimal');
-                              return (
-                                <li className={`${isUnordered ? 'relative pl-6 text-slate-600 before:content-[""] before:absolute before:left-1.5 before:top-2.5 before:w-1.5 before:h-1.5 before:bg-blue-400 before:rounded-full before:shadow-sm' : 'pl-2'}`} {...props}>
-                                  {children}
-                                </li>
-                              );
-                            },
-                            blockquote: ({ node, ...props }) => <blockquote className="border-l-4 border-blue-500 bg-gradient-to-r from-blue-50/50 to-transparent text-slate-700 px-5 py-3 rounded-r-xl mb-6 italic" {...props} />,
-                            code: ({ node, inline, className, children, ...props }: any) => {
-                              const match = /language-(\w+)/.exec(className || '');
-                              const language = match ? match[1] : '';
-                              if (!inline && language === 'mermaid') {
-                                return <Mermaid chart={String(children).replace(/\n$/, '')} />;
-                              }
-                              return !inline && match ? (
-                                <SyntaxHighlighter
-                                  {...props}
-                                  style={vscDarkPlus}
-                                  language={language}
-                                  PreTag="div"
-                                  className="rounded-xl my-4 text-[13px] shadow-sm"
-                                >
-                                  {String(children).replace(/\n$/, '')}
-                                </SyntaxHighlighter>
-                              ) : (
-                                <code className="bg-slate-100 text-slate-800 px-1.5 py-0.5 rounded-md font-mono text-[13px] border border-slate-200/60" {...props}>
-                                  {children}
-                                </code>
-                              );
-                            },
-                            a: ({ node, ...props }) => {
-                              if (props.href === 'citation') {
-                                const citationIdx = parseInt(props.children?.toString() || "1", 10) - 1;
-                                const sourceChunk = msg.sources?.[citationIdx];
-                                
-                                return (
-                                  <div className="relative inline-block group">
-                                    <span 
-                                      onClick={(e) => { e.preventDefault(); handleCitationClick(props.children?.toString() || ""); }}
-                                      className="inline-flex items-center justify-center px-2 py-0.5 ml-1.5 text-xs font-bold bg-blue-50 text-blue-700 rounded-md border border-blue-100 hover:bg-blue-600 hover:text-white hover:border-blue-600 hover:shadow-md transition-all cursor-pointer transform hover:-translate-y-0.5"
+                        <SmoothStreamer content={msg.content || ''} isStreaming={msg.role === 'assistant' && msg.id === messages[messages.length-1].id && chatState !== 'COMPLETED'}>
+                          {(smoothed) => (
+                            <ReactMarkdown
+                              remarkPlugins={[remarkGfm]}
+                              components={{
+                                h1: ({ node, ...props }) => <h1 className="text-2xl font-bold text-slate-900 mt-8 mb-4 tracking-tight border-b border-slate-100 pb-2" {...props} />,
+                                h2: ({ node, ...props }) => <h2 className="text-xl font-bold text-slate-800 mt-6 mb-3 tracking-tight" {...props} />,
+                                h3: ({ node, ...props }) => <h3 className="text-lg font-semibold text-slate-800 mt-5 mb-2" {...props} />,
+                                p: ({ node, ...props }) => <p className="text-slate-600 leading-[1.75] mb-5 text-justify" {...props} />,
+                                strong: ({ node, ...props }) => <strong className="font-semibold text-slate-900" {...props} />,
+                                ul: ({ node, ...props }) => <ul className="list-none space-y-2.5 mb-6 mt-2" {...props} />,
+                                ol: ({ node, ...props }) => <ol className="list-decimal list-outside ml-4 space-y-2.5 mb-6 mt-2 text-slate-600" {...props} />,
+                                li: ({ node, className, children, ...props }) => {
+                                  // If it's inside a ul, we add the custom bullet. If inside an ol, the native decimal is used.
+                                  const isUnordered = !className?.includes('list-decimal');
+                                  return (
+                                    <li className={`${isUnordered ? 'relative pl-6 text-slate-600 before:content-[""] before:absolute before:left-1.5 before:top-2.5 before:w-1.5 before:h-1.5 before:bg-blue-400 before:rounded-full before:shadow-sm' : 'pl-2'}`} {...props}>
+                                      {children}
+                                    </li>
+                                  );
+                                },
+                                blockquote: ({ node, ...props }) => <blockquote className="border-l-4 border-blue-500 bg-gradient-to-r from-blue-50/50 to-transparent text-slate-700 px-5 py-3 rounded-r-xl mb-6 italic" {...props} />,
+                                table: ({ node, ...props }) => <div className="overflow-x-auto my-6 rounded-xl border border-slate-200 shadow-sm"><table className="min-w-full text-left text-sm whitespace-nowrap border-collapse" {...props} /></div>,
+                                thead: ({ node, ...props }) => <thead className="bg-slate-50 border-b border-slate-200 text-slate-900 font-semibold uppercase tracking-wider" {...props} />,
+                                tbody: ({ node, ...props }) => <tbody className="divide-y divide-slate-100 text-slate-700 bg-white" {...props} />,
+                                tr: ({ node, ...props }) => <tr className="hover:bg-slate-50/50 transition-colors" {...props} />,
+                                th: ({ node, ...props }) => <th className="px-6 py-4 font-semibold text-slate-800" {...props} />,
+                                td: ({ node, ...props }) => <td className="px-6 py-4" {...props} />,
+                                code: ({ node, inline, className, children, ...props }: any) => {
+                                  const match = /language-(\w+)/.exec(className || '');
+                                  const language = match ? match[1] : '';
+                                  if (!inline && language === 'mermaid') {
+                                    return <Mermaid chart={String(children).replace(/\n$/, '')} />;
+                                  }
+                                  return !inline && match ? (
+                                    <SyntaxHighlighter
+                                      {...props}
+                                      style={vscDarkPlus}
+                                      language={language}
+                                      PreTag="div"
+                                      className="rounded-xl my-4 text-[13px] shadow-sm"
                                     >
-                                      {props.children}
-                                    </span>
-                                    {sourceChunk && (
-                                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-72 bg-slate-900 text-white text-xs rounded-xl p-3 shadow-xl opacity-0 invisible md:group-hover:opacity-100 md:group-hover:visible transition-all duration-200 z-50 pointer-events-none md:pointer-events-auto">
-                                        <div className="font-semibold text-blue-300 mb-1">Source {citationIdx + 1}</div>
-                                        <div className="line-clamp-4 leading-relaxed">{sourceChunk.content}</div>
-                                        <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45"></div>
+                                      {String(children).replace(/\n$/, '')}
+                                    </SyntaxHighlighter>
+                                  ) : (
+                                    <code className="bg-slate-100 text-slate-800 px-1.5 py-0.5 rounded-md font-mono text-[13px] border border-slate-200/60" {...props}>
+                                      {children}
+                                    </code>
+                                  );
+                                },
+                                a: ({ node, ...props }) => {
+                                  if (props.href === 'citation') {
+                                    const citationIdx = parseInt(props.children?.toString() || "1", 10) - 1;
+                                    const sourceChunk = msg.sources?.[citationIdx];
+                                    
+                                    return (
+                                      <div className="relative inline-block group">
+                                        <span 
+                                          onClick={(e) => { e.preventDefault(); handleCitationClick(props.children?.toString() || ""); }}
+                                          className="inline-flex items-center justify-center px-2 py-0.5 ml-1.5 text-xs font-bold bg-blue-50 text-blue-700 rounded-md border border-blue-100 hover:bg-blue-600 hover:text-white hover:border-blue-600 hover:shadow-md transition-all cursor-pointer transform hover:-translate-y-0.5"
+                                        >
+                                          {props.children}
+                                        </span>
+                                        {sourceChunk && (
+                                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-72 bg-slate-900 text-white text-xs rounded-xl p-3 shadow-xl opacity-0 invisible md:group-hover:opacity-100 md:group-hover:visible transition-all duration-200 z-50 pointer-events-none md:pointer-events-auto">
+                                            <div className="font-semibold text-blue-300 mb-1">Source {citationIdx + 1}</div>
+                                            <div className="line-clamp-4 leading-relaxed">{sourceChunk.content}</div>
+                                            <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45"></div>
+                                          </div>
+                                        )}
                                       </div>
-                                    )}
-                                  </div>
-                                );
-                              }
-                              return <a className="text-blue-600 hover:text-blue-700 hover:underline underline-offset-2 transition-colors" {...props} />;
-                            }
-                          }}
-                        >
-                          {(msg.content || '')
-                            .replace(/\[[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\]/g, '')
-                            .replace(/\[(\d+)\]/g, '[$1](citation)')}
-                        </ReactMarkdown>
+                                    );
+                                  }
+                                  return <a className="text-blue-600 hover:text-blue-700 hover:underline underline-offset-2 transition-colors" {...props} />;
+                                }
+                              }}
+                            >
+                              {(smoothed || '')
+                                .replace(/\[[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\]/g, '')
+                                .replace(/\[(\d+)\]/g, '[$1](citation)')}
+                            </ReactMarkdown>
+                          )}
+                        </SmoothStreamer>
                       )}
                       
 
