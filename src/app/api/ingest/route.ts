@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
     
     if (doc.file_name.toLowerCase().endsWith(".pdf")) {
       console.log("[MULTI-MODAL PARSING] Analyzing PDF with Gemini Vision...");
-      const extractionModel = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
+      const extractionModel = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite" });
       const b64Data = buffer.toString("base64");
       
       const prompt = `You are a highly precise document extraction AI. Extract the content of the attached PDF document perfectly into Markdown. 
