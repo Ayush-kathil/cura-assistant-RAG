@@ -21,6 +21,7 @@ export default function WorkspacePage() {
   const router = useRouter();
   const supabase = createClient();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isDesktopSidebarOpen, setIsDesktopSidebarOpen] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -214,7 +215,7 @@ export default function WorkspacePage() {
       )}
 
       {/* SideNavBar */}
-      <aside className={`fixed md:relative left-0 top-0 h-full z-40 flex flex-col w-64 bg-white/80 backdrop-blur-xl border-r border-slate-200 transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+      <aside className={`fixed md:relative left-0 top-0 h-full z-40 flex flex-col bg-white/80 backdrop-blur-xl border-r border-slate-200 transition-all duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${isDesktopSidebarOpen ? 'md:translate-x-0 md:w-64' : 'md:-translate-x-full md:w-0 overflow-hidden'}`}>
         <div className="flex items-center gap-3 p-6 mb-4">
           <div className="w-10 h-10 relative border border-slate-200 rounded-full shadow-sm overflow-hidden bg-white shrink-0">
              <div className="absolute inset-0 scale-[2.5] translate-y-1 pointer-events-none">
@@ -311,8 +312,12 @@ export default function WorkspacePage() {
           )}
 
           {hasMoreSessions && chatSessions.length > 0 && (
-            <div ref={lastSessionElementRef} className="py-4 flex justify-center items-center">
-              <Loader2 className="w-5 h-5 text-slate-300 animate-spin" />
+            <div ref={lastSessionElementRef} className="py-2 space-y-3">
+              {[1, 2].map((i) => (
+                <div key={i} className="animate-pulse flex items-center p-2 rounded-lg gap-3">
+                  <div className="h-4 bg-slate-200 rounded w-3/4"></div>
+                </div>
+              ))}
             </div>
           )}
         </div>
@@ -334,6 +339,12 @@ export default function WorkspacePage() {
             <button 
               onClick={() => setIsSidebarOpen(true)}
               className="md:hidden p-2 -ml-2 rounded-lg hover:bg-slate-100 text-slate-500"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+            <button 
+              onClick={() => setIsDesktopSidebarOpen(!isDesktopSidebarOpen)}
+              className="hidden md:block p-2 -ml-2 rounded-lg hover:bg-slate-100 text-slate-500 transition-colors"
             >
               <Menu className="w-5 h-5" />
             </button>

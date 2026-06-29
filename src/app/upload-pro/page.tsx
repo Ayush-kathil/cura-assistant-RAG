@@ -16,6 +16,7 @@ export default function UploadPage() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [recentDocs, setRecentDocs] = useState<any[]>([]);
+  const [isLoadingDocs, setIsLoadingDocs] = useState(true);
   const { activeWorkspace } = useWorkspace();
 
   useEffect(() => {
@@ -31,6 +32,7 @@ export default function UploadPage() {
           .order('created_at', { ascending: false })
           .limit(4);
         if (data) setRecentDocs(data);
+        setIsLoadingDocs(false);
       } else if (!user) {
         router.push('/login');
       }
@@ -248,7 +250,18 @@ export default function UploadPage() {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {recentDocs.length === 0 ? (
+              {isLoadingDocs ? (
+                [1, 2, 3, 4].map(i => (
+                  <div key={i} className="bg-white rounded-2xl p-5 flex items-start gap-4 border border-slate-200 animate-pulse">
+                     <div className="w-12 h-12 bg-slate-100 rounded-xl shrink-0" />
+                     <div className="flex-1 min-w-0 space-y-2 py-1">
+                        <div className="h-4 bg-slate-200 rounded w-3/4" />
+                        <div className="h-3 bg-slate-100 rounded w-1/4 mb-3" />
+                        <div className="h-6 bg-emerald-50 rounded w-16" />
+                     </div>
+                  </div>
+                ))
+              ) : recentDocs.length === 0 ? (
                 <div className="col-span-2 border border-slate-200 bg-white rounded-2xl p-8 flex flex-col items-center justify-center text-slate-400">
                   <FileText className="w-8 h-8 mb-3 opacity-50" />
                   <span className="text-sm font-medium">No documents uploaded yet</span>

@@ -228,9 +228,17 @@ export function ChatInterface(props: ChatInterfaceProps) {
     };
   }, [setMessages, saveAssistantMessage]);
 
+  const isAutoScrollPaused = useRef(false);
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+    // If we are within 100px of the bottom, resume auto-scroll
+    isAutoScrollPaused.current = scrollHeight - scrollTop - clientHeight > 100;
+  };
+
   // Auto-scroll
   useEffect(() => {
-    if (scrollRef.current) {
+    if (scrollRef.current && !isAutoScrollPaused.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages, chatState]);
@@ -339,7 +347,7 @@ export function ChatInterface(props: ChatInterfaceProps) {
   return (
     <div className="flex h-full w-full">
       <div className="flex flex-col h-full bg-white relative flex-1 min-w-0">
-        <div className="flex-1 overflow-y-auto p-4 md:p-8" ref={scrollRef}>
+        <div className="flex-1 overflow-y-auto p-4 md:p-8" ref={scrollRef} onScroll={handleScroll}>
           <div className="max-w-4xl mx-auto flex flex-col gap-8 pb-32">
           
 

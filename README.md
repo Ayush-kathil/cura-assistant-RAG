@@ -91,15 +91,50 @@ graph TD
     GeminiRerank --> Answer[Final Answer Generation]
 ```
 
-### LangGraph Agent
+### LangGraph RAG Agent Architecture
 ```mermaid
 graph TD
-    QueryAnalysis[Query Analysis] --> Retrieval[Retrieval]
-    Retrieval --> Rerank[Rerank Context]
-    Rerank --> Generate[Generate Answer]
-    Generate --> Verify{Verify Claims}
-    Verify -->|Hallucination Detected| Generate
-    Verify -->|Verified| Output[Final Output]
+    %% Define Styles
+    classDef user fill:#3b82f6,stroke:#1d4ed8,stroke-width:2px,color:#fff
+    classDef state fill:#f59e0b,stroke:#d97706,stroke-width:2px,color:#fff
+    classDef router fill:#8b5cf6,stroke:#6d28d9,stroke-width:2px,color:#fff
+    classDef search fill:#10b981,stroke:#047857,stroke-width:2px,color:#fff
+    classDef db fill:#ec4899,stroke:#be185d,stroke-width:2px,color:#fff
+    classDef cache fill:#f43f5e,stroke:#e11d48,stroke-width:2px,color:#fff
+
+    User((User)):::user -->|Query| UI[Frontend UI]
+    UI -->|API Request| Graph[LangGraph State Machine]:::state
+    
+    Graph --> QA[queryAnalyzer Node]:::router
+    QA -->|Semantic Router| CheckCasual{Is Casual?}
+    
+    %% Casual Flow
+    CheckCasual -->|Yes| CasualGen[casualGenerate Node]
+    CasualGen --> Return[Return Response]
+    
+    %% Cache Flow
+    CheckCasual -->|No| CheckCache{In Semantic Cache?}:::cache
+    CheckCache -->|Yes| CachedGen[cachedGenerate Node]:::cache
+    CachedGen --> Return
+    
+    %% Search Flow
+    CheckCache -->|No| Expand[Query Expansion]
+    Expand --> Retrieve[retrieve Node]:::search
+    Retrieve --> HybridSearch[hybridGraphSearch]:::search
+    
+    %% Databases
+    HybridSearch -->|pgvector| VectorDB[(Supabase Vector DB)]:::db
+    HybridSearch -->|GraphRAG| GraphDB[(Supabase Entity Graph)]:::db
+    VectorDB --> Rerank[Gemini Re-Ranking]
+    GraphDB --> Rerank
+    Rerank --> Gen[generate Node]
+    
+    %% Verification Loop
+    Gen --> Verify[verify Node]
+    Verify --> CheckHallucination{Hallucination?}
+    CheckHallucination -->|Yes, Rewrite Query| QA
+    CheckHallucination -->|No| SaveCache[Save to Cache]:::cache
+    SaveCache --> Return
 ```
 
 ---

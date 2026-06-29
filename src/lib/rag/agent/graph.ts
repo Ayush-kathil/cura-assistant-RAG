@@ -137,7 +137,19 @@ async function generate(state: typeof AgentState.State) {
     if (joinedContext.length + chunkText.length > maxChars) break;
     joinedContext += chunkText;
   }
-  const context = joinedContext.trim();
+  let context = joinedContext.trim();
+  
+  // Context Compression
+  if (context.length > 5000) {
+    try {
+      const compressorLlm = getLlm();
+      const compressPrompt = `Compress the following context, keeping only information relevant to answering this query: "${state.query}". Maintain Chunk IDs like [Chunk 123].\n\nContext:\n${context}`;
+      const compressRes = await compressorLlm.invoke(compressPrompt);
+      context = compressRes.content.toString();
+    } catch (e) {
+      console.warn("Context compression failed, using original context", e);
+    }
+  }
   
   // Task 8: Response Quality Formatter
   const prompt = `You are a highly intelligent and helpful AI assistant. Use the following retrieved context to comprehensively and accurately answer the user's query.
@@ -231,11 +243,22 @@ async function verify(state: typeof AgentState.State) {
 }
 
 // Edge Logic
+async function rewriteQuery(state: typeof AgentState.State) {
+  const llm = getLlm();
+  const prompt = `You are an AI assistant trying to answer: "${state.query}".
+Your previous generation hallucinated or didn't find the answer in the retrieved context. 
+Rewrite the query to be more specific, or use different keywords to help find the right documents.
+Return ONLY the new query string.`;
+  const response = await llm.invoke(prompt);
+  let newQuery = response.content.toString().replace(/["']/g, "").trim();
+  const embedding = await getEmbeddings(newQuery);
+  return { query: newQuery, queryEmbedding: embedding, loopCount: 1 };
+}
+
 function routeAfterVerify(state: typeof AgentState.State) {
-  // If research mode is on and we hallucinated (meaning we need more context), we would ideally loop back to retrieve with a new query.
-  // For now, if hallucinated, we regenerate.
+  // If we hallucinated (meaning we need more context), we loop back to rewriteQuery and retrieve
   if (state.hallucinated && state.loopCount <= (state.researchMode ? 5 : 2)) {
-    return state.researchMode ? "retrieve" : "generate";
+    return "rewriteQuery";
   }
   return END;
 }
@@ -251,6 +274,7 @@ const workflow = new StateGraph(AgentState)
   .addNode("queryAnalyzer", queryAnalyzer)
   .addNode("casualGenerate", casualGenerate)
   .addNode("cachedGenerate", cachedGenerate)
+  .addNode("rewriteQuery", rewriteQuery)
   .addNode("retrieve", retrieve)
   .addNode("generate", generate)
   .addNode("verify", verify)
@@ -258,6 +282,7 @@ const workflow = new StateGraph(AgentState)
   .addConditionalEdges("queryAnalyzer", routeAfterAnalyzer)
   .addEdge("casualGenerate", END)
   .addEdge("cachedGenerate", END)
+  .addEdge("rewriteQuery", "retrieve")
   .addEdge("retrieve", "generate")
   .addEdge("generate", "verify")
   .addConditionalEdges("verify", routeAfterVerify);
