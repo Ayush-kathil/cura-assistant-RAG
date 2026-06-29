@@ -19,7 +19,7 @@ export async function geminiRerank(query: string, chunks: RetrievedChunk[]): Pro
   if (!apiKey) throw new Error("Missing Gemini API Key in reranker.");
 
   const llm = new ChatGoogleGenerativeAI({
-    model: "gemini-2.5-flash",
+    model: "gemini-3.1-flash-lite",
     temperature: 0,
     apiKey,
   });

@@ -280,7 +280,6 @@ export default function LoginPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    autoComplete="email"
                     className="w-full px-6 py-4 rounded-full bg-slate-50 border border-slate-200 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder-slate-400" 
                     placeholder="hello@cura.ai" 
                   />
@@ -295,7 +294,6 @@ export default function LoginPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    autoComplete="current-password"
                     className="w-full px-6 py-4 rounded-full bg-slate-50 border border-slate-200 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder-slate-400" 
                     placeholder="••••••••" 
                   />
@@ -359,7 +357,6 @@ export default function LoginPage() {
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
                       required
-                      autoComplete="family-name"
                       className="w-full px-6 py-3 rounded-full bg-slate-50 border border-slate-200 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder-slate-400" 
                       placeholder="Jones" 
                     />

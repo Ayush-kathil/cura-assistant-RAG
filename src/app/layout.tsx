@@ -53,13 +53,6 @@ export default function RootLayout({
                 } else {
                   document.documentElement.classList.add('dark');
                 }
-                
-                // Suppress non-actionable Three.js console warnings
-                const originalWarn = console.warn;
-                console.warn = function(...args) {
-                  if (args[0] && typeof args[0] === 'string' && (args[0].includes('THREE.Clock') || args[0].includes('THREE.WebGLRenderer'))) return;
-                  originalWarn.apply(console, args);
-                };
               } catch (_) {}
             `,
           }}

@@ -48,7 +48,7 @@ export class TelemetryTracer {
       let costPer1kInput = 0;
       let costPer1kOutput = 0;
 
-      if (event.model.includes('gemini-2.5-flash')) {
+      if (event.model.includes('gemini-2.5-pro')) {
         costPer1kInput = 0.0035;
         costPer1kOutput = 0.0105;
       } else if (event.model.includes('gemini-2.5-flash')) {
