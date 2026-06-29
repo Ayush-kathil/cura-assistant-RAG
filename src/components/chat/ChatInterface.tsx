@@ -19,6 +19,39 @@ import mermaid from 'mermaid';
 import TextareaAutosize from 'react-textarea-autosize';
 import { toast } from 'sonner';
 
+const InlineCitation = ({ citationIdx, sourceChunk, onClick }: { citationIdx: number, sourceChunk: any, onClick: () => void }) => {
+  const [isHovered, setIsHovered] = useState(false);
+  return (
+    <div 
+      className="relative inline-block" 
+      onMouseEnter={() => setIsHovered(true)} 
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <span 
+        onClick={onClick}
+        className="inline-flex items-center justify-center px-2 py-0.5 ml-1.5 text-xs font-bold bg-blue-50 text-blue-700 rounded-md border border-blue-100 hover:bg-blue-600 hover:text-white hover:border-blue-600 hover:shadow-md transition-all cursor-pointer transform hover:-translate-y-0.5"
+      >
+        {citationIdx + 1}
+      </span>
+      <AnimatePresence>
+        {isHovered && sourceChunk && (
+          <motion.div 
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 5, scale: 0.95 }}
+            transition={{ duration: 0.15 }}
+            className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-72 bg-slate-900 text-white text-xs rounded-xl p-3 shadow-xl z-50 pointer-events-none"
+          >
+            <div className="font-semibold text-blue-300 mb-1">Source {citationIdx + 1}</div>
+            <div className="line-clamp-4 leading-relaxed">{sourceChunk.content}</div>
+            <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45"></div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
 const Mermaid = ({ chart }: { chart: string }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   
@@ -446,24 +479,16 @@ export function ChatInterface(props: ChatInterfaceProps) {
                                     const sourceChunk = msg.sources?.[citationIdx];
                                     
                                     return (
-                                      <div className="relative inline-block group">
-                                        <span 
-                                          onClick={(e) => { e.preventDefault(); handleCitationClick(props.children?.toString() || ""); }}
-                                          className="inline-flex items-center justify-center px-2 py-0.5 ml-1.5 text-xs font-bold bg-blue-50 text-blue-700 rounded-md border border-blue-100 hover:bg-blue-600 hover:text-white hover:border-blue-600 hover:shadow-md transition-all cursor-pointer transform hover:-translate-y-0.5"
-                                        >
-                                          {props.children}
-                                        </span>
-                                        {sourceChunk && (
-                                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-72 bg-slate-900 text-white text-xs rounded-xl p-3 shadow-xl opacity-0 invisible md:group-hover:opacity-100 md:group-hover:visible transition-all duration-200 z-50 pointer-events-none md:pointer-events-auto">
-                                            <div className="font-semibold text-blue-300 mb-1">Source {citationIdx + 1}</div>
-                                            <div className="line-clamp-4 leading-relaxed">{sourceChunk.content}</div>
-                                            <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45"></div>
-                                          </div>
-                                        )}
-                                      </div>
+                                      <InlineCitation
+                                        citationIdx={citationIdx}
+                                        sourceChunk={sourceChunk}
+                                        onClick={() => {
+                                          handleCitationClick(props.children?.toString() || "");
+                                        }}
+                                      />
                                     );
                                   }
-                                  return <a className="text-blue-600 hover:text-blue-700 hover:underline underline-offset-2 transition-colors" {...props} />;
+                                  return <a className="text-blue-600 hover:text-blue-700 hover:underline underline-offset-2 transition-colors font-medium" {...props} />;
                                 }
                               }}
                             >
