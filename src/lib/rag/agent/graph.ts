@@ -42,13 +42,13 @@ export const AgentState = Annotation.Root({
 function getLlm() {
   const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
   if (!apiKey) throw new Error("Missing Gemini API Key. Please configure GEMINI_API_KEY in your environment variables.");
-  return new ChatGoogleGenerativeAI({ model: "gemini-3.1-flash-lite", temperature: 0.2, apiKey });
+  return new ChatGoogleGenerativeAI({ model: "gemini-2.5-flash", temperature: 0.2, apiKey });
 }
 
 function getVerifierLlm() {
   const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
   if (!apiKey) throw new Error("Missing Gemini API Key. Please configure GEMINI_API_KEY in your environment variables.");
-  return new ChatGoogleGenerativeAI({ model: "gemini-3.1-flash-lite", temperature: 0, apiKey });
+  return new ChatGoogleGenerativeAI({ model: "gemini-2.5-flash", temperature: 0, apiKey });
 }
 
 // Nodes

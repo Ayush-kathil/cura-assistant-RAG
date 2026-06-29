@@ -85,7 +85,7 @@ function MobileMenu({ isOpen, onClose }: { isOpen: boolean, onClose: () => void 
                 transition={{ delay: i * 0.1, type: "spring", stiffness: 300, damping: 24 }}
               >
                 <Link 
-                  href={item === 'History of RAG' ? '/history' : `/${item.toLowerCase()}`}
+                  href={item === 'History of RAG' ? '#' : `/${item.toLowerCase()}`}
                   onClick={onClose}
                   className="block hover:text-blue-600 transition-colors"
                 >
@@ -309,7 +309,7 @@ export default function Home() {
             </Link>
           </div>
           <div className="hidden md:flex items-center gap-10">
-            <Link href="/history" className="text-sm font-medium tracking-wide uppercase hover:text-blue-600 transition-colors">History of RAG</Link>
+            <Link href="#" className="text-sm font-medium tracking-wide uppercase hover:text-blue-600 transition-colors">History of RAG</Link>
             <Link href="/science" className="text-sm font-medium tracking-wide uppercase hover:text-blue-600 transition-colors">Science</Link>
             <Link href="/pricing" className="text-sm font-medium tracking-wide uppercase hover:text-blue-600 transition-colors">Pricing</Link>
           </div>

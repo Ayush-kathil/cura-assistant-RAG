@@ -9,7 +9,7 @@ export async function POST(req: Request) {
   }
 
   const results = [];
-  const verifierLlm = new ChatGoogleGenerativeAI({ model: "gemini-3.1-flash-lite", temperature: 0, apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || "dummy" });
+  const verifierLlm = new ChatGoogleGenerativeAI({ model: "gemini-2.5-flash", temperature: 0, apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || "dummy" });
 
   for (const item of dataset) {
     try {

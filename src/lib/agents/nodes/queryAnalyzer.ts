@@ -24,7 +24,7 @@ DO NOT ANSWER THE QUESTION. JUST ANALYZE.
 
 function getChain() {
   const llm = new ChatGoogleGenerativeAI({
-    model: "gemini-3.1-flash-lite",
+    model: "gemini-2.5-flash",
     temperature: 0,
     apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || "dummy",
   });
