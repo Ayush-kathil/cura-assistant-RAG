@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import QueryProvider from "@/components/providers/QueryProvider";
 import { WorkspaceProvider } from "@/contexts/WorkspaceContext";
+import NextTopLoader from 'nextjs-toploader';
 import { Toaster } from "sonner";
 import CookieBanner from "@/components/CookieBanner";
 
@@ -62,6 +63,7 @@ export default function RootLayout({
         className={`${spaceGrotesk.variable} ${geistMono.variable} antialiased font-sans overscroll-y-none selection:bg-blue-100 selection:text-blue-900`}
         style={{ fontFamily: 'var(--font-space-grotesk), -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif' }}
       >
+        <NextTopLoader color="#2563eb" showSpinner={false} />
         <ThemeProvider>
           <QueryProvider>
             <WorkspaceProvider>
